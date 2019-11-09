@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Modals from './Modals';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { Collapse, InputGroup, InputGroupAddon, InputGroupText, Input } from 'reactstrap';
+import { Col, Collapse, InputGroup, InputGroupAddon, InputGroupText, Input, Label } from 'reactstrap';
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/markdown/markdown';
@@ -15,8 +15,10 @@ class QuestionModal extends Component {
 
 		this.updateQuestion = this.updateQuestion.bind(this);
 		this.updateFeedback = this.updateFeedback.bind(this);
+		this.updateMinutes = this.updateMinutes.bind(this);
+		this.updateSeconds = this.updateSeconds.bind(this);
+		this.updatePoints = this.updatePoints.bind(this);
 		this.addAnswer = this.addAnswer.bind(this);
-		this.updateTags = this.updateTags.bind(this);
 		this.toggle = this.toggle.bind(this);
 	}
 
@@ -60,9 +62,22 @@ class QuestionModal extends Component {
 		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, correct: event.target.checked } : ans) });
 	}
 
-	updateTags(tags) {
+	updateMinutes(event) {
 		const { data, update } = this.props;
-		update({ ...data, tags });
+		const minutes = parseInt(event.target.value) || 0;
+		update({ ...data, time: minutes * 60 + data.time % 60 });
+	}
+
+	updateSeconds(event) {
+		const { data, update } = this.props;
+		const seconds = parseInt(event.target.value) || 0;
+		update({ ...data, time: data.time - data.time % 60 + seconds });
+	}
+
+	updatePoints(event) {
+		const { data, update } = this.props;
+		const points = parseInt(event.target.value) || 0;
+		update({ ...data, points });
 	}
 
 	toggle() {
@@ -123,12 +138,32 @@ class QuestionModal extends Component {
 							</div>
 						);
 					})}
+
 					<InputGroup className="justify-content-center">
 						<Button onClick={this.addAnswer} color="success" className="mt-3 mb-3">
 							<i className="fas fa-plus"/>
 						</Button>
 					</InputGroup>
+
 					<Input type="textarea" value={data.feedback} onChange={this.updateFeedback} placeholder="Saisissez le feedback de votre question ici" className="mt-3"/>
+
+					<InputGroup className="justify-content-start align-items-center mt-3">
+						<Col xs="2" className="pl-0">
+							<Input type="number" min="0" value={(data.time - data.time % 60) / 60} onChange={this.updateMinutes}/>
+						</Col>
+						minutes
+						<Col xs="2">
+							<Input type="number" min="0" value={data.time % 60} onChange={this.updateSeconds}/>
+						</Col>
+						secondes
+					</InputGroup>
+
+					<InputGroup className="justify-content-start align-items-center mt-3">
+						<Col xs="2" className="pl-0">
+							<Input type="number" min="1" max="3" value={data.points} onChange={this.updatePoints}/>
+						</Col>
+						points
+					</InputGroup>
 				</ModalBody>
 				<ModalFooter>
 					<Button color="primary" onClick={e => this.onConfirm(data)}>Enregistrer</Button>

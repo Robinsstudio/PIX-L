@@ -70,7 +70,13 @@ class ExplorerView extends Component {
 			{ label: 'Nouveau dossier', onClick: () => {
 				Modals.showPromptModal('Nouveau dossier', 'Entrez un nom de dossier ici...').then(name => this.createFolder(name)).catch(() => {});
 			}},
-			{ label: 'Nouvelle question', onClick: () => Modals.showQuestionModal({ label: '', answers: [], idParent: folder.active._id }).then(quest => {
+			{ label: 'Nouvelle question', onClick: () => Modals.showQuestionModal({
+				label: '',
+				answers: [],
+				time: 120,
+				points: 1,
+				idParent: folder.active._id
+			}).then(quest => {
 				request('SaveQuestion', quest).then( () => refresh() );
 			}).catch(() => {}) },
 			{ label: 'Nouveau QCM', onClick: () => create() }

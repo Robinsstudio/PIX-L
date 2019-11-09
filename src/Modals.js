@@ -12,8 +12,7 @@ class Modals extends Component {
 			questionModal: {
 				data: {
 					label: '',
-					answers: [],
-					tags: []
+					answers: []
 				}
 			}
 		};

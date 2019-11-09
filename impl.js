@@ -16,6 +16,8 @@ const Question = mongoose.model('Question', {
 		}
 	}],
 	feedback: String,
+	time: Number,
+	points: Number,
 	idParent: ObjectId
 });
 
