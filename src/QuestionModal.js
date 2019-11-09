@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import Modals from './Modals';
-import TagInput from './TagInput';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { InputGroup, InputGroupAddon, InputGroupText, Input } from 'reactstrap';
+import { Collapse, InputGroup, InputGroupAddon, InputGroupText, Input } from 'reactstrap';
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/markdown/markdown';
@@ -15,6 +14,7 @@ class QuestionModal extends Component {
 		this.codeMirror = React.createRef();
 
 		this.updateQuestion = this.updateQuestion.bind(this);
+		this.updateFeedback = this.updateFeedback.bind(this);
 		this.addAnswer = this.addAnswer.bind(this);
 		this.updateTags = this.updateTags.bind(this);
 		this.toggle = this.toggle.bind(this);
@@ -25,14 +25,29 @@ class QuestionModal extends Component {
 		update({ ...data, label});
 	}
 
+	updateFeedback(event) {
+		const { data, update } = this.props;
+		update({ ...data, feedback: event.target.value });
+	}
+
+	updateAnswerFeedback(event, index) {
+		const { data, update } = this.props;
+		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, feedback: { ...(ans.feedback), label: event.target.value } } : ans) });
+	}
+
+	setAnswerFeedbackVisible(visible, index) {
+		const { data, update } = this.props;
+		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, feedback: { ...(ans.feedback), visible } } : ans) });
+	}
+
 	updateAnswer(event, index) {
 		const { data, update } = this.props;
-		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { label: event.target.value, correct: ans.correct } : ans) });
+		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, label: event.target.value } : ans) });
 	}
 
 	addAnswer() {
 		const { data, update } = this.props;
-		update({ ...data, answers: data.answers.concat({ label: '', correct: false }) });
+		update({ ...data, answers: data.answers.concat({ label: '', correct: false, feedback: { visible: false, label: '' } }) });
 	}
 
 	removeAnswer(index) {
@@ -42,7 +57,7 @@ class QuestionModal extends Component {
 
 	setAnswerCorrect(event, index) {
 		const { data, update } = this.props;
-		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { label: ans.label, correct: event.target.checked } : ans) });
+		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, correct: event.target.checked } : ans) });
 	}
 
 	updateTags(tags) {
@@ -88,27 +103,32 @@ class QuestionModal extends Component {
 						className="border mb-3"
 						ref={this.codeMirror}
 					/>
-					{data.answers.map((ans, index) => {
+					{data.answers.map((ans, index, array) => {
 						return (
-							<InputGroup className="mb-3">
-								<InputGroupAddon addonType="prepend">
-									<InputGroupText>
-										<Input addon type="checkbox" checked={ans.correct} onChange={e => this.setAnswerCorrect(e, index)}/>
-									</InputGroupText>
-								</InputGroupAddon>
-								<Input className="mr-3" type="text" placeholder="Saisissez votre réponse ici" spellCheck="false" value={ans.label} onChange={e => this.updateAnswer(e, index)}/>
-								<Button color="danger" onClick={e => this.removeAnswer(index)}>
-									<i className="fas fa-times"/>
-								</Button>
-							</InputGroup>
+							<div onFocus={() => this.setAnswerFeedbackVisible(true, index)} onBlur={() => this.setAnswerFeedbackVisible(false, index)}>
+								<InputGroup className={`${index === array.length - 1 || ans.feedback.visible ? 'mb-3' : ''} mt-3`}>
+									<InputGroupAddon addonType="prepend">
+										<InputGroupText>
+											<Input addon type="checkbox" checked={ans.correct} onChange={e => this.setAnswerCorrect(e, index)}/>
+										</InputGroupText>
+									</InputGroupAddon>
+									<Input className="mr-3" type="text" placeholder="Saisissez votre réponse ici" spellCheck="false" value={ans.label} onChange={e => this.updateAnswer(e, index)}/>
+									<Button color="danger" onClick={e => this.removeAnswer(index)}>
+										<i className="fas fa-times"/>
+									</Button>
+								</InputGroup>
+								<Collapse isOpen={ans.feedback.visible}>
+									<Input type="textarea" onChange={e => this.updateAnswerFeedback(e, index)} value={ans.feedback.label} placeholder="Saisissez le feedback de votre réponse ici"/>
+								</Collapse>
+							</div>
 						);
 					})}
 					<InputGroup className="justify-content-center">
-						<Button onClick={this.addAnswer} color="success" className="mb-3">
+						<Button onClick={this.addAnswer} color="success" className="mt-3 mb-3">
 							<i className="fas fa-plus"/>
 						</Button>
 					</InputGroup>
-					<TagInput tags={data.tags || []} onChange={this.updateTags}/>
+					<Input type="textarea" value={data.feedback} onChange={this.updateFeedback} placeholder="Saisissez le feedback de votre question ici" className="mt-3"/>
 				</ModalBody>
 				<ModalFooter>
 					<Button color="primary" onClick={e => this.onConfirm(data)}>Enregistrer</Button>

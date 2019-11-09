@@ -10,8 +10,12 @@ const Question = mongoose.model('Question', {
 	tags: [{ type: String }],
 	answers: [{
 		label: String,
-		correct: Boolean
+		correct: Boolean,
+		feedback: {
+			label: String
+		}
 	}],
+	feedback: String,
 	idParent: ObjectId
 });
 
