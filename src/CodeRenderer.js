@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { googlecode } from 'react-syntax-highlighter/dist/styles/hljs';
+import { googlecode } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 
 class CodeRenderer extends PureComponent {
 	render() {
