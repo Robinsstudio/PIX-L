@@ -2,16 +2,11 @@ import React, { Component } from 'react';
 import Modals from './Modals';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { Col, Collapse, InputGroup, InputGroupAddon, InputGroupText, Input, Label } from 'reactstrap';
-import CodeMirror from 'react-codemirror';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/mode/markdown/markdown';
-import 'codemirror/addon/display/placeholder';
+import QuestionEditor from './QuestionEditor';
 
 class QuestionModal extends Component {
 	constructor(props) {
 		super(props);
-
-		this.codeMirror = React.createRef();
 
 		this.updateQuestion = this.updateQuestion.bind(this);
 		this.updateFeedback = this.updateFeedback.bind(this);
@@ -19,7 +14,6 @@ class QuestionModal extends Component {
 		this.updateSeconds = this.updateSeconds.bind(this);
 		this.updatePoints = this.updatePoints.bind(this);
 		this.addAnswer = this.addAnswer.bind(this);
-		this.toggle = this.toggle.bind(this);
 	}
 
 	updateQuestion(label) {
@@ -80,12 +74,6 @@ class QuestionModal extends Component {
 		update({ ...data, points });
 	}
 
-	toggle() {
-		const { data, update } = this.props;
-		setTimeout(() => this.codeMirror.current.getCodeMirror().refresh(), 20);
-		update({ ...data, expand: !data.expand });
-	}
-
 	onConfirm(data) {
 		const { hide, promise: { resolve } } = this.props;
 		if (data.name) {
@@ -111,13 +99,7 @@ class QuestionModal extends Component {
 			<Modal isOpen={open} toggle={e => this.onCancel(data)} size="lg">
 				<ModalHeader>Saisir une question</ModalHeader>
 				<ModalBody>
-					<CodeMirror
-						value={data.label}
-						onChange={this.updateQuestion}
-						options={{ mode: 'text/x-markdown', placeholder: 'Saisissez votre question...', indentUnit: 4, indentWithTabs: true }}
-						className="border mb-3"
-						ref={this.codeMirror}
-					/>
+					<QuestionEditor updateQuestion={this.updateQuestion} initialValue={data.label}/>
 					{data.answers.map((ans, index, array) => {
 						return (
 							<div onFocus={() => this.setAnswerFeedbackVisible(true, index)} onBlur={() => this.setAnswerFeedbackVisible(false, index)}>

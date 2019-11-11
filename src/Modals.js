@@ -24,8 +24,8 @@ class Modals extends Component {
 		this.hideQuestionModal = this.hideQuestionModal.bind(this)
 	}
 
-	showPromptModal(title, placeholder, promise) {
-		this.setState({ promptModal: { open: true, title, placeholder, value: '', promise } });
+	showPromptModal(title, placeholder, value, promise) {
+		this.setState({ promptModal: { open: true, title, placeholder, value, promise } });
 	}
 
 	updatePromptModal(value) {
@@ -93,7 +93,7 @@ const modals = <Modals ref={(comp) => component = comp}/>
 
 export default {
 	get: () => modals,
-	showPromptModal: (title, placeholder) => new Promise((resolve, reject) => component.showPromptModal(title, placeholder, { resolve, reject })),
+	showPromptModal: (title, placeholder, value = '') => new Promise((resolve, reject) => component.showPromptModal(title, placeholder, value, { resolve, reject })),
 	showConfirmModal: (title, body) => new Promise((resolve, reject) => component.showConfirmModal(title, body, { resolve, reject })),
 	showQuestionModal: (data) => new Promise((resolve, reject) => component.showQuestionModal(data, { resolve, reject }))
 }

@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { EditorState, convertToRaw } from 'draft-js';
+
 import File from './File';
 import ContextMenu from './ContextMenu';
 import Modals from './Modals';
