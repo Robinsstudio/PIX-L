@@ -41,7 +41,6 @@ class QuestionEditor extends Component {
 		const selection = editorState.getSelection();
 		if (!selection.isCollapsed()) {
 			const contentState = editorState.getCurrentContent();
-			console.log(convertToRaw(contentState));
 			const startKey = editorState.getSelection().getStartKey();
 			const startOffset = editorState.getSelection().getStartOffset();
 			const blockWithLinkAtBeginning = contentState.getBlockForKey(startKey);

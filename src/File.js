@@ -82,7 +82,7 @@ class File extends Component {
 			onClick: () => this.copyToClipboard(`${window.location.href}qcm/${url}`)
 		} : {
 			label: 'Générer un lien partageable',
-			onClick: () => request('/GenerateLink', { _id }).then(() => refresh())
+			onClick: () => request('GenerateLink', { _id }).then(() => refresh())
 		};
 
 		const resultsItem = sessions && sessions.length ? {

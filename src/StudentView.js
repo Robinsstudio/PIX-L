@@ -23,7 +23,7 @@ class StudentView extends Component {
 		this.handleCurrentQuestionChanged = this.handleCurrentQuestionChanged.bind(this);
 		this.handleDone = this.handleDone.bind(this);
 
-		request('/GetMultipleChoice', { url: this.props.match.params.url })
+		request('GetMultipleChoice', { url: this.props.match.params.url })
 		.then(res => res.json())
 		.then(questions => this.setState({ questions }));
 	}
@@ -56,7 +56,7 @@ class StudentView extends Component {
 				'En cliquant sur "Terminé", '
 				+ 'vous validez l\'ensemble de vos réponses. Confirmez-vous votre choix ?')
 		.then(() => {
-			return request('/SaveSession', {
+			return request('SaveSession', {
 				url,
 				session: {
 					name: name.value,

@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { EditorState, convertToRaw } from 'draft-js';
 
 import File from './File';
 import ContextMenu from './ContextMenu';
 import Modals from './Modals';
 import request from './request';
-import TagInput from './TagInput';
 
 class ExplorerView extends Component {
 	constructor(props) {
@@ -135,7 +133,6 @@ class ExplorerView extends Component {
 			<div id="explorer" className="view">
 				<div id="explorerHeader" className="header">
 					<div id="searchByTags">
-						<TagInput tags={tags} onChange={searchByTags}/>
 					</div>
 
 					<div id="path">

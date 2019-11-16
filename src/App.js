@@ -10,8 +10,8 @@ class App extends Component {
 			<Fragment>
 				<Router>
 					<Switch>
-						<Route path="/qcm/:url" component={StudentView}/>
-						<Route path="/" component={AdminView}/>
+						<Route path={process.env.PUBLIC_URL + '/qcm/:url'} component={StudentView}/>
+						<Route path={process.env.PUBLIC_URL} component={AdminView}/>
 					</Switch>
 				</Router>
 				{Modals.get()}

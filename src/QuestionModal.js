@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Modals from './Modals';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { Col, Collapse, InputGroup, InputGroupAddon, InputGroupText, Input, Label } from 'reactstrap';
+import { Col, Collapse, InputGroup, InputGroupAddon, InputGroupText, Input } from 'reactstrap';
 import QuestionEditor from './QuestionEditor';
 import AutoCompleteInput from './AutoCompleteInput';
 import request from './request';
@@ -84,7 +84,7 @@ class QuestionModal extends Component {
 	}
 
 	loadHints(start) {
-		return request('/GetQuestionNamesStartingWith', { start }).then(res => res.json());
+		return request('GetQuestionNamesStartingWith', { start }).then(res => res.json());
 	}
 
 	handleLinkedQuestionBlur() {
