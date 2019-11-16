@@ -30,6 +30,11 @@ app.post('/GetTagsStartingWith', (req, res) => {
 	Impl.getTagsStartingWith(start).then(tags => res.json(tags));
 });
 
+app.post('/GetQuestionNamesStartingWith', (req, res) => {
+	const { start } = req.body;
+	Impl.getQuestionNamesStartingWith(start).then(names => res.json(names));
+});
+
 app.post('/Rename', (req, res) => {
 	const { _id, name } = req.body;
 	Impl.rename(_id, name).then( () => res.status(200).end() );

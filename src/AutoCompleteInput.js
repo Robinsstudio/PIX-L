@@ -42,6 +42,8 @@ class AutoCompleteInput extends Component {
 			});
 
 			event.preventDefault();
+		} else if (this.props.collapseOnEnter && event.key === 'Enter') {
+			this.clearHints();
 		}
 		this.fireOnKeyDown(event);
 	}
@@ -91,17 +93,31 @@ class AutoCompleteInput extends Component {
 		}
 	}
 
+	buildInputComponent() {
+		const { component, value } = this.props;
+		return React.createElement(component || 'input', {
+			...this.forwardProps(),
+			value: this.buildString(value),
+			onChange: this.handleChange,
+			onKeyDown: this.handleKeyDown,
+			onBlur: this.handleBlur,
+			spellCheck: "false"
+		});
+	}
+
+	buildString(value) {
+		const { toString } = this.props;
+		if (typeof value !== 'string' && typeof toString === 'function') {
+			return toString(value);
+		}
+		return value;
+	}
+
 	render() {
-		const { props: { value }, state: { hints, activeHint } } = this;
+		const { hints, activeHint } = this.state;
 		return (
 			<div className="autocomplete">
-				<input {...this.forwardProps()}
-					value={value}
-					onChange={this.handleChange}
-					onKeyDown={this.handleKeyDown}
-					onBlur={this.handleBlur}
-					spellCheck="false"
-				/>
+				{ this.buildInputComponent() }
 				{ hints.length > 0 &&
 					<div className="menu">
 						{ hints.map((hint, index) => {
@@ -109,7 +125,7 @@ class AutoCompleteInput extends Component {
 								<div
 									className={(index === activeHint) ? 'active' : ''}
 									onMouseEnter={() => this.handleMouseEnter(index)}
-								>{hint}</div>
+								>{ this.buildString(hint) }</div>
 							);
 						}) }
 					</div>

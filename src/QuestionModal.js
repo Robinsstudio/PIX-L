@@ -3,6 +3,8 @@ import Modals from './Modals';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { Col, Collapse, InputGroup, InputGroupAddon, InputGroupText, Input, Label } from 'reactstrap';
 import QuestionEditor from './QuestionEditor';
+import AutoCompleteInput from './AutoCompleteInput';
+import request from './request';
 
 class QuestionModal extends Component {
 	constructor(props) {
@@ -13,6 +15,8 @@ class QuestionModal extends Component {
 		this.updateMinutes = this.updateMinutes.bind(this);
 		this.updateSeconds = this.updateSeconds.bind(this);
 		this.updatePoints = this.updatePoints.bind(this);
+		this.updateLinkedQuestion = this.updateLinkedQuestion.bind(this);
+		this.handleLinkedQuestionBlur = this.handleLinkedQuestionBlur.bind(this);
 		this.addAnswer = this.addAnswer.bind(this);
 	}
 
@@ -74,6 +78,21 @@ class QuestionModal extends Component {
 		update({ ...data, points });
 	}
 
+	updateLinkedQuestion(linkedQuestion) {
+		const { data, update } = this.props;
+		update({ ...data, linkedQuestion });
+	}
+
+	loadHints(start) {
+		return request('/GetQuestionNamesStartingWith', { start }).then(res => res.json());
+	}
+
+	handleLinkedQuestionBlur() {
+		if (typeof this.props.data.linkedQuestion === 'string') {
+			this.updateLinkedQuestion('');
+		}
+	}
+
 	onConfirm(data) {
 		const { hide, promise: { resolve } } = this.props;
 		if (data.name) {
@@ -128,6 +147,18 @@ class QuestionModal extends Component {
 					</InputGroup>
 
 					<Input type="textarea" value={data.feedback} onChange={this.updateFeedback} placeholder="Saisissez le feedback de votre question ici" className="mt-3"/>
+
+					<AutoCompleteInput
+						loadHints={this.loadHints}
+						value={data.linkedQuestion || ''}
+						onChange={this.updateLinkedQuestion}
+						onBlur={this.handleLinkedQuestionBlur}
+						toString={question => question.name}
+						component={Input}
+						collapseOnEnter
+						placeholder="Saisissez les premières lettres du nom de votre question liée ici"
+						className="mt-3"
+					/>
 
 					<InputGroup className="justify-content-start align-items-center mt-3">
 						<Col xs="2" className="pl-0">

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-mongoose.connect('mongodb://localhost:27017/questionify', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://localhost:27017/pix-l', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const Question = mongoose.model('Question', {
 	type: String,
@@ -18,6 +18,10 @@ const Question = mongoose.model('Question', {
 	feedback: String,
 	time: Number,
 	points: Number,
+	linkedQuestion: {
+		_id: ObjectId,
+		name: String,
+	},
 	idParent: ObjectId
 });
 
@@ -131,6 +135,11 @@ module.exports = {
 	getTagsStartingWith: (start) => {
 		const regex = new RegExp(eval(`/^${start}/i`));
 		return Question.distinct('tags').then(tags => tags.filter(tag => tag.match(regex)).sort());
+	},
+
+	getQuestionNamesStartingWith: (start) => {
+		const regex = new RegExp(`^${start}`, 'i');
+		return Question.find({ name: regex }).limit(10).select('name').sort('name');
 	},
 
 	rename: (_id, name) => {
