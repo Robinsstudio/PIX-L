@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Alert, Button } from 'reactstrap';
 import Modals from './Modals';
 
-class Editor extends Component {
+class EditorView extends Component {
 	constructor(props) {
 		super(props);
 
@@ -100,4 +100,4 @@ class Editor extends Component {
 	}
 }
 
-export default Editor;
+export default EditorView;

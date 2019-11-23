@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
+
 import File from './File';
 import ContextMenu from './ContextMenu';
 import Modals from './Modals';
 import request from './request';
-import TagInput from './TagInput';
 
 class ExplorerView extends Component {
 	constructor(props) {
@@ -70,7 +70,13 @@ class ExplorerView extends Component {
 			{ label: 'Nouveau dossier', onClick: () => {
 				Modals.showPromptModal('Nouveau dossier', 'Entrez un nom de dossier ici...').then(name => this.createFolder(name)).catch(() => {});
 			}},
-			{ label: 'Nouvelle question', onClick: () => Modals.showQuestionModal({ label: '', answers: [], idParent: folder.active._id }).then(quest => {
+			{ label: 'Nouvelle question', onClick: () => Modals.showQuestionModal({
+				label: '',
+				answers: [],
+				time: 120,
+				points: 1,
+				idParent: folder.active._id
+			}).then(quest => {
 				request('SaveQuestion', quest).then( () => refresh() );
 			}).catch(() => {}) },
 			{ label: 'Nouveau QCM', onClick: () => create() }
@@ -127,7 +133,6 @@ class ExplorerView extends Component {
 			<div id="explorer" className="view">
 				<div id="explorerHeader" className="header">
 					<div id="searchByTags">
-						<TagInput tags={tags} onChange={searchByTags}/>
 					</div>
 
 					<div id="path">

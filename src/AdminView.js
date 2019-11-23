@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ExplorerView from './ExplorerView';
-import Editor from './Editor';
+import EditorView from './EditorView';
 import SessionView from './SessionView';
 import request from './request';
 
@@ -147,7 +147,7 @@ class AdminView extends Component {
 					refresh={this.refresh}
 				/>
 
-				<Editor
+				<EditorView
 					editor={editor}
 					folder={folder}
 					update={this.updateEditor}
