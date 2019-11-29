@@ -1,23 +1,37 @@
 import React, { Component } from 'react';
 import Modals from './Modals';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { Col, Collapse, InputGroup, InputGroupAddon, InputGroupText, Input } from 'reactstrap';
-import QuestionEditor from './QuestionEditor';
+import { Col, InputGroup, Input } from 'reactstrap';
+import TextEditor from './TextEditor';
 import AutoCompleteInput from './AutoCompleteInput';
 import request from './request';
+import AnswerField from './AnswerField';
+
+/* https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript */
+function uuidv4() {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		//eslint-disable-next-line
+		var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	});
+}
 
 class QuestionModal extends Component {
 	constructor(props) {
 		super(props);
 
 		this.updateQuestion = this.updateQuestion.bind(this);
+		this.updateAnswer = this.updateAnswer.bind(this);
 		this.updateFeedback = this.updateFeedback.bind(this);
 		this.updateMinutes = this.updateMinutes.bind(this);
 		this.updateSeconds = this.updateSeconds.bind(this);
 		this.updatePoints = this.updatePoints.bind(this);
 		this.updateLinkedQuestion = this.updateLinkedQuestion.bind(this);
 		this.handleLinkedQuestionBlur = this.handleLinkedQuestionBlur.bind(this);
+		this.setAnswerFocused = this.setAnswerFocused.bind(this);
+		this.toggleAnswerCorrect = this.toggleAnswerCorrect.bind(this);
 		this.addAnswer = this.addAnswer.bind(this);
+		this.removeAnswer = this.removeAnswer.bind(this);
 	}
 
 	updateQuestion(label) {
@@ -25,29 +39,34 @@ class QuestionModal extends Component {
 		update({ ...data, label});
 	}
 
-	updateFeedback(event) {
+	updateFeedback(feedback) {
 		const { data, update } = this.props;
-		update({ ...data, feedback: event.target.value });
+		update({ ...data, feedback });
 	}
 
-	updateAnswerFeedback(event, index) {
+	setAnswerFocused(index) {
 		const { data, update } = this.props;
-		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, feedback: { ...(ans.feedback), label: event.target.value } } : ans) });
+		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, focused: true } : ans) });
 	}
 
-	setAnswerFeedbackVisible(visible, index) {
+	updateAnswer(label, feedback, index) {
 		const { data, update } = this.props;
-		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, feedback: { ...(ans.feedback), visible } } : ans) });
-	}
+		const answer = {};
 
-	updateAnswer(event, index) {
-		const { data, update } = this.props;
-		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, label: event.target.value } : ans) });
+		if (label) {
+			answer.label = label;
+		}
+
+		if (feedback) {
+			answer.feedback = feedback;
+		}
+
+		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, ...answer, focused: false } : ans) });
 	}
 
 	addAnswer() {
 		const { data, update } = this.props;
-		update({ ...data, answers: data.answers.concat({ label: '', correct: false, feedback: { visible: false, label: '' } }) });
+		update({ ...data, answers: data.answers.concat({ key: uuidv4(), correct: false }) });
 	}
 
 	removeAnswer(index) {
@@ -55,9 +74,9 @@ class QuestionModal extends Component {
 		update({ ...data,  answers: data.answers.filter((ans, i) => i !== index) });
 	}
 
-	setAnswerCorrect(event, index) {
+	toggleAnswerCorrect(index) {
 		const { data, update } = this.props;
-		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, correct: event.target.checked } : ans) });
+		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, correct: !ans.correct } : ans) });
 	}
 
 	updateMinutes(event) {
@@ -74,7 +93,7 @@ class QuestionModal extends Component {
 
 	updatePoints(event) {
 		const { data, update } = this.props;
-		const points = parseInt(event.target.value) || 0;
+		const points = parseFloat(event.target.value) || 0;
 		update({ ...data, points });
 	}
 
@@ -89,7 +108,7 @@ class QuestionModal extends Component {
 
 	handleLinkedQuestionBlur() {
 		if (typeof this.props.data.linkedQuestion === 'string') {
-			this.updateLinkedQuestion('');
+			this.updateLinkedQuestion(null);
 		}
 	}
 
@@ -118,25 +137,19 @@ class QuestionModal extends Component {
 			<Modal isOpen={open} toggle={e => this.onCancel(data)} size="lg">
 				<ModalHeader>Saisir une question</ModalHeader>
 				<ModalBody>
-					<QuestionEditor updateQuestion={this.updateQuestion} initialValue={data.label}/>
-					{data.answers.map((ans, index, array) => {
+					<TextEditor onChange={this.updateQuestion} initialValue={data.label} placeholder="Saisissez votre question ici"/>
+					{data.answers.map((answer, index, array) => {
 						return (
-							<div onFocus={() => this.setAnswerFeedbackVisible(true, index)} onBlur={() => this.setAnswerFeedbackVisible(false, index)}>
-								<InputGroup className={`${index === array.length - 1 || ans.feedback.visible ? 'mb-3' : ''} mt-3`}>
-									<InputGroupAddon addonType="prepend">
-										<InputGroupText>
-											<Input addon type="checkbox" checked={ans.correct} onChange={e => this.setAnswerCorrect(e, index)}/>
-										</InputGroupText>
-									</InputGroupAddon>
-									<Input className="mr-3" type="text" placeholder="Saisissez votre réponse ici" spellCheck="false" value={ans.label} onChange={e => this.updateAnswer(e, index)}/>
-									<Button color="danger" onClick={e => this.removeAnswer(index)}>
-										<i className="fas fa-times"/>
-									</Button>
-								</InputGroup>
-								<Collapse isOpen={ans.feedback.visible}>
-									<Input type="textarea" onChange={e => this.updateAnswerFeedback(e, index)} value={ans.feedback.label} placeholder="Saisissez le feedback de votre réponse ici"/>
-								</Collapse>
-							</div>
+							<AnswerField
+								updateAnswer={this.updateAnswer}
+								removeAnswer={this.removeAnswer}
+								toggleAnswerCorrect={this.toggleAnswerCorrect}
+								setAnswerFocused={this.setAnswerFocused}
+								answer={answer}
+								index={index}
+								array={array}
+								key={answer.key || answer._id}
+							/>
 						);
 					})}
 
@@ -146,7 +159,7 @@ class QuestionModal extends Component {
 						</Button>
 					</InputGroup>
 
-					<Input type="textarea" value={data.feedback} onChange={this.updateFeedback} placeholder="Saisissez le feedback de votre question ici" className="mt-3"/>
+					<TextEditor onChange={this.updateFeedback} initialValue={data.feedback} placeholder="Saisissez le feedback de votre question ici"/>
 
 					<AutoCompleteInput
 						loadHints={this.loadHints}
@@ -173,7 +186,7 @@ class QuestionModal extends Component {
 
 					<InputGroup className="justify-content-start align-items-center mt-3">
 						<Col xs="2" className="pl-0">
-							<Input type="number" min="1" max="3" value={data.points} onChange={this.updatePoints}/>
+							<Input type="number" min="1" max="3" step="0.1" value={data.points} onChange={this.updatePoints}/>
 						</Col>
 						points
 					</InputGroup>

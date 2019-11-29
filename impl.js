@@ -11,9 +11,7 @@ const Question = mongoose.model('Question', {
 	answers: [{
 		label: String,
 		correct: Boolean,
-		feedback: {
-			label: String
-		}
+		feedback: String
 	}],
 	feedback: String,
 	time: Number,

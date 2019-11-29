@@ -60,7 +60,7 @@ class AutoCompleteInput extends Component {
 	}
 
 	forwardProps() {
-		const selfProps = [ 'loadHints' ];
+		const selfProps = [ 'loadHints', 'toString', 'component', 'collapseOnEnter'];
 		const forwardingProps = {};
 
 		Object.entries(this.props).forEach(prop => {

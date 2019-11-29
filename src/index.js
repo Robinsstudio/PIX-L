@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './style/global.css';
 import './style/explorer.css';
 import './style/menu.css'
-import './style/editor.css';
+import './style/multiple_choice_editor.css';
 import './style/taginput.css';
 import './style/multiplechoice.css';
 import './style/utils.css';
