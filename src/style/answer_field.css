@@ -1,0 +1,18 @@
+.answerWrapper {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.checkbox {
+	flex-grow: 0;
+	padding: .375rem .75rem;
+	border-radius: 4px;
+	background-color: #ebebeb;
+	border: 1px solid #ced4da;
+}
+
+.delete {
+	flex-grow: 0;
+}

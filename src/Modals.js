@@ -21,7 +21,7 @@ class Modals extends Component {
 		this.hidePromptModal = this.hidePromptModal.bind(this);
 		this.hideConfirmModal = this.hideConfirmModal.bind(this);
 		this.updateQuestionModal = this.updateQuestionModal.bind(this);
-		this.hideQuestionModal = this.hideQuestionModal.bind(this)
+		this.hideQuestionModal = this.hideQuestionModal.bind(this);
 	}
 
 	showPromptModal(title, placeholder, value, promise) {

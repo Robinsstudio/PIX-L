@@ -1,0 +1,45 @@
+.textEditorWrapper {
+	display: inline-block;
+	position: relative;
+	width: 100%;
+}
+
+.toolbar {
+	display: none;
+	flex-direction: row;
+	position: absolute;
+	top: 0;
+	height: 30px;
+	transform: translateY(-100%);
+	background-color: #ebebeb;
+	border-radius: .25em;
+	z-index: 10;
+}
+
+.textEditor {
+	display: inline-block;
+	padding: 10px;
+	width: 100%;
+	border: 1px solid #ced4da;
+	border-radius: .25rem;
+}
+
+.toolbar.visible {
+	display: flex;
+}
+
+.control {
+	width: 30px;
+	height: 30px;
+	background-color: transparent;
+	border: none;
+	outline: 0 !important;
+}
+
+.control:active, .active {
+	background-color: #c9c9c9;
+}
+
+.linkControl {
+	position: relative;
+}

@@ -1,0 +1,37 @@
+.promptPopover {
+	display: none;
+	position: absolute;
+	left: 50%;
+	bottom: -10px;
+	padding: 10px;
+	width: 500px;
+	background-color: white;
+	border: 1px solid #ced4da;
+	border-radius: .25em;
+	transform: translate(-50%, 100%);
+}
+
+.promptPopover.visible {
+	display: flex;
+}
+
+.promptPopover::before, .promptPopover::after {
+	content: '';
+	display: inline-block;
+	position: absolute;
+	left: 50%;
+	width: 10px;
+	height: 10px;
+	border: 10px solid transparent;
+	transform: translate(-50%, 0%);
+}
+
+.promptPopover::before {
+	top: -20px;
+	border-bottom-color: #ced4da;
+}
+
+.promptPopover::after {
+	top: -19px;
+	border-bottom-color: white;
+}
