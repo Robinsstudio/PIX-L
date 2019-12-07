@@ -89,7 +89,7 @@ class AdminView extends Component {
 		const { editor, folder } = this.state;
 		const idParent = editor.model.idParent || folder.active._id;
 
-		request('SaveMultipleChoice', { ...editor.model, idParent, name, questions: editor.questions.map(quest => {
+		request('SaveGame', { ...editor.model, idParent, name, questions: editor.questions.map(quest => {
 			return { idQuestion: quest._id };
 		}) }).then(this.closeEditor).then(this.refresh);
 	}

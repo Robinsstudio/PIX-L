@@ -61,9 +61,9 @@ router.post('/SaveQuestion', (req, res) => {
 	Impl.saveQuestion(questionData).then( () => res.status(200).end() );
 });
 
-router.post('/SaveMultipleChoice', (req, res) => {
-	const multipleChoiceData = { ...req.body, type: 'qcm'};
-	Impl.saveMultipleChoice(multipleChoiceData).then( () => res.status(200).end() );
+router.post('/SaveGame', (req, res) => {
+	const gameData = { ...req.body, type: 'jeu'};
+	Impl.saveGame(gameData).then( () => res.status(200).end() );
 });
 
 router.post('/GenerateLink', (req, res) => {
@@ -71,7 +71,7 @@ router.post('/GenerateLink', (req, res) => {
 	Impl.generateLink(_id).then(() => res.status(200).end());
 });
 
-router.post('/GetMultipleChoice', (req, res) => {
+router.post('/GetGame', (req, res) => {
 	const { url } = req.body;
 	Impl.getByLink(url).then(questions => res.json(questions));
 });

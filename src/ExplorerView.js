@@ -45,7 +45,7 @@ class ExplorerView extends Component {
 
 	dropFile(event, _id) {
 		const { refresh } = this.props;
-		['folder', 'question', 'qcm'].forEach(type => {
+		['folder', 'question', 'jeu'].forEach(type => {
 			if (event.dataTransfer.types.includes(type)) {
 				const file = JSON.parse(event.dataTransfer.getData(type));
 				request('Move', { _id: file._id, idParent: _id }).then(() => refresh());
@@ -79,7 +79,7 @@ class ExplorerView extends Component {
 			}).then(quest => {
 				request('SaveQuestion', quest).then( () => refresh() );
 			}).catch(() => {}) },
-			{ label: 'Nouveau QCM', onClick: () => create() }
+			{ label: 'Nouveau jeu', onClick: () => create() }
 		);
 	}
 

@@ -27,7 +27,7 @@ class EditorView extends Component {
 		if (editor.model.name) {
 			save(editor.model.name);
 		} else {
-			Modals.showPromptModal('Nouveau QCM', 'Entrez un nom de QCM ici...').then(name => save(name)).catch(() => {});
+			Modals.showPromptModal('Nouveau jeu', 'Entrez un nom ici...').then(name => save(name)).catch(() => {});
 		}
 	}
 
@@ -80,7 +80,7 @@ class EditorView extends Component {
 		return (
 			<div id="editor" className={`view ${editor.visible ? 'visible' : ''}`}>
 				<div id="editorHeader" className="header">
-					<span className="ml-3">Éditer un QCM</span>
+					<span className="ml-3">Éditer un jeu</span>
 					<div id="buttons" className="mr-3">
 						<Button color="primary" className="mr-2" onClick={this.save}>Enregistrer</Button>
 						<Button color="secondary" onClick={closeEditor}>Annuler</Button>

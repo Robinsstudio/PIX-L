@@ -32,7 +32,7 @@ class File extends Component {
 			Modals.showQuestionModal(file).then(quest => {
 				request('SaveQuestion', quest).then( () => refresh() );
 			}).catch(() => {});
-		} else if (file.type === 'qcm') {
+		} else if (file.type === 'jeu') {
 			edit(file);
 		}
 	}
@@ -79,7 +79,7 @@ class File extends Component {
 
 		const sharedLinkItem = url ? {
 			label: 'Copier le lien partageable',
-			onClick: () => this.copyToClipboard(`${window.location.href}qcm/${url}`)
+			onClick: () => this.copyToClipboard(`${window.location.href}jeu/${url}`)
 		} : {
 			label: 'Générer un lien partageable',
 			onClick: () => request('GenerateLink', { _id }).then(() => refresh())
@@ -100,8 +100,8 @@ class File extends Component {
 			},
 			{ label: 'Copier', onClick: () => copyFile(_id) }
 		]
-		.concat(type === 'qcm' ? sharedLinkItem : [])
-		.concat(type === 'qcm' ? resultsItem : []);
+		.concat(type === 'jeu' ? sharedLinkItem : [])
+		.concat(type === 'jeu' ? resultsItem : []);
 
 		this.props.handleContextMenu(event, menuItems);
 	}

@@ -3,7 +3,7 @@ import { InputGroup, InputGroupAddon, InputGroupText, Input, Button } from 'reac
 import ReactMarkdown from 'react-markdown';
 import CodeRenderer from './CodeRenderer';
 
-class MultipleChoiceView extends Component {
+class GameView extends Component {
 	constructor(props) {
 		super(props);
 
@@ -134,4 +134,4 @@ class MultipleChoiceView extends Component {
 	}
 }
 
-export default MultipleChoiceView;
+export default GameView;
