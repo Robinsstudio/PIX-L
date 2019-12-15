@@ -23,7 +23,7 @@ const Question = mongoose.model('Question', {
 	idParent: ObjectId
 });
 
-const MultipleChoice  = mongoose.model('MultipleChoice', {
+const Game  = mongoose.model('Game', {
 	type: String,
 	name: String,
 	questions: [{ idQuestion: ObjectId }],
@@ -49,11 +49,11 @@ const Folder = mongoose.model('Folder', {
 });
 
 const getById = (_id) => {
-	return Promise.all([ Folder.findById(_id), Question.findById(_id), MultipleChoice.findById(_id) ]).then(result => result[0] || result[1] || result[2]);
+	return Promise.all([ Folder.findById(_id), Question.findById(_id), Game.findById(_id) ]).then(result => result[0] || result[1] || result[2]);
 }
 
 const getByParams = (params) => {
-	return Promise.all([ Folder.find(params), Question.find(params), MultipleChoice.find(params) ]).then(result => {
+	return Promise.all([ Folder.find(params), Question.find(params), Game.find(params) ]).then(result => {
 		const folders = result[0].sort((file1, file2) => file1.name.localeCompare(file2.name));
 		const files = result[1].concat(result[2]).sort((file1, file2) => file1.name.localeCompare(file2.name));
 		return folders.concat(files);
@@ -84,7 +84,7 @@ const copyRecursiveTo = (_id, idParent) => {
 
 const deleteRecursive = (_id) => {
 	return Folder.find({ idParent: _id }).then(folders => Promise.all(folders.map(folder => deleteRecursive(folder)))).then(() => {
-		return Promise.all([ Folder.deleteMany({ idParent: _id }), Question.deleteMany({ idParent: _id }), MultipleChoice.deleteMany({ idParent: _id }) ]);
+		return Promise.all([ Folder.deleteMany({ idParent: _id }), Question.deleteMany({ idParent: _id }), Game.deleteMany({ idParent: _id }) ]);
 	});
 }
 
@@ -159,7 +159,7 @@ module.exports = {
 			deleteRecursive(_id),
 			Folder.deleteOne({ _id }),
 			Question.deleteOne({ _id }),
-			MultipleChoice.deleteOne({ _id })
+			Game.deleteOne({ _id })
 		]);
 	},
 
@@ -175,43 +175,43 @@ module.exports = {
 		}
 	},
 
-	saveMultipleChoice: (multipleChoiceData) => {
-		if (multipleChoiceData._id) {
-			return MultipleChoice.findOneAndUpdate({ _id: multipleChoiceData._id }, multipleChoiceData, { upsert: true });
+	saveGame: (gameData) => {
+		if (gameData._id) {
+			return Game.findOneAndUpdate({ _id: gameData._id }, gameData, { upsert: true });
 		} else {
-			return new MultipleChoice(multipleChoiceData).save();
+			return new Game(gameData).save();
 		}
 	},
 
 	generateLink: (_id) => {
-		return MultipleChoice.findById(_id).then(multipleChoice => {
-			multipleChoice.url = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-			return multipleChoice.save();
+		return Game.findById(_id).then(game => {
+			game.url = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+			return game.save();
 		});
 	},
 
 	getByLink: (url) => {
-		return MultipleChoice.find({ url }).then(multipleChoices => {
-			if (multipleChoices.length) {
-				return getQuestionsByIdsWithoutAnswers(multipleChoices[0].questions.map(quest => quest.idQuestion));
+		return Game.find({ url }).then(games => {
+			if (games.length) {
+				return getQuestionsByIdsWithoutAnswers(games[0].questions.map(quest => quest.idQuestion));
 			}
 			return Promise.resolve([]);
 		});
 	},
 
 	saveSession: (url, session) => {
-		return MultipleChoice.find({ url }).then(multipleChoices => {
-			if (multipleChoices.length) {
-				const multipleChoice = multipleChoices[0];
-				return getQuestionsByIds(multipleChoice.questions.map(q => q.idQuestion)).then(questions => {
+		return Game.find({ url }).then(games => {
+			if (games.length) {
+				const game = games[0];
+				return getQuestionsByIds(game.questions.map(q => q.idQuestion)).then(questions => {
 					session.questions.forEach((question, i) => {
 						question.answers.forEach((answer, j) => {
 							answer.correct = questions[i].answers[j].correct;
 						});
 					});
-					multipleChoice.sessions = multipleChoice.sessions || [];
-					multipleChoice.sessions = multipleChoice.sessions.concat(session);
-					multipleChoice.save();
+					game.sessions = game.sessions || [];
+					game.sessions = game.sessions.concat(session);
+					game.save();
 					return session.questions;
 				});
 			}

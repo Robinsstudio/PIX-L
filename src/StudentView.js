@@ -1,8 +1,9 @@
 import React, { Component, Fragment } from 'react';
 import { Input } from 'reactstrap';
-import MultipleChoiceView from './MultipleChoiceView';
 import Modals from './Modals';
 import request from './request';
+
+import './style/student_view.css';
 
 class StudentView extends Component {
 	constructor(props) {
@@ -23,7 +24,7 @@ class StudentView extends Component {
 		this.handleCurrentQuestionChanged = this.handleCurrentQuestionChanged.bind(this);
 		this.handleDone = this.handleDone.bind(this);
 
-		request('GetMultipleChoice', { url: this.props.match.params.url })
+		request('GetGame', { url: this.props.match.params.url })
 		.then(res => res.json())
 		.then(questions => this.setState({ questions }));
 	}
@@ -86,28 +87,21 @@ class StudentView extends Component {
 	}
 
 	render() {
-		const { questions, current, editable, name: { typingEnded } } = this.state;
-
-		const columns = typingEnded ? 8 : 6;
+		const { questions } = this.state;
 
 		return (
-			<div className="centerVertically">
-				<div className="container">
-					<div className="row justify-content-center mt-3">
-						<div className={`col-md-${columns} col-xs-12`}>
-							{ typingEnded ?
-								<MultipleChoiceView
-									questions={questions}
-									current={current}
-									editable={editable}
-									onAnswersChanged={this.handleAnswersChanged}
-									onCurrentQuestionChanged={this.handleCurrentQuestionChanged}
-									onDone={editable ? this.handleDone : null}
-								/> : this.buildNameInput()
-							}
-						</div>
-					</div>
+			<div id="gameWrapper">
+				<div id="gameHeader"/>
+				<div id="gameContainer">
+					{ questions.map((_,i) => {
+						return (
+							<div className="card">
+								<div className="number">{i + 1}</div>
+							</div>
+						);
+					})}
 				</div>
+				<div id="gameFooter"/>
 			</div>
 		);
 	}

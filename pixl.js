@@ -5,7 +5,7 @@ const router = express.Router();
 router.use('/api/', require('./routes'));
 
 if (process.env.NODE_ENV === 'production') {
-	router.get('/qcm/:id', (req, res) => {
+	router.get('/jeu/:id', (req, res) => {
 		res.sendFile(__dirname + '/build/index.html');
 	});
 

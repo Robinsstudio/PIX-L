@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Button, ListGroup, ListGroupItem } from 'reactstrap';
-import MultipleChoiceView from './MultipleChoiceView';
+import GameView from './GameView';
 
 class SessionView extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			multipleChoiceView: {
+			gameView: {
 				visible: false,
 				questions: [],
 				current: 0,
@@ -18,27 +18,27 @@ class SessionView extends Component {
 		this.handleDone = this.handleDone.bind(this);
 	}
 
-	updateMultipleChoiceView(data) {
+	updateGameView(data) {
 		this.setState({
-			multipleChoiceView: {
-				...this.state.multipleChoiceView,
+			gameView: {
+				...this.state.gameView,
 				...data
 			}
 		});
 	}
 
 	handleCurrentQuestionChanged(current) {
-		this.updateMultipleChoiceView({ current });
+		this.updateGameView({ current });
 	}
 
 	handleDone() {
-		this.updateMultipleChoiceView({ visible: false, current: 0 });
+		this.updateGameView({ visible: false, current: 0 });
 	}
 
 	render() {
 		const {
 			props: { visible, sessions, updateSessionView },
-			state: { multipleChoiceView }
+			state: { gameView }
 		} = this;
 
 		return (
@@ -53,7 +53,7 @@ class SessionView extends Component {
 						{ sessions.map(({name, questions}) => {
 							return (
 								<ListGroupItem
-									onClick={() => this.updateMultipleChoiceView({ visible: true, questions })}
+									onClick={() => this.updateGameView({ visible: true, questions })}
 									tag="a"
 									action
 								>{name}</ListGroupItem>
@@ -61,13 +61,13 @@ class SessionView extends Component {
 						}) }
 					</ListGroup>
 
-					{ multipleChoiceView.visible &&
+					{ gameView.visible &&
 						<div className="centerVertically" >
 							<div className="container">
 								<div className="row justify-content-center mt-3">
 									<div className={`col-md-8 col-xs-12`}>
-										<MultipleChoiceView
-											{ ...multipleChoiceView }
+										<GameView
+											{ ...gameView }
 											onCurrentQuestionChanged={this.handleCurrentQuestionChanged}
 											onDone={this.handleDone}
 										/>

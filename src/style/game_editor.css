@@ -1,7 +1,3 @@
-#editor {
-	overflow-x: hidden;
-}
-
 #questions {
 	display: flex;
 	flex-direction: column;

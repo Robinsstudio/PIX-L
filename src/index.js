@@ -4,9 +4,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './style/global.css';
 import './style/explorer.css';
 import './style/menu.css'
-import './style/multiple_choice_editor.css';
+import './style/game_editor.css';
 import './style/taginput.css';
-import './style/multiplechoice.css';
+import './style/game.css';
 import './style/utils.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';

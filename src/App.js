@@ -10,7 +10,7 @@ class App extends Component {
 			<Fragment>
 				<Router>
 					<Switch>
-						<Route path={process.env.PUBLIC_URL + '/qcm/:url'} component={StudentView}/>
+						<Route path={process.env.PUBLIC_URL + '/jeu/:url'} component={StudentView}/>
 						<Route path={process.env.PUBLIC_URL} component={AdminView}/>
 					</Switch>
 				</Router>

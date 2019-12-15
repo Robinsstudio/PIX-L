@@ -1,0 +1,39 @@
+#gameWrapper {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+#gameHeader, #gameFooter {
+	flex-grow: 1;
+}
+
+#gameContainer {
+	font-family: 'Questrial', sans-serif;
+	font-size: 1.5em;
+	font-weight: bold;
+	color: white;
+}
+
+.card {
+	--width: 7.5em;
+
+	display: inline-block;
+	position: relative;
+	width: var(--width);
+	height: calc(var(--width) / 40 * 63);
+	margin: 1em;
+	border-radius: .25em;
+	background-image: url("../icons/glass.png");
+	background-color: rgb(2, 83, 146);
+}
+
+.number {
+	display: inline-block;
+	position: absolute;
+	left: 45%;
+	top: 48%;
+	transform: translate(-50%, -50%);
+}
