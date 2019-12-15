@@ -4,10 +4,14 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 mongoose.connect('mongodb://localhost:27017/pix-l', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const Question = mongoose.model('Question', {
+	/* Common fields */
 	type: String,
+	questionType: String,
 	name: String,
 	label: String,
-	tags: [{ type: String }],
+	idParent: ObjectId,
+
+	/* Multiple-choice question fields */
 	answers: [{
 		label: String,
 		correct: Boolean,
@@ -20,7 +24,9 @@ const Question = mongoose.model('Question', {
 		_id: ObjectId,
 		name: String,
 	},
-	idParent: ObjectId
+
+	/* Open-ended question fields */
+	words: [String]
 });
 
 const Game  = mongoose.model('Game', {

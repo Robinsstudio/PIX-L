@@ -4,6 +4,7 @@ import File from './File';
 import ContextMenu from './ContextMenu';
 import Modals from './Modals';
 import request from './request';
+import QuestionUtils from './QuestionUtils';
 
 class ExplorerView extends Component {
 	constructor(props) {
@@ -70,15 +71,13 @@ class ExplorerView extends Component {
 			{ label: 'Nouveau dossier', onClick: () => {
 				Modals.showPromptModal('Nouveau dossier', 'Entrez un nom de dossier ici...').then(name => this.createFolder(name)).catch(() => {});
 			}},
-			{ label: 'Nouvelle question', onClick: () => Modals.showQuestionModal({
-				label: '',
-				answers: [],
-				time: 120,
-				points: 1,
-				idParent: folder.active._id
-			}).then(quest => {
-				request('SaveQuestion', quest).then( () => refresh() );
-			}).catch(() => {}) },
+			{
+				label: 'Nouvelle question', onClick: () => {
+					Modals.showQuestionModal(QuestionUtils.createMultipleChoiceQuestion(folder.active._id)).then(quest => {
+						request('SaveQuestion', quest).then( () => refresh() );
+					}).catch(() => {});
+				}
+			},
 			{ label: 'Nouveau jeu', onClick: () => create() }
 		);
 	}

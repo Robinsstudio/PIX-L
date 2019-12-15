@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import Modals from './Modals';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { Col, InputGroup, Input } from 'reactstrap';
-import TextEditor from './TextEditor';
-import AutoCompleteInput from './AutoCompleteInput';
-import request from './request';
-import AnswerField from './AnswerField';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, InputGroup } from 'reactstrap';
+import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import MultipleChoiceQuestionView from './MultipleChoiceQuestionView';
+import OpenEndedQuestionView from './OpenEndedQuestionView';
+import QuestionUtils from './QuestionUtils';
+import QuestionFooterView from './QuestionFooterView';
 
 /* https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript */
 function uuidv4() {
@@ -27,11 +27,26 @@ class QuestionModal extends Component {
 		this.updateSeconds = this.updateSeconds.bind(this);
 		this.updatePoints = this.updatePoints.bind(this);
 		this.updateLinkedQuestion = this.updateLinkedQuestion.bind(this);
-		this.handleLinkedQuestionBlur = this.handleLinkedQuestionBlur.bind(this);
+		this.updateWords = this.updateWords.bind(this);
 		this.setAnswerFocused = this.setAnswerFocused.bind(this);
 		this.toggleAnswerCorrect = this.toggleAnswerCorrect.bind(this);
 		this.addAnswer = this.addAnswer.bind(this);
 		this.removeAnswer = this.removeAnswer.bind(this);
+		this.buildMultipleChoiceQuestionView = this.buildMultipleChoiceQuestionView.bind(this);
+		this.buildOpenEndedQuestionView = this.buildOpenEndedQuestionView.bind(this);
+
+		this.TYPES = {
+			multipleChoice: {
+				label: 'Question à choix multiple',
+				getView: this.buildMultipleChoiceQuestionView,
+				create: QuestionUtils.createMultipleChoiceQuestion
+			},
+			openEnded: {
+				label: 'Question à réponse libre',
+				getView: this.buildOpenEndedQuestionView,
+				create: QuestionUtils.createOpenEndedQuestion
+			}
+		};
 	}
 
 	updateQuestion(label) {
@@ -102,13 +117,23 @@ class QuestionModal extends Component {
 		update({ ...data, linkedQuestion });
 	}
 
-	loadHints(start) {
-		return request('GetQuestionNamesStartingWith', { start }).then(res => res.json());
+	updateWords(words) {
+		const { data, update } = this.props;
+		update({ ...data, words });
 	}
 
-	handleLinkedQuestionBlur() {
-		if (typeof this.props.data.linkedQuestion === 'string') {
-			this.updateLinkedQuestion(null);
+	updateQuestionType(questionType) {
+		const { props: { data, update }, TYPES } = this;
+		if (questionType !== data.questionType) {
+			const question = TYPES[questionType].create(data.idParent);
+			update({
+				...question,
+				_id: data._id,
+				name: data.name,
+				linkedQuestion: data.linkedQuestion,
+				time: data.time,
+				points: data.points
+			});
 		}
 	}
 
@@ -131,65 +156,59 @@ class QuestionModal extends Component {
 		hide();
 	}
 
+	buildMultipleChoiceQuestionView() {
+		const { data } = this.props;
+		return (
+			<MultipleChoiceQuestionView
+				data={data}
+				updateQuestion={this.updateQuestion}
+				updateAnswer={this.updateAnswer}
+				removeAnswer={this.removeAnswer}
+				toggleAnswerCorrect={this.toggleAnswerCorrect}
+				setAnswerFocused={this.setAnswerFocused}
+				addAnswer={this.addAnswer}
+			/>
+		);
+	}
+
+	buildOpenEndedQuestionView() {
+		const { data } = this.props;
+		return (
+			<OpenEndedQuestionView
+				data={data}
+				updateQuestion={this.updateQuestion}
+				updateWords={this.updateWords}
+			/>
+		);
+	}
+
 	render() {
-		const { open, data } = this.props;
+		const { props: { open, data }, TYPES } = this;
 		return (
 			<Modal isOpen={open} toggle={e => this.onCancel(data)} size="lg">
 				<ModalHeader>Saisir une question</ModalHeader>
 				<ModalBody>
-					<TextEditor onChange={this.updateQuestion} initialValue={data.label} placeholder="Saisissez votre question ici"/>
-					{data.answers.map((answer, index, array) => {
-						return (
-							<AnswerField
-								updateAnswer={this.updateAnswer}
-								removeAnswer={this.removeAnswer}
-								toggleAnswerCorrect={this.toggleAnswerCorrect}
-								setAnswerFocused={this.setAnswerFocused}
-								answer={answer}
-								index={index}
-								array={array}
-								key={answer.key || answer._id}
-							/>
-						);
-					})}
-
-					<InputGroup className="justify-content-center">
-						<Button onClick={this.addAnswer} color="success" className="mt-3 mb-3">
-							<i className="fas fa-plus"/>
-						</Button>
+					<InputGroup className="justify-content-center align-items-center mb-3">
+						<UncontrolledDropdown>
+							<DropdownToggle caret>
+								Type : { TYPES[data.questionType].label }
+							</DropdownToggle>
+							<DropdownMenu>
+								{ Object.entries(TYPES).map(e => <DropdownItem onClick={() => this.updateQuestionType(e[0])}>{e[1].label}</DropdownItem>) }
+							</DropdownMenu>
+						</UncontrolledDropdown>
 					</InputGroup>
 
-					<TextEditor onChange={this.updateFeedback} initialValue={data.feedback} placeholder="Saisissez le feedback de votre question ici"/>
+					{ TYPES[data.questionType].getView() }
 
-					<AutoCompleteInput
-						loadHints={this.loadHints}
-						value={data.linkedQuestion || ''}
-						onChange={this.updateLinkedQuestion}
-						onBlur={this.handleLinkedQuestionBlur}
-						toString={question => question.name}
-						component={Input}
-						collapseOnEnter
-						placeholder="Saisissez les premières lettres du nom de votre question liée ici"
-						className="mt-3"
+					<QuestionFooterView
+						data={data}
+						updateFeedback={this.updateFeedback}
+						updateLinkedQuestion={this.updateLinkedQuestion}
+						updateMinutes={this.updateMinutes}
+						updateSeconds={this.updateSeconds}
+						updatePoints={this.updatePoints}
 					/>
-
-					<InputGroup className="justify-content-start align-items-center mt-3">
-						<Col xs="2" className="pl-0">
-							<Input type="number" min="0" value={(data.time - data.time % 60) / 60} onChange={this.updateMinutes}/>
-						</Col>
-						minutes
-						<Col xs="2">
-							<Input type="number" min="0" value={data.time % 60} onChange={this.updateSeconds}/>
-						</Col>
-						secondes
-					</InputGroup>
-
-					<InputGroup className="justify-content-start align-items-center mt-3">
-						<Col xs="2" className="pl-0">
-							<Input type="number" min="1" max="3" step="0.1" value={data.points} onChange={this.updatePoints}/>
-						</Col>
-						points
-					</InputGroup>
 				</ModalBody>
 				<ModalFooter>
 					<Button color="primary" onClick={e => this.onConfirm(data)}>Enregistrer</Button>

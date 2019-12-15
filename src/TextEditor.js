@@ -142,9 +142,9 @@ class TextEditor extends Component {
 	}
 
 	render() {
-		const { props: { placeholder, style }, state: { focused, popover, editorState } } = this;
+		const { props: { placeholder, style, className }, state: { focused, popover, editorState } } = this;
 		return (
-			<div className="textEditorWrapper" onFocus={this.handleFocus} onBlur={this.handleBlur} style={style}>
+			<div className={`textEditorWrapper ${className}`} onFocus={this.handleFocus} onBlur={this.handleBlur} style={style}>
 				<div className={`toolbar ${focused ? 'visible' : ''}`} ref="toolbar">
 					{[
 						this.buildInlineStyleControl('BOLD'),

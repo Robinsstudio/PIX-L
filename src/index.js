@@ -5,7 +5,7 @@ import './style/global.css';
 import './style/explorer.css';
 import './style/menu.css'
 import './style/game_editor.css';
-import './style/taginput.css';
+import './style/tag_input.css';
 import './style/game.css';
 import './style/utils.css';
 import App from './App';

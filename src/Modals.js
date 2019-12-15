@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import PromptModal from './PromptModal';
 import ConfirmModal from './ConfirmModal';
 import QuestionModal from './QuestionModal';
+import QuestionUtils from './QuestionUtils';
 
 class Modals extends Component {
 	constructor(props) {
@@ -10,10 +11,7 @@ class Modals extends Component {
 			promptModal: {},
 			confirmModal: {},
 			questionModal: {
-				data: {
-					label: '',
-					answers: []
-				}
+				data: QuestionUtils.createMultipleChoiceQuestion()
 			}
 		};
 

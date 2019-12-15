@@ -1,9 +1,22 @@
+.tagContainer {
+	display: flex;
+	flex-wrap: wrap;
+	border: 1px solid #ced4da;
+	border-radius: .25em;
+	padding: 7px;
+}
+
+.tagContainer > input {
+	flex-grow: 1;
+}
+
 .tag {
 	display: inline-block;
 	border-radius: 3px;
 	font-size: 10pt;
 	color: white;
 	padding: 3px 7px 3px 7px;
+	margin: 3px;
 }
 
 .removeTag:hover {
