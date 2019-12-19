@@ -212,6 +212,7 @@ class QuestionModal extends Component {
 		return (
 			<MatchingQuestionView
 				data={data}
+				updateQuestion={this.updateQuestion}
 				addMatchingField={this.addMatchingField}
 				removeMatchingField={this.removeMatchingField}
 				updateMatchingField={this.updateMatchingField}
