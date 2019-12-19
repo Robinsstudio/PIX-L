@@ -36,6 +36,11 @@ router.post('/GetQuestionNamesStartingWith', (req, res) => {
 	Impl.getQuestionNamesStartingWith(start).then(names => res.json(names));
 });
 
+router.post('/GetThemesStartingWith', (req, res) => {
+	const { start } = req.body;
+	Impl.getThemesStartingWith(start).then(themes => res.json(themes));
+});
+
 router.post('/Rename', (req, res) => {
 	const { _id, name } = req.body;
 	Impl.rename(_id, name).then( () => res.status(200).end() );

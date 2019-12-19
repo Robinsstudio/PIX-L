@@ -28,6 +28,7 @@ class QuestionModal extends Component {
 		this.updateSeconds = this.updateSeconds.bind(this);
 		this.updatePoints = this.updatePoints.bind(this);
 		this.updateLinkedQuestion = this.updateLinkedQuestion.bind(this);
+		this.updateTheme = this.updateTheme.bind(this);
 		this.updateWords = this.updateWords.bind(this);
 		this.updateMatchingField = this.updateMatchingField.bind(this);
 		this.setAnswerFocused = this.setAnswerFocused.bind(this);
@@ -127,6 +128,11 @@ class QuestionModal extends Component {
 		update({ ...data, linkedQuestion });
 	}
 
+	updateTheme(theme) {
+		const { data, update } = this.props;
+		update({ ...data, theme });
+	}
+
 	updateWords(words) {
 		const { data, update } = this.props;
 		update({ ...data, words });
@@ -155,6 +161,7 @@ class QuestionModal extends Component {
 				...question,
 				_id: data._id,
 				name: data.name,
+				theme: data.theme,
 				linkedQuestion: data.linkedQuestion,
 				time: data.time,
 				points: data.points
@@ -244,6 +251,7 @@ class QuestionModal extends Component {
 						data={data}
 						updateFeedback={this.updateFeedback}
 						updateLinkedQuestion={this.updateLinkedQuestion}
+						updateTheme={this.updateTheme}
 						updateMinutes={this.updateMinutes}
 						updateSeconds={this.updateSeconds}
 						updatePoints={this.updatePoints}

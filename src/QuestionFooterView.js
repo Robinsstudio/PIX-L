@@ -11,8 +11,12 @@ class QuestionFooterView extends Component {
 		this.handleLinkedQuestionBlur = this.handleLinkedQuestionBlur.bind(this);
 	}
 
-	loadHints(start) {
+	loadQuestionNames(start) {
 		return request('GetQuestionNamesStartingWith', { start }).then(res => res.json());
+	}
+
+	loadThemes(start) {
+		return request('GetThemesStartingWith', { start }).then(res => res.json());
 	}
 
 	handleLinkedQuestionBlur() {
@@ -27,6 +31,7 @@ class QuestionFooterView extends Component {
 			data,
 			updateFeedback,
 			updateLinkedQuestion,
+			updateTheme,
 			updateMinutes,
 			updateSeconds,
 			updatePoints
@@ -37,7 +42,17 @@ class QuestionFooterView extends Component {
 				<TextEditor onChange={updateFeedback} initialValue={data.feedback} placeholder="Saisissez le feedback de votre question ici" className="mt-3"/>
 
 				<AutoCompleteInput
-					loadHints={this.loadHints}
+					loadHints={this.loadThemes}
+					value={data.theme || ''}
+					onChange={updateTheme}
+					component={Input}
+					collapseOnEnter
+					placeholder="Saisissez le thème de votre question ici"
+					className="mt-3"
+				/>
+
+				<AutoCompleteInput
+					loadHints={this.loadQuestionNames}
 					value={data.linkedQuestion || ''}
 					onChange={updateLinkedQuestion}
 					onBlur={this.handleLinkedQuestionBlur}
