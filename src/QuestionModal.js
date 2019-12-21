@@ -6,6 +6,7 @@ import MultipleChoiceQuestionView from './MultipleChoiceQuestionView';
 import OpenEndedQuestionView from './OpenEndedQuestionView';
 import QuestionUtils from './QuestionUtils';
 import QuestionFooterView from './QuestionFooterView';
+import MatchingQuestionView from './MatchingQuestionView';
 
 /* https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript */
 function uuidv4() {
@@ -28,12 +29,16 @@ class QuestionModal extends Component {
 		this.updatePoints = this.updatePoints.bind(this);
 		this.updateLinkedQuestion = this.updateLinkedQuestion.bind(this);
 		this.updateWords = this.updateWords.bind(this);
+		this.updateMatchingField = this.updateMatchingField.bind(this);
 		this.setAnswerFocused = this.setAnswerFocused.bind(this);
 		this.toggleAnswerCorrect = this.toggleAnswerCorrect.bind(this);
 		this.addAnswer = this.addAnswer.bind(this);
 		this.removeAnswer = this.removeAnswer.bind(this);
+		this.addMatchingField = this.addMatchingField.bind(this);
+		this.removeMatchingField = this.removeMatchingField.bind(this);
 		this.buildMultipleChoiceQuestionView = this.buildMultipleChoiceQuestionView.bind(this);
 		this.buildOpenEndedQuestionView = this.buildOpenEndedQuestionView.bind(this);
+		this.buildMatchingQuestionView = this.buildMatchingQuestionView.bind(this);
 
 		this.TYPES = {
 			multipleChoice: {
@@ -45,6 +50,11 @@ class QuestionModal extends Component {
 				label: 'Question à réponse libre',
 				getView: this.buildOpenEndedQuestionView,
 				create: QuestionUtils.createOpenEndedQuestion
+			},
+			matching: {
+				label: 'Question à appariements',
+				getView: this.buildMatchingQuestionView,
+				create: QuestionUtils.createMatchingQuestion
 			}
 		};
 	}
@@ -122,6 +132,21 @@ class QuestionModal extends Component {
 		update({ ...data, words });
 	}
 
+	updateMatchingField(matchingField, index) {
+		const { data, update } = this.props;
+		update({ ...data, matchingFields: data.matchingFields.map((field, i) => i === index ? { ...field, ...matchingField } : field)});
+	}
+
+	addMatchingField() {
+		const { data, update } = this.props;
+		update({ ...data, matchingFields: data.matchingFields.concat({ key: uuidv4(), label: '', answers: [] }) });
+	}
+
+	removeMatchingField(index) {
+		const { data, update } = this.props;
+		update({ ...data, matchingFields: data.matchingFields.filter((_,i) => i !== index) });
+	}
+
 	updateQuestionType(questionType) {
 		const { props: { data, update }, TYPES } = this;
 		if (questionType !== data.questionType) {
@@ -178,6 +203,19 @@ class QuestionModal extends Component {
 				data={data}
 				updateQuestion={this.updateQuestion}
 				updateWords={this.updateWords}
+			/>
+		);
+	}
+
+	buildMatchingQuestionView() {
+		const { data } = this.props;
+		return (
+			<MatchingQuestionView
+				data={data}
+				addMatchingField={this.addMatchingField}
+				removeMatchingField={this.removeMatchingField}
+				updateMatchingField={this.updateMatchingField}
+				addAnswerToMatchingField={this.addAnswerToMatchingField}
 			/>
 		);
 	}

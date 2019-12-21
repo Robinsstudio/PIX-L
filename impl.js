@@ -10,13 +10,6 @@ const Question = mongoose.model('Question', {
 	name: String,
 	label: String,
 	idParent: ObjectId,
-
-	/* Multiple-choice question fields */
-	answers: [{
-		label: String,
-		correct: Boolean,
-		feedback: String
-	}],
 	feedback: String,
 	time: Number,
 	points: Number,
@@ -25,8 +18,25 @@ const Question = mongoose.model('Question', {
 		name: String,
 	},
 
+	/* Multiple-choice question fields */
+	answers: [{
+		label: String,
+		correct: Boolean,
+		feedback: String
+	}],
+
 	/* Open-ended question fields */
-	words: [String]
+	words: [String],
+
+	/* Matching question fields */
+	matchingFields: [{
+		label: String,
+		answers: [{
+			label: String,
+			correct: Boolean
+		}]
+	}]
+
 });
 
 const Game  = mongoose.model('Game', {
