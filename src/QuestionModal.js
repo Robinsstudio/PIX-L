@@ -30,6 +30,8 @@ class QuestionModal extends Component {
 		this.updateLinkedQuestion = this.updateLinkedQuestion.bind(this);
 		this.updateTheme = this.updateTheme.bind(this);
 		this.updateWords = this.updateWords.bind(this);
+		this.updatePositiveFeedback = this.updatePositiveFeedback.bind(this);
+		this.updateNegativeFeedback = this.updateNegativeFeedback.bind(this);
 		this.updateMatchingField = this.updateMatchingField.bind(this);
 		this.setAnswerFocused = this.setAnswerFocused.bind(this);
 		this.toggleAnswerCorrect = this.toggleAnswerCorrect.bind(this);
@@ -138,6 +140,16 @@ class QuestionModal extends Component {
 		update({ ...data, words });
 	}
 
+	updatePositiveFeedback(positiveFeedback) {
+		const { data, update } = this.props;
+		update({ ...data, positiveFeedback });
+	}
+
+	updateNegativeFeedback(negativeFeedback) {
+		const { data, update } = this.props;
+		update({ ...data, negativeFeedback });
+	}
+
 	updateMatchingField(matchingField, index) {
 		const { data, update } = this.props;
 		update({ ...data, matchingFields: data.matchingFields.map((field, i) => i === index ? { ...field, ...matchingField } : field)});
@@ -210,6 +222,8 @@ class QuestionModal extends Component {
 				data={data}
 				updateQuestion={this.updateQuestion}
 				updateWords={this.updateWords}
+				updatePositiveFeedback={this.updatePositiveFeedback}
+				updateNegativeFeedback={this.updateNegativeFeedback}
 			/>
 		);
 	}
