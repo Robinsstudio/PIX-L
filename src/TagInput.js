@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import AutoCompleteInput from './AutoCompleteInput';
-import request from './request';
 
 class TagInput extends Component {
 	constructor(props) {
@@ -25,15 +23,14 @@ class TagInput extends Component {
 		onChange(tags.filter((_, i) => i !== index));
 	}
 
-	handleChange(input) {
-		this.setState({ input: input.replace(/\s/g, '') });
+	handleChange(event) {
+		this.setState({ input: event.target.value });
 	}
 
 	handleKeyDown(event) {
 		const { props: { tags }, state: { input } } = this;
-		if (input.length && [' ', 'Enter'].includes(event.key)) {
+		if (input.length && ['Enter'].includes(event.key)) {
 			this.add(input);
-			this.input.current.clearHints();
 			event.preventDefault();
 		} else if (!input.length && event.key === 'Backspace') {
 			this.remove(tags.length - 1);
@@ -41,14 +38,10 @@ class TagInput extends Component {
 		}
 	}
 
-	loadHints(start) {
-		return request('GetTagsStartingWith', { start } ).then(res => res.json());
-	}
-
 	render() {
 		const { props: { tags }, state: { input } } = this;
 		return (
-			<div className="form-control">
+			<div className="tagContainer mt-3">
 				{ tags.map((tag, index) => {
 					return (
 						<div className="bg-success tag mr-2">
@@ -58,12 +51,11 @@ class TagInput extends Component {
 					);
 				}) }
 
-				<AutoCompleteInput
-					placeholder="Ajouter un tag..."
+				<input
+					placeholder="Saisissez un mot-clé ici"
 					value={input}
 					onChange={this.handleChange}
 					onKeyDown={this.handleKeyDown}
-					loadHints={this.loadHints}
 					style={{ border: 'none', outline: 'none' }}
 					ref={this.input}
 				/>
