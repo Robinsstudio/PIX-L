@@ -11,6 +11,7 @@ const Question = mongoose.model('Question', {
 	label: String,
 	idParent: ObjectId,
 	feedback: String,
+	theme: String,
 	time: Number,
 	points: Number,
 	linkedQuestion: {
@@ -27,6 +28,8 @@ const Question = mongoose.model('Question', {
 
 	/* Open-ended question fields */
 	words: [String],
+	positiveFeedback: String,
+	negativeFeedback: String,
 
 	/* Matching question fields */
 	matchingFields: [{
@@ -153,7 +156,11 @@ module.exports = {
 
 	getQuestionNamesStartingWith: (start) => {
 		const regex = new RegExp(`^${start}`, 'i');
-		return Question.find({ name: regex }).limit(10).select('name').sort('name');
+		return Question.find({ name: regex }).limit(10).select('name');
+	},
+
+	getThemesStartingWith: (start) => {
+		return Question.distinct('theme', { theme: new RegExp(`^${start}`, 'i') });
 	},
 
 	rename: (_id, name) => {

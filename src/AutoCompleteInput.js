@@ -23,7 +23,9 @@ class AutoCompleteInput extends Component {
 		const { value } = event.target;
 		const { loadHints } = this.props;
 		this.setState({ activeHint: -1, initialValue: value });
-		loadHints(value).then(hints => this.setState({ hints }));
+		loadHints(value).then(hints => this.setState({ hints: hints.sort((h1, h2) => {
+			return this.buildString(h1).localeCompare(this.buildString(h2));
+		}) }));
 		this.fireOnChange(value);
 	}
 

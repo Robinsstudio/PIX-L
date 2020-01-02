@@ -28,7 +28,10 @@ class QuestionModal extends Component {
 		this.updateSeconds = this.updateSeconds.bind(this);
 		this.updatePoints = this.updatePoints.bind(this);
 		this.updateLinkedQuestion = this.updateLinkedQuestion.bind(this);
+		this.updateTheme = this.updateTheme.bind(this);
 		this.updateWords = this.updateWords.bind(this);
+		this.updatePositiveFeedback = this.updatePositiveFeedback.bind(this);
+		this.updateNegativeFeedback = this.updateNegativeFeedback.bind(this);
 		this.updateMatchingField = this.updateMatchingField.bind(this);
 		this.setAnswerFocused = this.setAnswerFocused.bind(this);
 		this.toggleAnswerCorrect = this.toggleAnswerCorrect.bind(this);
@@ -127,9 +130,24 @@ class QuestionModal extends Component {
 		update({ ...data, linkedQuestion });
 	}
 
+	updateTheme(theme) {
+		const { data, update } = this.props;
+		update({ ...data, theme });
+	}
+
 	updateWords(words) {
 		const { data, update } = this.props;
 		update({ ...data, words });
+	}
+
+	updatePositiveFeedback(positiveFeedback) {
+		const { data, update } = this.props;
+		update({ ...data, positiveFeedback });
+	}
+
+	updateNegativeFeedback(negativeFeedback) {
+		const { data, update } = this.props;
+		update({ ...data, negativeFeedback });
 	}
 
 	updateMatchingField(matchingField, index) {
@@ -155,6 +173,7 @@ class QuestionModal extends Component {
 				...question,
 				_id: data._id,
 				name: data.name,
+				theme: data.theme,
 				linkedQuestion: data.linkedQuestion,
 				time: data.time,
 				points: data.points
@@ -203,6 +222,8 @@ class QuestionModal extends Component {
 				data={data}
 				updateQuestion={this.updateQuestion}
 				updateWords={this.updateWords}
+				updatePositiveFeedback={this.updatePositiveFeedback}
+				updateNegativeFeedback={this.updateNegativeFeedback}
 			/>
 		);
 	}
@@ -212,6 +233,7 @@ class QuestionModal extends Component {
 		return (
 			<MatchingQuestionView
 				data={data}
+				updateQuestion={this.updateQuestion}
 				addMatchingField={this.addMatchingField}
 				removeMatchingField={this.removeMatchingField}
 				updateMatchingField={this.updateMatchingField}
@@ -243,6 +265,7 @@ class QuestionModal extends Component {
 						data={data}
 						updateFeedback={this.updateFeedback}
 						updateLinkedQuestion={this.updateLinkedQuestion}
+						updateTheme={this.updateTheme}
 						updateMinutes={this.updateMinutes}
 						updateSeconds={this.updateSeconds}
 						updatePoints={this.updatePoints}

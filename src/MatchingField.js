@@ -57,7 +57,7 @@ class MatchingField extends Component {
 				<InputGroup className="align-items-center mb-3">
 					<input
 						type="text"
-						placeholder="Saisissez votre question ici"
+						placeholder="Saisissez votre sous-question ici"
 						onChange={e => this.setMatchingFieldLabel(e, index)}
 						value={field.label}
 						className="form-control"
