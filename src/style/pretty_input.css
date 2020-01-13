@@ -8,6 +8,11 @@
 	height: 6rem;
 }
 
+.input-text.input-text-large {
+	margin: 0;
+	width: 50rem;
+}
+
 .input-text input {
 	position: absolute;
 	outline: none;

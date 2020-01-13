@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 import TextRenderer from './TextRenderer';
+import PrettyInput from './PrettyInput';
 import request from './request';
 
 import './style/student_view.css';
@@ -9,7 +10,17 @@ class StudentView extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			questions: []
+			questions: [],
+			openEndedAnswer: ''
+		};
+
+		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
+		this.buildMultipleChoiceQuestionBody = this.buildMultipleChoiceQuestionBody.bind(this);
+		this.buildOpenEndedQuestionBody = this.buildOpenEndedQuestionBody.bind(this);
+
+		this.buildersByQuestionType = {
+			multipleChoice: this.buildMultipleChoiceQuestionBody,
+			openEnded: this.buildOpenEndedQuestionBody,
 		};
 
 		request('GetGame', { url: this.props.match.params.url })
@@ -46,6 +57,10 @@ class StudentView extends Component {
 		}
 	}
 
+	handleOpenEndedAnswerChanged(event) {
+		this.setState({ openEndedAnswer: event.target.value });
+	}
+
 	buildCards() {
 		const { questions } = this.state;
 
@@ -64,6 +79,42 @@ class StudentView extends Component {
 		);
 	}
 
+	buildMultipleChoiceQuestionBody() {
+		const { activeQuestion } = this.state;
+
+		return (
+			<div id="cardContainer">
+				{activeQuestion.answers.map(answer => {
+					return (
+						<div className="card card--wide" key={answer._id} onClick={() => this.setState({ activeQuestion: null })}>
+							<TextRenderer initialValue={answer.label}/>
+						</div>
+					);
+				})}
+			</div>
+		);
+	}
+
+	buildOpenEndedQuestionBody() {
+		const { openEndedAnswer } = this.state;
+
+		return (
+			<PrettyInput
+				id="openEndedAnswer"
+				type="text"
+				label="Réponse"
+				onChange={this.handleOpenEndedAnswerChanged}
+				value={openEndedAnswer}
+				large
+			/>
+		);
+	}
+
+	buildActiveQuestionBody() {
+		const { buildersByQuestionType, state: { activeQuestion } } = this;
+		return buildersByQuestionType[activeQuestion.questionType]();
+	}
+
 	buildActiveQuestion() {
 		const { activeQuestion } = this.state;
 
@@ -72,15 +123,7 @@ class StudentView extends Component {
 				<div id="questionLabel">
 					<TextRenderer initialValue={activeQuestion.label}/>
 				</div>
-				<div id="cardContainer">
-					{activeQuestion.answers.map(answer => {
-						return (
-							<div className="card card--wide" key={answer._id} onClick={() => this.setState({ activeQuestion: null })}>
-								<TextRenderer initialValue={answer.label}/>
-							</div>
-						);
-					})}
-				</div>
+				{ this.buildActiveQuestionBody() }
 			</div>
 		);
 	}
