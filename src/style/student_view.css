@@ -29,6 +29,11 @@
 #questionLabel {
 	color: rgb(0, 82, 145);
 	margin-bottom: 2rem;
+	text-align: center;
+}
+
+#questionLabelRenderer {
+	display: inline-block;
 }
 
 #cardContainer {
@@ -54,6 +59,9 @@
 }
 
 .card--wide {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 	width: 100%;
 	height: auto;
 	padding: .5rem;

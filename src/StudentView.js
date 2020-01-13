@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import { Input } from 'reactstrap';
 import io from 'socket.io-client';
 import TextRenderer from './TextRenderer';
 import PrettyInput from './PrettyInput';
 import request from './request';
 
+import './style/form_view.css';
 import './style/student_view.css';
 
 class StudentView extends Component {
@@ -11,7 +13,7 @@ class StudentView extends Component {
 		super(props);
 		this.state = {
 			questions: [],
-			openEndedAnswer: ''
+			openEndedAnswer: '',
 		};
 
 		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
@@ -57,6 +59,18 @@ class StudentView extends Component {
 		}
 	}
 
+	handleMultipleChoiceAnswerChanged(index) {
+		const { activeQuestion } = this.state;
+		this.setState({
+			activeQuestion: {
+				...activeQuestion,
+				answers: activeQuestion.answers.map((answer, i) => {
+					return index === i ? { ...answer, correct: !answer.correct } : answer;
+				})
+			}
+		});
+	}
+
 	handleOpenEndedAnswerChanged(event) {
 		this.setState({ openEndedAnswer: event.target.value });
 	}
@@ -84,9 +98,10 @@ class StudentView extends Component {
 
 		return (
 			<div id="cardContainer">
-				{activeQuestion.answers.map(answer => {
+				{activeQuestion.answers.map((answer, i) => {
 					return (
-						<div className="card card--wide" key={answer._id} onClick={() => this.setState({ activeQuestion: null })}>
+						<div className="card card--wide" key={answer._id} onClick={() => this.handleMultipleChoiceAnswerChanged(i)}>
+							<input type="checkbox" checked={answer.correct} className="mr-3"/>
 							<TextRenderer initialValue={answer.label}/>
 						</div>
 					);
@@ -121,9 +136,16 @@ class StudentView extends Component {
 		return (
 			<div id="questionSection">
 				<div id="questionLabel">
-					<TextRenderer initialValue={activeQuestion.label}/>
+					<div id="questionLabelRenderer">
+						<TextRenderer initialValue={activeQuestion.label}/>
+					</div>
 				</div>
+
 				{ this.buildActiveQuestionBody() }
+
+				<div className="form-button" onClick={() => alert('Validé')}>
+					<span className="form-button-content">Valider</span>
+				</div>
 			</div>
 		);
 	}
