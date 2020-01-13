@@ -1,7 +1,9 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 
 const router = express.Router();
 
+router.use(cookieParser());
 router.use('/api/', require('./routes'));
 
 if (process.env.NODE_ENV === 'production') {
@@ -14,4 +16,7 @@ if (process.env.NODE_ENV === 'production') {
 	console.log('Production server is running');
 }
 
-module.exports = router;
+module.exports = function(server) {
+	require('./sessions')(server);
+	return router;
+};

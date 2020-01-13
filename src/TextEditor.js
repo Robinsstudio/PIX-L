@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Editor, EditorState, RichUtils, CompositeDecorator, convertFromRaw, convertToRaw } from 'draft-js';
+import { Editor, EditorState, RichUtils, convertFromRaw, convertToRaw } from 'draft-js';
+import EditorDecorator from './EditorDecorator';
 import PromptPopover from './PromptPopover';
 import 'draft-js/dist/Draft.css';
 import './style/text_editor.css';
@@ -8,10 +9,7 @@ class TextEditor extends Component {
 	constructor(props) {
 		super(props);
 
-		const decorator = new CompositeDecorator([{
-			strategy: findLinkEntities,
-			component: Link
-		}]);
+		const decorator = new EditorDecorator();
 
 		this.state = {
 			focused: false,
@@ -178,28 +176,6 @@ class TextEditor extends Component {
 			</div>
 		);
 	}
-}
-
-const Link = (props) => {
-	const {url} = props.contentState.getEntity(props.entityKey).getData();
-	return (
-		<span onDoubleClick={() => window.open(url)} className="link">
-			{props.children}
-		</span>
-	);
-};
-
-function findLinkEntities(contentBlock, callback, contentState) {
-	contentBlock.findEntityRanges(
-		(character) => {
-			const entityKey = character.getEntity();
-			return (
-				entityKey !== null &&
-				contentState.getEntity(entityKey).getType() === 'LINK'
-			);
-		},
-		callback
-	);
 }
 
 export default TextEditor;

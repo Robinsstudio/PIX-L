@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { InputGroup, Input, Button } from 'reactstrap';
+import { InputGroup, Button } from 'reactstrap';
 import TextEditor from './TextEditor';
 import AnswerField from './AnswerField';
 

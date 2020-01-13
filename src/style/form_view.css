@@ -1,0 +1,52 @@
+.form-background {
+	font-family: 'Questrial';
+	color: white;
+	background-color: rgb(0, 82, 145);
+}
+
+.form-section {
+	display: flex;
+	flex-direction: column;
+	width: 40rem;
+	min-height: 100vh;
+	margin: auto;
+	background-color: rgb(238, 127, 0);
+}
+
+.form-section-header, .form-section-footer {
+	flex-grow: 1;
+}
+
+.form-header-primary {
+	text-align: center;
+	font-size: 5rem;
+	margin-bottom: 2rem;
+}
+
+.form-header-secondary {
+	text-align: center;
+	font-size: 2rem;
+	margin-bottom: 1rem;
+}
+
+.form-button {
+	position: relative;
+	background-color: rgb(0, 82, 145);
+	margin: 3rem auto;
+	width: 10rem;
+	height: 4rem;
+	text-align: center;
+	cursor: pointer;
+}
+
+.form-button-content {
+	position: absolute;
+	font-size: 1.3rem;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.form-button:active {
+	background-color: rgb(0, 49, 87);
+}

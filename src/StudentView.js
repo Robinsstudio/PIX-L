@@ -1,6 +1,6 @@
-import React, { Component, Fragment } from 'react';
-import { Input } from 'reactstrap';
-import Modals from './Modals';
+import React, { Component } from 'react';
+import io from 'socket.io-client';
+import TextRenderer from './TextRenderer';
 import request from './request';
 
 import './style/student_view.css';
@@ -9,97 +9,112 @@ class StudentView extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			name: {
-				value: '',
-				typingEnded: false
-			},
-			questions: [],
-			current: 0,
-			editable: true
+			questions: []
 		};
-
-		this.setName = this.setName.bind(this);
-		this.endTyping = this.endTyping.bind(this);
-		this.handleAnswersChanged = this.handleAnswersChanged.bind(this);
-		this.handleCurrentQuestionChanged = this.handleCurrentQuestionChanged.bind(this);
-		this.handleDone = this.handleDone.bind(this);
 
 		request('GetGame', { url: this.props.match.params.url })
 		.then(res => res.json())
 		.then(questions => this.setState({ questions }));
 	}
 
-	setName(event) {
-		const { value } = event.target;
-		this.setState({ name: { ...this.state.name, value } });
+	componentDidMount() {
+		const socket = io('/PIX-L');
+		socket.on('connect', () => socket.emit('init', { url: this.props.match.params.url }));
+		socket.on('cardSelected', ({index, selected}) => this.selectCard(index, selected));
+		socket.on('questionSelected', ({index, selected}) => this.selectQuestion(index, selected));
+		this.socket = socket;
 	}
 
-	endTyping(event) {
-		const { name } = this.state;
-		if (event.key === 'Enter' && !name.value.match(/^\s*$/)) {
-			this.setState({ name: { ...name, typingEnded: true } });
+	isAuthenticated() {
+		return this.props.authenticated;
+	}
+
+	selectCard(index, selected) {
+		this.setState({
+			questions: this.state.questions.map((quest, i) => index === i ? { ...quest, selected } : quest)
+		});
+	}
+
+	selectQuestion(index, selected) {
+		const activeQuestion = selected ? this.state.questions[index] : null;
+		this.setState({ activeQuestion });
+	}
+
+	handleCardClicked(index) {
+		if (this.isAuthenticated()) {
+			this.socket.emit('selectCard', index);
 		}
 	}
 
-	handleAnswersChanged(questions) {
-		this.setState({ questions });
-	}
+	buildCards() {
+		const { questions } = this.state;
 
-	handleCurrentQuestionChanged(current) {
-		this.setState({ current });
-	}
-
-	handleDone() {
-		const { url } = this.props.match.params;
-		const { questions, name } = this.state;
-
-		Modals.showConfirmModal('Confirmation des réponses',
-				'En cliquant sur "Terminé", '
-				+ 'vous validez l\'ensemble de vos réponses. Confirmez-vous votre choix ?')
-		.then(() => {
-			return request('SaveSession', {
-				url,
-				session: {
-					name: name.value,
-					questions
-				}
-			})
-			.then(res => res.json())
-			.then(questions => this.setState({ questions, current: 0, editable: false }));
-		}, () => {});
-	}
-
-	buildNameInput() {
-		const { value } = this.state.name;
 		return (
-			<Fragment>
-				<label htmlFor="nameInput">Saisissez votre nom:</label>
-				<Input
-					id="nameInput"
-					type="text"
-					spellCheck="false"
-					onChange={this.setName}
-					onKeyDown={this.endTyping}
-					value={value}
-				/>
-			</Fragment>
+			questions.map((question, i) => {
+				return (
+					<div className={`card ${question.selected ? 'selected' : ''}`} key={question._id} onClick={() => this.handleCardClicked(i)}>
+						<div className="card-background">
+							<div className="number">{i + 1}</div>
+						</div>
+						<div className="theme">{ question.theme }</div>
+						<div className="points">{ `${question.points} pt${question.points > 1 ? 's' : ''}` }</div>
+					</div>
+				);
+			})
+		);
+	}
+
+	buildActiveQuestion() {
+		const { activeQuestion } = this.state;
+
+		return (
+			<div id="questionSection">
+				<div id="questionLabel">
+					<TextRenderer initialValue={activeQuestion.label}/>
+				</div>
+				<div id="cardContainer">
+					{activeQuestion.answers.map(answer => {
+						return (
+							<div className="card card--wide" key={answer._id} onClick={() => this.setState({ activeQuestion: null })}>
+								<TextRenderer initialValue={answer.label}/>
+							</div>
+						);
+					})}
+				</div>
+			</div>
 		);
 	}
 
 	render() {
-		const { questions } = this.state;
+		const { activeQuestion } = this.state;
 
 		return (
 			<div id="gameWrapper">
 				<div id="gameHeader"/>
 				<div id="gameContainer">
-					{ questions.map((_,i) => {
-						return (
-							<div className="card">
-								<div className="number">{i + 1}</div>
+					<div id="game">
+						{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
+					</div>
+					<div id="score">
+						<div class="points-container">
+							<div class="points-rectangle points-rectangle--1">
+								<div class="points-value points-value--1">100</div>
 							</div>
-						);
-					})}
+							<div class="points-rectangle points-rectangle--2">
+								<div class="points-value points-value--2">100</div>
+							</div>
+							<div class="points-rectangle points-rectangle--3">
+								<div class="points-value points-value--3">100</div>
+							</div>
+							<div class="points-rectangle points-rectangle--4">
+								<div class="points-value points-value--4">100</div>
+							</div>
+							<div class="points-rectangle points-rectangle--5">
+								<div class="points-value points-value--5">100</div>
+							</div>
+						</div>
+						<div class="points-label">PTS</div>
+					</div>
 				</div>
 				<div id="gameFooter"/>
 			</div>

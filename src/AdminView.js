@@ -8,7 +8,6 @@ class AdminView extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			tags: [],
 			files: [],
 			folder: {
 				path: [],
@@ -28,7 +27,6 @@ class AdminView extends Component {
 		};
 
 		this.requestFolder = this.requestFolder.bind(this);
-		this.searchByTags = this.searchByTags.bind(this);
 		this.create = this.create.bind(this);
 		this.edit = this.edit.bind(this);
 		this.save = this.save.bind(this);
@@ -40,21 +38,9 @@ class AdminView extends Component {
 	}
 
 	requestFolder(_id) {
-		this.setState({ tags: [] });
 		request('ListFolder', { _id }).then(res => res.json()).then(({folder, files}) => {
 			this.setState({ folder, files });
 		});
-	}
-
-	searchByTags(tags) {
-		if (tags.length) {
-			this.setState({ tags });
-			request('GetQuestionsByTags', { tags, idParent: this.state.folder.active._id }).then(res => res.json()).then(files => {
-				this.setState({ files });
-			});
-		} else {
-			this.refresh();
-		}
 	}
 
 	create() {
@@ -132,15 +118,13 @@ class AdminView extends Component {
 	}
 
 	render() {
-		const { folder, files, tags, editor, sessionView } = this.state;
+		const { folder, files, editor, sessionView } = this.state;
 		return (
 			<div id="app">
 				<ExplorerView
 					folder={folder}
 					files={files}
-					tags={tags}
 					requestFolder={this.requestFolder}
-					searchByTags={this.searchByTags}
 					create={this.create}
 					edit={this.edit}
 					updateSessionView={this.updateSessionView}

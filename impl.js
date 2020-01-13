@@ -114,8 +114,13 @@ const getQuestionsByIds = (_ids) => {
 };
 
 const getQuestionsByIdsWithoutAnswers = (_ids) => {
-	return Question.where('_id').in(_ids).select('label answers.label -_id').then(questions => {
-		return questions.sort((q1, q2) => _ids.indexOf(q1.id) - _ids.indexOf(q2.id));
+	return Question.where('_id').in(_ids).select('-answers.correct').then(questions => {
+		const questionsWithLinked = questions.filter(question => question.linkedQuestion._id);
+		return questions.filter(question => {
+			return questionsWithLinked.reduce((prev, quest) => {
+				return prev && !question._id.equals(quest.linkedQuestion._id);
+			}, true);
+		}).sort((q1, q2) => _ids.indexOf(q1.id) - _ids.indexOf(q2.id));
 	});
 };
 
@@ -142,17 +147,6 @@ module.exports = {
 	},
 
 	getQuestionsByIds,
-
-	getQuestionsByTags: (tags, idParent) => {
-		return Question.find({ idParent }).where('tags').all(tags).then(questions => {
-			return questions.sort((q1, q2) => q1.name.localeCompare(q2.name));
-		});
-	},
-
-	getTagsStartingWith: (start) => {
-		const regex = new RegExp(eval(`/^${start}/i`));
-		return Question.distinct('tags').then(tags => tags.filter(tag => tag.match(regex)).sort());
-	},
 
 	getQuestionNamesStartingWith: (start) => {
 		const regex = new RegExp(`^${start}`, 'i');
@@ -219,26 +213,6 @@ module.exports = {
 				return getQuestionsByIdsWithoutAnswers(games[0].questions.map(quest => quest.idQuestion));
 			}
 			return Promise.resolve([]);
-		});
-	},
-
-	saveSession: (url, session) => {
-		return Game.find({ url }).then(games => {
-			if (games.length) {
-				const game = games[0];
-				return getQuestionsByIds(game.questions.map(q => q.idQuestion)).then(questions => {
-					session.questions.forEach((question, i) => {
-						question.answers.forEach((answer, j) => {
-							answer.correct = questions[i].answers[j].correct;
-						});
-					});
-					game.sessions = game.sessions || [];
-					game.sessions = game.sessions.concat(session);
-					game.save();
-					return session.questions;
-				});
-			}
-			return Promise.resolve();
 		});
 	}
 }

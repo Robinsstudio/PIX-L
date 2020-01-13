@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 import File from './File';
 import ContextMenu from './ContextMenu';
@@ -123,7 +124,7 @@ class ExplorerView extends Component {
 	
 	render() {
 		const {
-			props: { folder, tags, searchByTags },
+			props: { folder },
 			state: { contextMenu, displayByList }
 		} = this;
 		const path = folder.path.concat(folder.active.name ? folder.active : []);
@@ -131,7 +132,8 @@ class ExplorerView extends Component {
 		return (
 			<div id="explorer" className="view">
 				<div id="explorerHeader" className="header">
-					<div id="searchByTags">
+					<div id="account">
+						<Link to={process.env.PUBLIC_URL + '/compte'}>Mon compte</Link>
 					</div>
 
 					<div id="path">
