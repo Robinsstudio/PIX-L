@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import { Input } from 'reactstrap';
+import React, { Component, Fragment } from 'react';
 import io from 'socket.io-client';
 import TextRenderer from './TextRenderer';
 import PrettyInput from './PrettyInput';
@@ -7,6 +6,7 @@ import request from './request';
 
 import './style/form_view.css';
 import './style/student_view.css';
+import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 
 class StudentView extends Component {
 	constructor(props) {
@@ -19,10 +19,12 @@ class StudentView extends Component {
 		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
 		this.buildMultipleChoiceQuestionBody = this.buildMultipleChoiceQuestionBody.bind(this);
 		this.buildOpenEndedQuestionBody = this.buildOpenEndedQuestionBody.bind(this);
+		this.buildMatchingQuestionBody = this.buildMatchingQuestionBody.bind(this);
 
 		this.buildersByQuestionType = {
 			multipleChoice: this.buildMultipleChoiceQuestionBody,
 			openEnded: this.buildOpenEndedQuestionBody,
+			matching: this.buildMatchingQuestionBody
 		};
 
 		request('GetGame', { url: this.props.match.params.url })
@@ -75,6 +77,23 @@ class StudentView extends Component {
 		this.setState({ openEndedAnswer: event.target.value });
 	}
 
+	handleMatchingFieldAnswerChanged(fieldIndex, answerIndex) {
+		const { activeQuestion } = this.state;
+		this.setState({
+			activeQuestion: {
+				...activeQuestion,
+				matchingFields: activeQuestion.matchingFields.map((field, i) => {
+					return fieldIndex === i ? {
+						...field,
+						answers: field.answers.map((answer, j) => {
+							return answerIndex === j ? { ...answer, correct: true } : { ...answer, correct: false }
+						})
+					} : field;
+				})
+			}
+		});
+	}
+
 	buildCards() {
 		const { questions } = this.state;
 
@@ -94,11 +113,11 @@ class StudentView extends Component {
 	}
 
 	buildMultipleChoiceQuestionBody() {
-		const { activeQuestion } = this.state;
+		const { answers } = this.state.activeQuestion;
 
 		return (
 			<div id="cardContainer">
-				{activeQuestion.answers.map((answer, i) => {
+				{answers.map((answer, i) => {
 					return (
 						<div className="card card--wide" key={answer._id} onClick={() => this.handleMultipleChoiceAnswerChanged(i)}>
 							<input type="checkbox" checked={answer.correct} className="mr-3"/>
@@ -125,6 +144,34 @@ class StudentView extends Component {
 		);
 	}
 
+	buildMatchingQuestionBody() {
+		const { matchingFields } = this.state.activeQuestion;
+
+		return (
+			<div id="matchingFieldsDropdowns">
+				{matchingFields.map((field, i) => {
+					const correctAnswer = field.answers.find(answer => answer.correct);
+
+					return (
+						<Fragment>
+							<label className="matchingFieldLabel color-blue">{ field.label }</label>
+							<UncontrolledDropdown className="matchingFieldDropdown">
+								<DropdownToggle caret>
+									{correctAnswer ? correctAnswer.label : 'Sélectionnez la bonne réponse'}
+								</DropdownToggle>
+								<DropdownMenu>
+									{field.answers.map((answer, j) =>
+										<DropdownItem onClick={() => this.handleMatchingFieldAnswerChanged(i,j)}>{ answer.label }</DropdownItem>
+									)}
+								</DropdownMenu>
+							</UncontrolledDropdown>
+						</Fragment>
+					);
+				})}
+			</div>
+		);
+	}
+
 	buildActiveQuestionBody() {
 		const { buildersByQuestionType, state: { activeQuestion } } = this;
 		return buildersByQuestionType[activeQuestion.questionType]();
@@ -135,7 +182,7 @@ class StudentView extends Component {
 
 		return (
 			<div id="questionSection">
-				<div id="questionLabel">
+				<div id="questionLabel" className="color-blue">
 					<div id="questionLabelRenderer">
 						<TextRenderer initialValue={activeQuestion.label}/>
 					</div>

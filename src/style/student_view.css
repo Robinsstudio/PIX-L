@@ -27,13 +27,34 @@
 }
 
 #questionLabel {
-	color: rgb(0, 82, 145);
 	margin-bottom: 2rem;
 	text-align: center;
 }
 
 #questionLabelRenderer {
 	display: inline-block;
+}
+
+#matchingFieldsDropdowns {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 1rem;
+	align-items: center;
+}
+
+.matchingFieldLabel {
+	grid-column: 1 / 2;
+	margin: 0;
+	text-align: right;
+}
+
+.matchingFieldDropdown {
+	grid-column: 2 / 3;
+}
+
+#matchingFieldsDropdowns > .matchingFieldDropdown > button {
+	background-color: rgb(238, 127, 0);
+	border-color: rgb(238, 127, 0);
 }
 
 #cardContainer {
@@ -206,4 +227,8 @@
 	font-size: 3rem;
 	font-weight: bold;
 	color: rgb(213, 213, 213);
+}
+
+.color-blue {
+	color: rgb(0, 82, 145);
 }
