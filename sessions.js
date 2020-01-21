@@ -36,17 +36,18 @@ class Session {
 	}
 
 	initializeTeamEvents(socket) {
-		socket.on('teamChosen', team => {
+		socket.on('teamChoice', team => {
 			if (this.getAvailableTeams().includes(team)) {
-				this.broadcast('teamJoined', { team, score: 0 });
-				this.teams[socket.id] = team;
+
+				this.teams[socket.id] = { team, score: 0 };
+				this.broadcast('teamChange', Object.values(this.teams));
 
 				socket.on('disconnect', () => {
-					this.broadcast('teamLeft', this.teams[socket.id]);
-					this.teams[socket.id] = null;
+					delete this.teams[socket.id];
+					this.broadcast('teamChange', Object.values(this.teams));
 				});
 
-				socket.removeAllListeners('teamChosen');
+				socket.removeAllListeners('teamChoice');
 			}
 		});
 	}
@@ -62,7 +63,7 @@ class Session {
 
 		socket.emit('init', {
 			questions: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
-			teams: Object.values(this.teams).filter(team => team).map(team => { return { team, score: 0 } })
+			teams: Object.values(this.teams)
 		});
 
 		console.log('Listening to socket ' + socket.id);

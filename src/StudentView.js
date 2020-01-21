@@ -43,12 +43,12 @@ class StudentView extends Component {
 		socket.on('questionSelection', questions => this.changeSelection(questions));
 		socket.on('questionStart', question => this.startQuestion(question));
 
-		socket.on('teamJoined', team => this.setState({ teams: this.state.teams.concat(team).sort((t1, t2) => t1.team - t2.team) }));
-		socket.on('teamLeft', team => this.setState({ teams: this.state.teams.filter(t => team !== t.team) }));
+		socket.on('teamChange', teams => this.updateTeams(teams));
 
 		socket.on('init', data => {
 			this.changeSelection(data.questions);
-			this.setState({ teams: data.teams, initialized: true });
+			this.updateTeams(data.teams);
+			this.setState({ initialized: true });
 		});
 		this.socket = socket;
 	}
@@ -71,13 +71,17 @@ class StudentView extends Component {
 		});
 	}
 
+	updateTeams(teams) {
+		this.setState({ teams: teams.sort((t1, t2) => t1.team - t2.team) })
+	}
+
 	startQuestion(index) {
 		this.setState({ activeQuestion: this.state.questions[index] });
 	}
 
 	handleTeamClicked(team) {
-		this.socket.emit('teamChosen', team);
-		this.setState({ team: { team, score: 0 } });
+		this.socket.emit('teamChoice', team);
+		this.setState({ team });
 	}
 
 	handleCardClicked(index) {
