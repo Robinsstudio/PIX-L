@@ -57,3 +57,43 @@
 	border: 1px blue dotted;
 	background-color: rgba(98, 156, 201, .5);
 }
+
+.color-team-1 {
+	color: rgb(238, 0, 0);
+}
+
+.color-team-2 {
+	color: rgb(238, 213, 0);
+}
+
+.color-team-3 {
+	color: rgb(0, 238, 95);
+}
+
+.color-team-4 {
+	color: rgb(0, 202, 238);
+}
+
+.color-team-5 {
+	color: rgb(190, 0, 238);
+}
+
+.background-color-team-1 {
+	background-color: rgb(238, 0, 0);
+}
+
+.background-color-team-2 {
+	background-color: rgb(238, 213, 0);
+}
+
+.background-color-team-3 {
+	background-color: rgb(0, 238, 95);
+}
+
+.background-color-team-4 {
+	background-color: rgb(0, 202, 238);
+}
+
+.background-color-team-5 {
+	background-color: rgb(190, 0, 238);
+}

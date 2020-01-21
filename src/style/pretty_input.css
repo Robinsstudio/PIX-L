@@ -8,10 +8,6 @@
 	height: 6rem;
 }
 
-.input-text.input-text-large {
-	width: 50rem;
-}
-
 .input-text input {
 	position: absolute;
 	outline: none;

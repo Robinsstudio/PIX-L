@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import io from 'socket.io-client';
 import TextRenderer from './TextRenderer';
 import PrettyInput from './PrettyInput';
@@ -6,12 +7,15 @@ import request from './request';
 
 import './style/form_view.css';
 import './style/student_view.css';
-import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import './style/team_chooser.css';
+
+const MAX_TEAMS = 5;
 
 class StudentView extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			teams: [],
 			questions: [],
 			openEndedAnswer: '',
 		};
@@ -35,8 +39,15 @@ class StudentView extends Component {
 	componentDidMount() {
 		const socket = io('/PIX-L');
 		socket.on('connect', () => socket.emit('init', { url: this.props.match.params.url }));
-		socket.on('cardSelected', ({index, selected}) => this.selectCard(index, selected));
+		socket.on('cardSelected', ({index, selected}) => this.selectCards([index], selected));
 		socket.on('questionSelected', ({index, selected}) => this.selectQuestion(index, selected));
+
+		socket.on('teamJoined', team => this.setState({ teams: this.state.teams.concat(team).sort((t1, t2) => t1.team - t2.team) }));
+		socket.on('teamLeft', team => this.setState({ teams: this.state.teams.filter(t => team !== t.team) }));
+		socket.on('init', data => {
+			this.selectCards(data.selectedCards, true);
+			this.setState({ teams: data.teams, initialized: true });
+		});
 		this.socket = socket;
 	}
 
@@ -44,15 +55,20 @@ class StudentView extends Component {
 		return this.props.authenticated;
 	}
 
-	selectCard(index, selected) {
+	selectCards(indexes, selected) {
 		this.setState({
-			questions: this.state.questions.map((quest, i) => index === i ? { ...quest, selected } : quest)
+			questions: this.state.questions.map((quest, i) => indexes.includes(i) ? { ...quest, selected } : quest)
 		});
 	}
 
 	selectQuestion(index, selected) {
 		const activeQuestion = selected ? this.state.questions[index] : null;
 		this.setState({ activeQuestion });
+	}
+
+	handleTeamClicked(team) {
+		this.socket.emit('teamChosen', team);
+		this.setState({ team: { team, score: 0 } });
 	}
 
 	handleCardClicked(index) {
@@ -177,6 +193,10 @@ class StudentView extends Component {
 		return buildersByQuestionType[activeQuestion.questionType]();
 	}
 
+	setNonBreakingSpaces(label) {
+		return !label ? label : label.replace(/\s\?/g, '\u00a0?');
+	}
+
 	buildActiveQuestion() {
 		const { activeQuestion } = this.state;
 
@@ -184,7 +204,7 @@ class StudentView extends Component {
 			<div id="questionSection">
 				<div id="questionLabel" className="color-blue">
 					<div id="questionLabelRenderer">
-						<TextRenderer initialValue={activeQuestion.label}/>
+						<TextRenderer initialValue={this.setNonBreakingSpaces(activeQuestion.label)}/>
 					</div>
 				</div>
 
@@ -197,39 +217,59 @@ class StudentView extends Component {
 		);
 	}
 
-	render() {
-		const { activeQuestion } = this.state;
-
-		return (
-			<div id="gameWrapper">
-				<div id="gameHeader"/>
-				<div id="gameContainer">
-					<div id="game">
-						{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
-					</div>
-					<div id="score">
-						<div class="points-container">
-							<div class="points-rectangle points-rectangle--1">
-								<div class="points-value points-value--1">100</div>
-							</div>
-							<div class="points-rectangle points-rectangle--2">
-								<div class="points-value points-value--2">100</div>
-							</div>
-							<div class="points-rectangle points-rectangle--3">
-								<div class="points-value points-value--3">100</div>
-							</div>
-							<div class="points-rectangle points-rectangle--4">
-								<div class="points-value points-value--4">100</div>
-							</div>
-							<div class="points-rectangle points-rectangle--5">
-								<div class="points-value points-value--5">100</div>
-							</div>
+	buildTeamChooser() {
+		const { initialized, team, teams } = this.state;
+		if (initialized && !team && !this.isAuthenticated()) {
+			return (
+				<div className="darkBackground">
+					<div id="teamChooser" className="color-blue">
+						<div id="teamChooserTitle">Veuillez choisir une équipe</div>
+						<div id="teamChooserBody">
+							{Array.from({ length: MAX_TEAMS }, (_,i) => i + 1)
+							.filter(team => !teams.find(t => team === t.team))
+							.map(team => {
+								return (
+									<div className="teamOption" onClick={() => this.handleTeamClicked(team)}>
+										Équipe {team}
+										<div className={`teamOptionRectangle background-color-team-${team}`}/>
+									</div>
+								);
+							})}
 						</div>
-						<div class="points-label">PTS</div>
 					</div>
 				</div>
-				<div id="gameFooter"/>
-			</div>
+			);
+		}
+	}
+
+	render() {
+		const { activeQuestion, teams } = this.state;
+
+		return (
+			<Fragment>
+				<div id="gameWrapper">
+					<div id="gameHeader"/>
+					<div id="gameContainer">
+						<div id="game">
+							{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
+						</div>
+						<div id="score">
+							<div class="points-container">
+								{teams.map(({team, score}) => {
+									return (
+										<div className={`points-rectangle background-color-team-${team}`}>
+											<div className={`points-value color-team-${team}`}>{score}</div>
+										</div>
+									);
+								})}
+							</div>
+							<div class="points-label">pts</div>
+						</div>
+					</div>
+					<div id="gameFooter"/>
+				</div>
+				{ this.buildTeamChooser() }
+			</Fragment>
 		);
 	}
 }
