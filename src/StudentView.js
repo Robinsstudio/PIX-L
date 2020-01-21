@@ -39,13 +39,15 @@ class StudentView extends Component {
 	componentDidMount() {
 		const socket = io('/PIX-L');
 		socket.on('connect', () => socket.emit('init', { url: this.props.match.params.url }));
-		socket.on('cardSelected', ({index, selected}) => this.selectCards([index], selected));
-		socket.on('questionSelected', ({index, selected}) => this.selectQuestion(index, selected));
+
+		socket.on('questionSelection', questions => this.changeSelection(questions));
+		socket.on('questionStart', question => this.startQuestion(question));
 
 		socket.on('teamJoined', team => this.setState({ teams: this.state.teams.concat(team).sort((t1, t2) => t1.team - t2.team) }));
 		socket.on('teamLeft', team => this.setState({ teams: this.state.teams.filter(t => team !== t.team) }));
+
 		socket.on('init', data => {
-			this.selectCards(data.selectedCards, true);
+			this.changeSelection(data.questions);
 			this.setState({ teams: data.teams, initialized: true });
 		});
 		this.socket = socket;
@@ -55,15 +57,22 @@ class StudentView extends Component {
 		return this.props.authenticated;
 	}
 
-	selectCards(indexes, selected) {
+	changeSelection({ selectedQuestions, unselectedQuestions }) {
 		this.setState({
-			questions: this.state.questions.map((quest, i) => indexes.includes(i) ? { ...quest, selected } : quest)
+			questions: this.state.questions.map((quest, i) => {
+				if (selectedQuestions.includes(i)) {
+					return { ...quest, selected: true };
+				}
+				if (unselectedQuestions.includes(i)) {
+					return { ...quest, selected: false };
+				}
+				return quest;
+			})
 		});
 	}
 
-	selectQuestion(index, selected) {
-		const activeQuestion = selected ? this.state.questions[index] : null;
-		this.setState({ activeQuestion });
+	startQuestion(index) {
+		this.setState({ activeQuestion: this.state.questions[index] });
 	}
 
 	handleTeamClicked(team) {
@@ -73,7 +82,7 @@ class StudentView extends Component {
 
 	handleCardClicked(index) {
 		if (this.isAuthenticated()) {
-			this.socket.emit('selectCard', index);
+			this.socket.emit('selectQuestion', index);
 		}
 	}
 
@@ -254,7 +263,7 @@ class StudentView extends Component {
 							{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
 						</div>
 						<div id="score">
-							<div class="points-container">
+							<div className="points-container">
 								{teams.map(({team, score}) => {
 									return (
 										<div className={`points-rectangle background-color-team-${team}`}>

@@ -1,6 +1,7 @@
 const cookie = require('cookie');
 const Impl = require('./impl');
 const User = require('./User');
+const QuestionPool = require('./QuestionPool');
 
 const MAX_TEAMS = 5;
 
@@ -11,7 +12,10 @@ class Session {
 		this.questions = questions;
 		this.admins = {};
 		this.teams = {};
-		this.visibleQuestions = [];
+		this.questionPool = new QuestionPool(questions);
+
+		this.questionPool.onSelectionChanged(questions => this.broadcast('questionSelection', questions));
+		this.questionPool.onQuestionStarted(question => this.broadcast('questionStart', question));
 	}
 
 	broadcast(event, payload) {
@@ -28,18 +32,7 @@ class Session {
 	}
 
 	initializeAdminEvents(socket) {
-		socket.on('selectCard', index => {
-			if (this.visibleQuestions.includes(index)) {
-				this.broadcast('questionSelected', { index, selected: true });
-
-				this.visibleQuestions = this.visibleQuestions.filter(index => {
-					this.broadcast('cardSelected', { index, selected: false });
-				});
-			} else {
-				this.visibleQuestions.push(index);
-				this.broadcast('cardSelected', { index, selected: true });
-			}
-		});
+		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
 	}
 
 	initializeTeamEvents(socket) {
@@ -68,7 +61,7 @@ class Session {
 		socket.join(this.room);
 
 		socket.emit('init', {
-			selectedCards: this.visibleQuestions,
+			questions: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
 			teams: Object.values(this.teams).filter(team => team).map(team => { return { team, score: 0 } })
 		});
 
