@@ -20,6 +20,7 @@ class StudentView extends Component {
 			openEndedAnswer: '',
 		};
 
+		this.handleCancelClicked = this.handleCancelClicked.bind(this);
 		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
 		this.buildMultipleChoiceQuestionBody = this.buildMultipleChoiceQuestionBody.bind(this);
 		this.buildOpenEndedQuestionBody = this.buildOpenEndedQuestionBody.bind(this);
@@ -42,12 +43,14 @@ class StudentView extends Component {
 
 		socket.on('questionSelection', questions => this.changeSelection(questions));
 		socket.on('questionStart', question => this.startQuestion(question));
+		socket.on('questionEnd', () => this.endQuestion());
 
 		socket.on('teamChange', teams => this.updateTeams(teams));
 
 		socket.on('init', data => {
 			this.changeSelection(data.questions);
 			this.updateTeams(data.teams);
+			this.startQuestion(data.activeQuestion);
 			this.setState({ initialized: true });
 		});
 		this.socket = socket;
@@ -79,6 +82,10 @@ class StudentView extends Component {
 		this.setState({ activeQuestion: this.state.questions[index] });
 	}
 
+	endQuestion() {
+		this.setState({ activeQuestion: null });
+	}
+
 	handleTeamClicked(team) {
 		this.socket.emit('teamChoice', team);
 		this.setState({ team });
@@ -88,6 +95,10 @@ class StudentView extends Component {
 		if (this.isAuthenticated()) {
 			this.socket.emit('selectQuestion', index);
 		}
+	}
+
+	handleCancelClicked() {
+		this.socket.emit('cancel');
 	}
 
 	handleMultipleChoiceAnswerChanged(index) {
@@ -257,7 +268,7 @@ class StudentView extends Component {
 
 	buildTopBar() {
 		return (
-			<div id="cancelLast" className="color-blue">
+			<div id="cancelLast" className="color-blue" onClick={this.handleCancelClicked}>
 				{ this.state.activeQuestion ? 'Annuler la question' : 'Annuler la dernière carte retournée' }
 			</div>
 		);

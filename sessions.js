@@ -16,6 +16,7 @@ class Session {
 
 		this.questionPool.onSelectionChanged(questions => this.broadcast('questionSelection', questions));
 		this.questionPool.onQuestionStarted(question => this.broadcast('questionStart', question));
+		this.questionPool.onQuestionEnded(() => this.broadcast('questionEnd'));
 	}
 
 	broadcast(event, payload) {
@@ -33,6 +34,7 @@ class Session {
 
 	initializeAdminEvents(socket) {
 		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
+		socket.on('cancel', () => this.questionPool.cancel());
 	}
 
 	initializeTeamEvents(socket) {
@@ -63,6 +65,7 @@ class Session {
 
 		socket.emit('init', {
 			questions: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
+			activeQuestion: this.questionPool.getActiveQuestion(),
 			teams: Object.values(this.teams)
 		});
 

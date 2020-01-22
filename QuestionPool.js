@@ -16,20 +16,34 @@ class QuestionPool {
 		this.onQuestionStartedHandler = callback;
 	}
 
-	fireSelectionChanged(selectedQuestions) {
+	onQuestionEnded(callback) {
+		this.onQuestionEndedHandler = callback;
+	}
+
+	fireSelectionChanged(questions) {
 		if (typeof this.onSelectionChangedHandler === 'function') {
-			this.onSelectionChangedHandler(selectedQuestions);
+			this.onSelectionChangedHandler(questions);
 		}
 	}
 
-	fireStartedQuestion(startedQuestion) {
+	fireQuestionStarted(startedQuestion) {
 		if (typeof this.onQuestionStartedHandler === 'function') {
 			this.onQuestionStartedHandler(startedQuestion);
 		}
 	}
 
+	fireQuestionEnded(questionEnded) {
+		if (typeof this.onQuestionEndedHandler === 'function') {
+			this.onQuestionEndedHandler(questionEnded);
+		}
+	}
+
 	getVisibleQuestions() {
 		return this.pastQuestions.concat(this.selectedQuestions);
+	}
+
+	getActiveQuestion() {
+		return this.activeQuestion;
 	}
 
 	selectQuestion(question) {
@@ -40,16 +54,21 @@ class QuestionPool {
 
 				this.fireSelectionChanged({ selectedQuestions: [question], unselectedQuestions: [] });
 			}
-		} else {
-			const selectedQuestionIndex = this.selectedQuestions.indexOf(question);
-			if (selectedQuestionIndex != -1) {
-				const unselectedQuestions = this.selectedQuestions.filter(quest => quest !== question);
-				this.unselectedQuestions.push(...unselectedQuestions);
-				this.selectedQuestions = [question];
+		} else if (this.selectedQuestions.includes(question)) {
+			this.activeQuestion = question;
+			this.fireQuestionStarted(question);
+		}
+	}
 
-				this.fireStartedQuestion(question);
-				this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions });
-			}
+	cancel() {
+		if (this.activeQuestion) {
+			this.activeQuestion = null;
+			this.fireQuestionEnded();
+		} else if (this.selectedQuestions.length) {
+			const unselectedQuestion = this.selectedQuestions.pop();
+			this.unselectedQuestions.push(unselectedQuestion);
+
+			this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions: [unselectedQuestion] });
 		}
 	}
 }
