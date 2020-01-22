@@ -19,6 +19,14 @@
 	margin: 2rem;
 }
 
+#cancelLast {
+	position: fixed;
+	top: 0;
+	right: 0;
+	padding: 1rem;
+	margin-right: 2rem;
+}
+
 #questionLabel {
 	margin-bottom: 2rem;
 	text-align: center;

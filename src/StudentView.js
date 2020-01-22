@@ -255,6 +255,14 @@ class StudentView extends Component {
 		}
 	}
 
+	buildTopBar() {
+		return (
+			<div id="cancelLast" className="color-blue">
+				{ this.state.activeQuestion ? 'Annuler la question' : 'Annuler la dernière carte retournée' }
+			</div>
+		);
+	}
+
 	render() {
 		const { activeQuestion, teams } = this.state;
 
@@ -263,6 +271,7 @@ class StudentView extends Component {
 				<div id="gameWrapper">
 					<div id="gameHeader"/>
 					<div id="gameContainer">
+						{ this.buildTopBar() }
 						<div id="game">
 							{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
 						</div>
