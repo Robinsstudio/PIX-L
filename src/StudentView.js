@@ -18,6 +18,7 @@ class StudentView extends Component {
 			teams: [],
 			questions: [],
 			openEndedAnswer: '',
+			time: null
 		};
 
 		this.handleCancelClicked = this.handleCancelClicked.bind(this);
@@ -46,7 +47,7 @@ class StudentView extends Component {
 		socket.on('questionEnd', () => this.endQuestion());
 
 		socket.on('teamChange', teams => this.updateTeams(teams));
-		socket.on('count', seconds => console.log(seconds));
+		socket.on('count', time => this.count(time));
 
 		socket.on('init', data => {
 			this.changeSelection(data.questions);
@@ -84,7 +85,11 @@ class StudentView extends Component {
 	}
 
 	endQuestion() {
-		this.setState({ activeQuestion: null });
+		this.setState({ activeQuestion: null, time: null });
+	}
+
+	count(time) {
+		this.setState({ time });
 	}
 
 	handleTeamClicked(team) {
@@ -161,7 +166,7 @@ class StudentView extends Component {
 				{answers.map((answer, i) => {
 					return (
 						<div className="card card--wide" key={answer._id} onClick={() => this.handleMultipleChoiceAnswerChanged(i)}>
-							<input type="checkbox" checked={answer.correct} className="mr-3"/>
+							<input type="checkbox" checked={answer.correct} className="mr-3" readOnly/>
 							<TextRenderer initialValue={answer.label}/>
 						</div>
 					);
@@ -267,10 +272,27 @@ class StudentView extends Component {
 		}
 	}
 
+	formatTime(time) {
+		return `${((time - time % 60) / 60).toString().padStart(2, '0')}:${(time % 60).toString().padStart(2, '0')}`;
+	}
+
 	buildTopBar() {
+		const { props: { authenticated }, state: { activeQuestion, time } } = this;
 		return (
-			<div id="cancelLast" className="color-blue" onClick={this.handleCancelClicked}>
-				{ this.state.activeQuestion ? 'Annuler la question' : 'Annuler la dernière carte retournée' }
+			<div id="topBar">
+				<div id="countdown">
+					{ activeQuestion && time != null
+						? this.formatTime(time)
+						: ( activeQuestion
+							? this.formatTime(activeQuestion.time)
+							: '' )
+					}
+				</div>
+				{ authenticated &&
+					<div id="cancelLast" className="color-blue" onClick={this.handleCancelClicked}>
+						{ activeQuestion ? 'Annuler la question' : 'Annuler la dernière carte retournée' }
+					</div>
+				}
 			</div>
 		);
 	}
@@ -297,7 +319,7 @@ class StudentView extends Component {
 									);
 								})}
 							</div>
-							<div class="points-label">pts</div>
+							<div className="points-label">pts</div>
 						</div>
 					</div>
 					<div id="gameFooter"/>

@@ -61,7 +61,7 @@ class QuestionPool {
 	}
 
 	cancel() {
-		if (this.activeQuestion) {
+		if (this.activeQuestion != null) {
 			this.activeQuestion = null;
 			this.fireQuestionEnded();
 		} else if (this.selectedQuestions.length) {

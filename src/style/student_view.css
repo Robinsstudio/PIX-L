@@ -19,11 +19,25 @@
 	margin: 2rem;
 }
 
-#cancelLast {
+#topBar {
+	display: flex;
+	justify-content: space-between;
 	position: fixed;
 	top: 0;
-	right: 0;
+	left: 0;
 	padding: 1rem;
+	width: 100%;
+	z-index: 10;
+}
+
+#countdown {
+	font-size: 2.5rem;
+	color: rgb(238, 127, 0);
+	-webkit-text-stroke: 3px rgb(241, 241, 241);
+	text-stroke: 3px rgb(241, 241, 241);
+}
+
+#cancelLast {
 	margin-right: 2rem;
 	cursor: pointer;
 	transition: transform .2s;
@@ -38,7 +52,7 @@
 }
 
 #questionLabel {
-	margin-bottom: 2rem;
+	margin: 3rem 0;
 	text-align: center;
 }
 
