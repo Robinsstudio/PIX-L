@@ -2,6 +2,7 @@ const cookie = require('cookie');
 const Impl = require('./impl');
 const User = require('./User');
 const QuestionPool = require('./QuestionPool');
+const Timer = require('./Timer');
 
 const MAX_TEAMS = 5;
 
@@ -13,10 +14,13 @@ class Session {
 		this.admins = {};
 		this.teams = {};
 		this.questionPool = new QuestionPool(questions);
+		this.timer = new Timer();
 
 		this.questionPool.onSelectionChanged(questions => this.broadcast('questionSelection', questions));
-		this.questionPool.onQuestionStarted(question => this.broadcast('questionStart', question));
-		this.questionPool.onQuestionEnded(() => this.broadcast('questionEnd'));
+		this.questionPool.onQuestionStarted(question => this.startQuestion(question));
+		this.questionPool.onQuestionEnded(() => this.endQuestion());
+
+		this.timer.onCount(seconds => this.broadcast('count', seconds));
 	}
 
 	broadcast(event, payload) {
@@ -52,6 +56,16 @@ class Session {
 				socket.removeAllListeners('teamChoice');
 			}
 		});
+	}
+
+	startQuestion(question) {
+		this.broadcast('questionStart', question);
+		this.timer.count(this.questions[question].time);
+	}
+
+	endQuestion() {
+		this.broadcast('questionEnd');
+		this.timer.reset();
 	}
 
 	addSocket(socket, { admin }) {

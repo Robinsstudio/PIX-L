@@ -46,6 +46,7 @@ class StudentView extends Component {
 		socket.on('questionEnd', () => this.endQuestion());
 
 		socket.on('teamChange', teams => this.updateTeams(teams));
+		socket.on('count', seconds => console.log(seconds));
 
 		socket.on('init', data => {
 			this.changeSelection(data.questions);
