@@ -8,36 +8,6 @@ class QuestionPool {
 		this.pastQuestions = [];
 	}
 
-	onSelectionChanged(callback) {
-		this.onSelectionChangedHandler = callback;
-	}
-
-	onQuestionStarted(callback) {
-		this.onQuestionStartedHandler = callback;
-	}
-
-	onQuestionEnded(callback) {
-		this.onQuestionEndedHandler = callback;
-	}
-
-	fireSelectionChanged(questions) {
-		if (typeof this.onSelectionChangedHandler === 'function') {
-			this.onSelectionChangedHandler(questions);
-		}
-	}
-
-	fireQuestionStarted(startedQuestion) {
-		if (typeof this.onQuestionStartedHandler === 'function') {
-			this.onQuestionStartedHandler(startedQuestion);
-		}
-	}
-
-	fireQuestionEnded(questionEnded) {
-		if (typeof this.onQuestionEndedHandler === 'function') {
-			this.onQuestionEndedHandler(questionEnded);
-		}
-	}
-
 	getVisibleQuestions() {
 		return this.pastQuestions.concat(this.selectedQuestions);
 	}
@@ -60,16 +30,46 @@ class QuestionPool {
 		}
 	}
 
-	cancel() {
-		if (this.activeQuestion != null) {
+	endQuestion() {
+		if (this.activeQuestion !== null) {
 			this.activeQuestion = null;
 			this.fireQuestionEnded();
+		}
+	}
+
+	cancel() {
+		if (this.activeQuestion !== null) {
+			this.endQuestion();
 		} else if (this.selectedQuestions.length) {
 			const unselectedQuestion = this.selectedQuestions.pop();
 			this.unselectedQuestions.push(unselectedQuestion);
 
 			this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions: [unselectedQuestion] });
 		}
+	}
+
+	onSelectionChanged(callback) {
+		this.onSelectionChangedHandler = callback;
+	}
+
+	onQuestionStarted(callback) {
+		this.onQuestionStartedHandler = callback;
+	}
+
+	onQuestionEnded(callback) {
+		this.onQuestionEndedHandler = callback;
+	}
+
+	fireSelectionChanged(questions) {
+		this.onSelectionChangedHandler(questions);
+	}
+
+	fireQuestionStarted(startedQuestion) {
+		this.onQuestionStartedHandler(startedQuestion);
+	}
+
+	fireQuestionEnded(questionEnded) {
+		this.onQuestionEndedHandler(questionEnded);
 	}
 }
 

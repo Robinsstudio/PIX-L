@@ -33,8 +33,6 @@
 #countdown {
 	font-size: 2.5rem;
 	color: rgb(238, 127, 0);
-	-webkit-text-stroke: 3px rgb(241, 241, 241);
-	text-stroke: 3px rgb(241, 241, 241);
 }
 
 #cancelLast {

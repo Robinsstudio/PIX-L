@@ -5,8 +5,12 @@ class Timer {
 	}
 
 	reset() {
-		clearInterval(this.interval);
-		this.interval = null;
+		const { interval } = this;
+		if (interval) {
+			this.interval = null;
+			setTimeout(() => this.fireOutOfTime(), 1000);
+			clearInterval(interval);
+		}
 	}
 
 	onCount(callback) {
@@ -19,6 +23,14 @@ class Timer {
 				callback(--this.seconds);
 			}
 		};
+	}
+
+	onOutOfTime(callback) {
+		this.onOutOfTimeHandler = callback;
+	}
+
+	fireOutOfTime() {
+		this.onOutOfTimeHandler();
 	}
 }
 
