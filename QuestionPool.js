@@ -1,3 +1,5 @@
+const QuestionUtils = require('./QuestionUtils');
+
 const MAX_SELECTED_QUESTIONS = 2;
 
 class QuestionPool {
@@ -25,8 +27,8 @@ class QuestionPool {
 				this.fireSelectionChanged({ selectedQuestions: [question], unselectedQuestions: [] });
 			}
 		} else if (this.selectedQuestions.includes(question)) {
-			this.activeQuestion = question;
-			this.fireQuestionStarted(question);
+			this.activeQuestion = this.questions[question];
+			this.fireQuestionStarted(QuestionUtils.getActiveQuestion(this.activeQuestion));
 		}
 	}
 

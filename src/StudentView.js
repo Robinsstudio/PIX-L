@@ -32,17 +32,13 @@ class StudentView extends Component {
 			openEnded: this.buildOpenEndedQuestionBody,
 			matching: this.buildMatchingQuestionBody
 		};
-
-		request('GetGame', { url: this.props.match.params.url })
-		.then(res => res.json())
-		.then(questions => this.setState({ questions }));
 	}
 
 	componentDidMount() {
 		const socket = io('/PIX-L');
 		socket.on('connect', () => socket.emit('init', { url: this.props.match.params.url }));
 
-		socket.on('questionSelection', questions => this.changeSelection(questions));
+		socket.on('questionSelection', selection => this.updateSelection(selection));
 		socket.on('questionStart', question => this.startQuestion(question));
 		socket.on('questionEnd', () => this.endQuestion());
 
@@ -50,7 +46,8 @@ class StudentView extends Component {
 		socket.on('count', time => this.count(time));
 
 		socket.on('init', data => {
-			this.changeSelection(data.questions);
+			this.updateQuestions(data.questions);
+			this.updateSelection(data.selection);
 			this.updateTeams(data.teams);
 			this.startQuestion(data.activeQuestion);
 			this.setState({ initialized: true });
@@ -62,7 +59,11 @@ class StudentView extends Component {
 		return this.props.authenticated;
 	}
 
-	changeSelection({ selectedQuestions, unselectedQuestions }) {
+	updateQuestions(questions) {
+		this.setState({ questions });
+	}
+
+	updateSelection({ selectedQuestions, unselectedQuestions }) {
 		this.setState({
 			questions: this.state.questions.map((quest, i) => {
 				if (selectedQuestions.includes(i)) {
@@ -80,8 +81,8 @@ class StudentView extends Component {
 		this.setState({ teams: teams.sort((t1, t2) => t1.team - t2.team) })
 	}
 
-	startQuestion(index) {
-		this.setState({ activeQuestion: this.state.questions[index] });
+	startQuestion(activeQuestion) {
+		this.setState({ activeQuestion });
 	}
 
 	endQuestion() {

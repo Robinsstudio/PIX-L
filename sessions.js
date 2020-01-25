@@ -3,6 +3,7 @@ const Impl = require('./impl');
 const User = require('./User');
 const QuestionPool = require('./QuestionPool');
 const Timer = require('./Timer');
+const QuestionUtils = require('./QuestionUtils');
 
 const MAX_TEAMS = 5;
 
@@ -16,7 +17,7 @@ class Session {
 		this.questionPool = new QuestionPool(questions);
 		this.timer = new Timer();
 
-		this.questionPool.onSelectionChanged(questions => this.broadcast('questionSelection', questions));
+		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
 		this.questionPool.onQuestionStarted(question => this.startQuestion(question));
 		this.questionPool.onQuestionEnded(() => this.endQuestion());
 
@@ -61,7 +62,7 @@ class Session {
 
 	startQuestion(question) {
 		this.broadcast('questionStart', question);
-		this.timer.count(this.questions[question].time);
+		this.timer.count(question.time);
 	}
 
 	endQuestion() {
@@ -79,7 +80,8 @@ class Session {
 		socket.join(this.room);
 
 		socket.emit('init', {
-			questions: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
+			questions: this.questions.map(question => QuestionUtils.getQuestion(question)),
+			selection: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
 			activeQuestion: this.questionPool.getActiveQuestion(),
 			teams: Object.values(this.teams)
 		});
