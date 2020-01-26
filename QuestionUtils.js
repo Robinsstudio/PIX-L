@@ -19,13 +19,54 @@ function getActiveQuestion(question) {
 	};
 }
 
-function correctQuestion(studentQuestion, originalQuestion) {
-	return correctOpenEndedQuestion(studentQuestion, originalQuestion);
+const correctByQuestionType = {
+	multipleChoice: correctMultipleChoiceQuestion,
+	openEnded: correctOpenEndedQuestion,
+	matching: correctMatchingQuestion
+};
+
+function checkMultipleChoiceQuestion(studentQuestion, originalQuestion) {
+	return studentQuestion
+			&& Array.isArray(studentQuestion.answers)
+			&& studentQuestion.answers.length === originalQuestion.answers.length
+			&& studentQuestion.answers.filter(e => e).length === studentQuestion.answers.length;
+}
+
+function checkOpenEndedQuestion(studentQuestion) {
+	return studentQuestion && typeof studentQuestion.openEndedAnswer === 'string';
+}
+
+function checkMatchingQuestion(studentQuestion, originalQuestion) {
+	return studentQuestion
+			&& Array.isArray(studentQuestion.matchingFields)
+			&& studentQuestion.matchingFields.length === originalQuestion.matchingFields.length
+			&& studentQuestion.matchingFields.every((field, i) => {
+				return field
+						&& Array.isArray(field.answers)
+						&& field.answers.length === originalQuestion.matchingFields[i].answers.length
+						&& field.answers.filter(e => e).length == field.answers.length;
+			});
+}
+
+function correctMultipleChoiceQuestion(studentQuestion, originalQuestion) {
+	return checkMultipleChoiceQuestion(studentQuestion, originalQuestion)
+			&& originalQuestion.answers.every(({correct}, i) => correct === !!studentQuestion.answers[i].correct);
 }
 
 function correctOpenEndedQuestion(studentQuestion, originalQuestion) {
-	return studentQuestion && typeof studentQuestion.openEndedAnswer === 'string'
+	return checkOpenEndedQuestion(studentQuestion)
 			&& originalQuestion.words.some(word => studentQuestion.openEndedAnswer.toLowerCase().includes(word.toLowerCase()));
+}
+
+function correctMatchingQuestion(studentQuestion, originalQuestion) {
+	return checkMatchingQuestion(studentQuestion, originalQuestion)
+			&& originalQuestion.matchingFields.every((field, i) => {
+				return field.answers.every(({correct}, j) => correct === !!studentQuestion.matchingFields[i].answers[j].correct);
+			});
+}
+
+function correctQuestion(studentQuestion, originalQuestion) {
+	return correctByQuestionType[originalQuestion.questionType](studentQuestion, originalQuestion);
 }
 
 module.exports = { getQuestion, getActiveQuestion, correctQuestion };

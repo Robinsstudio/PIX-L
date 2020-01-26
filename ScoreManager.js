@@ -35,9 +35,10 @@ class ScoreManager {
 		if (
 			this.activeQuestion
 			&& !Object.keys(this.scores[team]).includes(this.activeQuestion.theme)
-			&& QuestionUtils.correctQuestion(question, this.activeQuestion)
 		) {
-			this.scores[team][this.activeQuestion.theme] = this.activeQuestion.points;
+			this.scores[team][this.activeQuestion.theme] =
+				QuestionUtils.correctQuestion(question, this.activeQuestion) ? this.activeQuestion.points : 0;
+
 			this.fireScoreChange();
 		}
 	}

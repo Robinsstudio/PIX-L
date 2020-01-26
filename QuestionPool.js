@@ -15,7 +15,7 @@ class QuestionPool {
 	}
 
 	getActiveQuestion() {
-		return this.activeQuestion;
+		return this.activeQuestion ? QuestionUtils.getActiveQuestion(this.activeQuestion) : null;
 	}
 
 	selectQuestion(question) {

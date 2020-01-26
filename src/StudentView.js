@@ -330,6 +330,7 @@ class StudentView extends Component {
 										<div
 											className={`points-rectangle background-color-team-${team}`}
 											style={{ height: `${100 * score / maxPoints}%` }}
+											key={team}
 										>
 											<div className={`points-value color-team-${team}`}>{score}</div>
 										</div>
