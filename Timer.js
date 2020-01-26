@@ -1,15 +1,13 @@
 class Timer {
 	count(seconds) {
 		this.seconds = seconds;
-		setTimeout(() => this.interval = setInterval(this.onCountHandler, 1000), 1000);
+		this.interval = setInterval(this.onCountHandler, 1000);
 	}
 
 	reset() {
-		const { interval } = this;
-		if (interval) {
+		if (this.interval) {
+			clearInterval(this.interval);
 			this.interval = null;
-			setTimeout(() => this.fireOutOfTime(), 1000);
-			clearInterval(interval);
 		}
 	}
 
@@ -17,6 +15,7 @@ class Timer {
 		this.onCountHandler = () => {
 			if (!this.seconds) {
 				this.reset();
+				this.fireOutOfTime();
 			}
 
 			if (this.interval) {

@@ -22,7 +22,7 @@ class Session {
 		this.questionPool.onQuestionEnded(() => this.endQuestion());
 
 		this.timer.onCount(seconds => this.broadcast('count', seconds));
-		this.timer.onOutOfTime(() => this.questionPool.endQuestion());
+		this.timer.onOutOfTime(() => this.questionPool.stopQuestion());
 	}
 
 	broadcast(event, payload) {

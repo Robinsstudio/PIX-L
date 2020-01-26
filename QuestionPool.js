@@ -32,16 +32,23 @@ class QuestionPool {
 		}
 	}
 
-	endQuestion() {
-		if (this.activeQuestion !== null) {
-			this.activeQuestion = null;
-			this.fireQuestionEnded();
-		}
+	stopQuestion() {
+		const activeQuestionIndex = this.selectedQuestions.indexOf(this.activeQuestion);
+		this.pastQuestions.push(...this.selectedQuestions.splice(activeQuestionIndex, 1));
+
+		const unselectedQuestions = this.selectedQuestions;
+		this.unselectedQuestions.push(...unselectedQuestions);
+		this.selectedQuestions = [];
+		this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions });
+
+		this.activeQuestion = null;
+		this.fireQuestionEnded();
 	}
 
 	cancel() {
-		if (this.activeQuestion !== null) {
-			this.endQuestion();
+		if (this.activeQuestion) {
+			this.activeQuestion = null;
+			this.fireQuestionEnded();
 		} else if (this.selectedQuestions.length) {
 			const unselectedQuestion = this.selectedQuestions.pop();
 			this.unselectedQuestions.push(unselectedQuestion);

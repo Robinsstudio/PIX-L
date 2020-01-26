@@ -3,7 +3,6 @@ import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from
 import io from 'socket.io-client';
 import TextRenderer from './TextRenderer';
 import PrettyInput from './PrettyInput';
-import request from './request';
 
 import './style/form_view.css';
 import './style/student_view.css';
