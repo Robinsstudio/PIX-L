@@ -16,7 +16,6 @@ class StudentView extends Component {
 		this.state = {
 			teams: [],
 			questions: [],
-			openEndedAnswer: '',
 			time: null
 		};
 
@@ -120,7 +119,12 @@ class StudentView extends Component {
 	}
 
 	handleOpenEndedAnswerChanged(event) {
-		this.setState({ openEndedAnswer: event.target.value });
+		this.setState({
+			activeQuestion: {
+				...this.state.activeQuestion,
+				openEndedAnswer: event.target.value
+			}
+		});
 	}
 
 	handleMatchingFieldAnswerChanged(fieldIndex, answerIndex) {
@@ -176,7 +180,7 @@ class StudentView extends Component {
 	}
 
 	buildOpenEndedQuestionBody() {
-		const { openEndedAnswer } = this.state;
+		const { openEndedAnswer } = this.state.activeQuestion;
 
 		return (
 			<PrettyInput
@@ -184,7 +188,7 @@ class StudentView extends Component {
 				type="text"
 				label="Réponse"
 				onChange={this.handleOpenEndedAnswerChanged}
-				value={openEndedAnswer}
+				value={openEndedAnswer || ''}
 				large
 			/>
 		);
