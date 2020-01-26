@@ -2,8 +2,9 @@ const cookie = require('cookie');
 const Impl = require('./impl');
 const User = require('./User');
 const QuestionPool = require('./QuestionPool');
-const Timer = require('./Timer');
 const QuestionUtils = require('./QuestionUtils');
+const ScoreManager = require('./ScoreManager');
+const Timer = require('./Timer');
 
 const MAX_TEAMS = 5;
 
@@ -15,6 +16,7 @@ class Session {
 		this.admins = {};
 		this.teams = {};
 		this.questionPool = new QuestionPool(questions);
+		this.scoreManager = new ScoreManager();
 		this.timer = new Timer();
 
 		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
@@ -47,12 +49,12 @@ class Session {
 		socket.on('teamChoice', team => {
 			if (this.getAvailableTeams().includes(team)) {
 
-				this.teams[socket.id] = { team, score: 0 };
-				this.broadcast('teamChange', Object.values(this.teams));
+				this.addTeam(socket, team);
+				this.broadcast('teamChange', this.getTeams());
 
 				socket.on('disconnect', () => {
 					delete this.teams[socket.id];
-					this.broadcast('teamChange', Object.values(this.teams));
+					this.broadcast('teamChange', this.getTeams());
 				});
 
 				socket.removeAllListeners('teamChoice');
@@ -60,14 +62,25 @@ class Session {
 		});
 	}
 
+	addTeam(socket, team) {
+		this.teams[socket.id] = team;
+		this.scoreManager.addTeam(team);
+	}
+
+	getTeams() {
+		return this.scoreManager.getTeams(Object.values(this.teams));
+	}
+
 	startQuestion(question) {
 		this.broadcast('questionStart', question);
 		this.timer.count(question.time);
+		this.scoreManager.startQuestion(question);
 	}
 
 	endQuestion() {
 		this.broadcast('questionEnd');
 		this.timer.reset();
+		this.scoreManager.endQuestion();
 	}
 
 	addSocket(socket, { admin }) {
@@ -83,7 +96,7 @@ class Session {
 			questions: this.questions.map(question => QuestionUtils.getQuestion(question)),
 			selection: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
 			activeQuestion: this.questionPool.getActiveQuestion(),
-			teams: Object.values(this.teams)
+			teams: this.getTeams()
 		});
 
 		console.log('Listening to socket ' + socket.id);
