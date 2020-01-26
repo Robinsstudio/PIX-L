@@ -113,12 +113,6 @@ const getQuestionsByIds = (_ids) => {
 	});
 };
 
-const getQuestionsByIdsWithoutAnswers = (_ids) => {
-	return Question.where('_id').in(_ids).select('-answers.correct -words -matchingFields.answers.correct').then(questions => {
-		return questions.sort((q1, q2) => _ids.indexOf(q1.id) - _ids.indexOf(q2.id));
-	});
-};
-
 module.exports = {
 	createFolder: (folderData) => {
 		return new Folder({ ...folderData, type: 'folder' }).save();
@@ -205,7 +199,7 @@ module.exports = {
 	getByLink: (url) => {
 		return Game.find({ url }).then(games => {
 			if (games.length) {
-				return getQuestionsByIdsWithoutAnswers(games[0].questions.map(quest => quest.idQuestion));
+				return getQuestionsByIds(games[0].questions.map(quest => quest.idQuestion));
 			}
 			return Promise.resolve([]);
 		});

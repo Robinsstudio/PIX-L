@@ -205,6 +205,7 @@
 	height: 0;
 	border-radius: 5px;
 	margin: 0rem .3rem;
+	transition: height .5s;
 }
 
 .points-value {

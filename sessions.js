@@ -16,7 +16,7 @@ class Session {
 		this.admins = {};
 		this.teams = {};
 		this.questionPool = new QuestionPool(questions);
-		this.scoreManager = new ScoreManager();
+		this.scoreManager = new ScoreManager(questions);
 		this.timer = new Timer();
 
 		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
@@ -25,6 +25,8 @@ class Session {
 
 		this.timer.onCount(seconds => this.broadcast('count', seconds));
 		this.timer.onOutOfTime(() => this.questionPool.stopQuestion());
+
+		this.scoreManager.onScoreChange(() => this.broadcast('teamChange', this.getTeams()));
 	}
 
 	broadcast(event, payload) {
@@ -60,6 +62,7 @@ class Session {
 				socket.removeAllListeners('teamChoice');
 			}
 		});
+		socket.on('answer', question => this.scoreManager.correct(this.teams[socket.id], question));
 	}
 
 	addTeam(socket, team) {
@@ -71,10 +74,12 @@ class Session {
 		return this.scoreManager.getTeams(Object.values(this.teams));
 	}
 
-	startQuestion(question) {
-		this.broadcast('questionStart', question);
+	startQuestion(questionIndex) {
+		const question = this.questions[questionIndex];
+
+		this.broadcast('questionStart', QuestionUtils.getActiveQuestion(question));
 		this.timer.count(question.time);
-		this.scoreManager.startQuestion(question);
+		this.scoreManager.startQuestion(questionIndex);
 	}
 
 	endQuestion() {
@@ -96,7 +101,8 @@ class Session {
 			questions: this.questions.map(question => QuestionUtils.getQuestion(question)),
 			selection: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
 			activeQuestion: this.questionPool.getActiveQuestion(),
-			teams: this.getTeams()
+			teams: this.getTeams(),
+			maxPoints: this.questions.reduce((sum, question) => sum + question.points, 0)
 		});
 
 		console.log('Listening to socket ' + socket.id);

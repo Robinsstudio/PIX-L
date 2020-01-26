@@ -19,4 +19,13 @@ function getActiveQuestion(question) {
 	};
 }
 
-module.exports = { getQuestion, getActiveQuestion };
+function correctQuestion(studentQuestion, originalQuestion) {
+	return correctOpenEndedQuestion(studentQuestion, originalQuestion);
+}
+
+function correctOpenEndedQuestion(studentQuestion, originalQuestion) {
+	return studentQuestion && typeof studentQuestion.openEndedAnswer === 'string'
+			&& originalQuestion.words.some(word => studentQuestion.openEndedAnswer.toLowerCase().includes(word.toLowerCase()));
+}
+
+module.exports = { getQuestion, getActiveQuestion, correctQuestion };

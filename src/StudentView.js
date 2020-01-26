@@ -21,6 +21,7 @@ class StudentView extends Component {
 
 		this.handleCancelClicked = this.handleCancelClicked.bind(this);
 		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
 		this.buildMultipleChoiceQuestionBody = this.buildMultipleChoiceQuestionBody.bind(this);
 		this.buildOpenEndedQuestionBody = this.buildOpenEndedQuestionBody.bind(this);
 		this.buildMatchingQuestionBody = this.buildMatchingQuestionBody.bind(this);
@@ -47,6 +48,7 @@ class StudentView extends Component {
 			this.updateQuestions(data.questions);
 			this.updateSelection(data.selection);
 			this.updateTeams(data.teams);
+			this.updateMaxPoints(data.maxPoints);
 			this.startQuestion(data.activeQuestion);
 			this.setState({ initialized: true });
 		});
@@ -79,6 +81,10 @@ class StudentView extends Component {
 		this.setState({ teams: teams.sort((t1, t2) => t1.team - t2.team) })
 	}
 
+	updateMaxPoints(maxPoints) {
+		this.setState({ maxPoints });
+	}
+
 	startQuestion(activeQuestion) {
 		this.setState({ activeQuestion });
 	}
@@ -104,6 +110,10 @@ class StudentView extends Component {
 
 	handleCancelClicked() {
 		this.socket.emit('cancel');
+	}
+
+	handleSubmit() {
+		this.socket.emit('answer', this.state.activeQuestion);
 	}
 
 	handleMultipleChoiceAnswerChanged(index) {
@@ -244,7 +254,7 @@ class StudentView extends Component {
 
 				{ this.buildActiveQuestionBody() }
 
-				<div className="form-button" onClick={() => alert('Validé')}>
+				<div className="form-button" onClick={this.handleSubmit}>
 					<span className="form-button-content">Valider</span>
 				</div>
 			</div>
@@ -302,7 +312,7 @@ class StudentView extends Component {
 	}
 
 	render() {
-		const { activeQuestion, teams } = this.state;
+		const { activeQuestion, teams, maxPoints } = this.state;
 
 		return (
 			<Fragment>
@@ -317,7 +327,10 @@ class StudentView extends Component {
 							<div className="points-container">
 								{teams.map(({team, score}) => {
 									return (
-										<div className={`points-rectangle background-color-team-${team}`}>
+										<div
+											className={`points-rectangle background-color-team-${team}`}
+											style={{ height: `${100 * score / maxPoints}%` }}
+										>
 											<div className={`points-value color-team-${team}`}>{score}</div>
 										</div>
 									);

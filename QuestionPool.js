@@ -28,7 +28,7 @@ class QuestionPool {
 			}
 		} else if (this.selectedQuestions.includes(question)) {
 			this.activeQuestion = this.questions[question];
-			this.fireQuestionStarted(QuestionUtils.getActiveQuestion(this.activeQuestion));
+			this.fireQuestionStarted(question);
 		}
 	}
 
