@@ -19,30 +19,33 @@ class QuestionPool {
 	}
 
 	selectQuestion(question) {
-		const unselectedQuestionIndex = this.unselectedQuestions.indexOf(question);
-		if (unselectedQuestionIndex != -1) {
-			if (this.selectedQuestions.length < MAX_SELECTED_QUESTIONS) {
-				this.selectedQuestions.push(...this.unselectedQuestions.splice(unselectedQuestionIndex, 1));
-
-				this.fireSelectionChanged({ selectedQuestions: [question], unselectedQuestions: [] });
+		if (!this.activeQuestion) {
+			const unselectedQuestionIndex = this.unselectedQuestions.indexOf(question);
+			if (unselectedQuestionIndex != -1) {
+				if (this.selectedQuestions.length < MAX_SELECTED_QUESTIONS) {
+					this.selectedQuestions.push(...this.unselectedQuestions.splice(unselectedQuestionIndex, 1));
+					this.fireSelectionChanged({ selectedQuestions: [question], unselectedQuestions: [] });
+				}
+			} else if (this.selectedQuestions.includes(question)) {
+				this.activeQuestion = this.questions[question];
+				this.fireQuestionStarted(question);
 			}
-		} else if (this.selectedQuestions.includes(question)) {
-			this.activeQuestion = this.questions[question];
-			this.fireQuestionStarted(question);
 		}
 	}
 
 	stopQuestion() {
-		const activeQuestionIndex = this.selectedQuestions.indexOf(this.activeQuestion);
-		this.pastQuestions.push(...this.selectedQuestions.splice(activeQuestionIndex, 1));
+		if (this.activeQuestion) {
+			const activeQuestionIndex = this.selectedQuestions.indexOf(this.activeQuestion);
+			this.pastQuestions.push(...this.selectedQuestions.splice(activeQuestionIndex, 1));
 
-		const unselectedQuestions = this.selectedQuestions;
-		this.unselectedQuestions.push(...unselectedQuestions);
-		this.selectedQuestions = [];
-		this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions });
+			const unselectedQuestions = this.selectedQuestions;
+			this.unselectedQuestions.push(...unselectedQuestions);
+			this.selectedQuestions = [];
+			this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions });
 
-		this.activeQuestion = null;
-		this.fireQuestionEnded();
+			this.activeQuestion = null;
+			this.fireQuestionEnded();
+		}
 	}
 
 	cancel() {

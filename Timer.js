@@ -1,5 +1,6 @@
 class Timer {
 	count(seconds) {
+		this.reset();
 		this.seconds = seconds;
 		this.interval = setInterval(this.onCountHandler, 1000);
 	}

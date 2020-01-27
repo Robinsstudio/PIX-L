@@ -54,6 +54,8 @@ class Session {
 				this.addTeam(socket, team);
 				this.broadcast('teamChange', this.getTeams());
 
+				socket.on('answer', question => this.scoreManager.correct(team, question));
+
 				socket.on('disconnect', () => {
 					delete this.teams[socket.id];
 					this.broadcast('teamChange', this.getTeams());
@@ -62,7 +64,6 @@ class Session {
 				socket.removeAllListeners('teamChoice');
 			}
 		});
-		socket.on('answer', question => this.scoreManager.correct(this.teams[socket.id], question));
 	}
 
 	addTeam(socket, team) {

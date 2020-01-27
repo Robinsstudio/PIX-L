@@ -15,7 +15,7 @@ class ScoreManager {
 	getTeam(team) {
 		return {
 			team,
-			score: Object.values(this.scores[team]).reduce((sum, score) => sum + score, 0)
+			score: Object.values(this.scores[team]).reduce((sum, {score}) => sum + score, 0)
 		}
 	}
 
@@ -32,12 +32,17 @@ class ScoreManager {
 	}
 
 	correct(team, question) {
+		const { activeQuestion } = this;
+		const activeQuestionId = activeQuestion._id.toString();
+
 		if (
-			this.activeQuestion
-			&& !Object.keys(this.scores[team]).includes(this.activeQuestion.theme)
+			activeQuestion
+			&& !Object.keys(this.scores[team]).includes(activeQuestionId)
 		) {
-			this.scores[team][this.activeQuestion.theme] =
-				QuestionUtils.correctQuestion(question, this.activeQuestion) ? this.activeQuestion.points : 0;
+			this.scores[team][activeQuestionId] = {
+				theme: activeQuestion.theme,
+				score: QuestionUtils.correctQuestion(question, activeQuestion) ? activeQuestion.points : 0
+			};
 
 			this.fireScoreChange();
 		}
