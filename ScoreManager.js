@@ -1,8 +1,8 @@
 const QuestionUtils = require('./QuestionUtils');
 
 class ScoreManager {
-	constructor(questions) {
-		this.questions = questions;
+	constructor(questionManager) {
+		this.questionManager = questionManager;
 		this.scores = {};
 	}
 
@@ -23,16 +23,8 @@ class ScoreManager {
 		return teams.map(team => this.getTeam(team));
 	}
 
-	startQuestion(question) {
-		this.activeQuestion = this.questions[question];
-	}
-
-	endQuestion() {
-		this.activeQuestion = null;
-	}
-
 	correct(team, question) {
-		const { activeQuestion } = this;
+		const activeQuestion = this.questionManager.getActiveQuestion();
 		const activeQuestionId = activeQuestion._id.toString();
 
 		if (

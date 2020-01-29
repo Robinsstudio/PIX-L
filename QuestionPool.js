@@ -1,11 +1,9 @@
-const QuestionUtils = require('./QuestionUtils');
-
 const MAX_SELECTED_QUESTIONS = 2;
 
 class QuestionPool {
-	constructor(questions) {
-		this.questions = questions;
-		this.unselectedQuestions = Array.from({ length: questions.length }, (_,i) => i);
+	constructor(questionManager) {
+		this.questionManager = questionManager;
+		this.unselectedQuestions = Array.from({ length: questionManager.getQuestionCount() }, (_,i) => i);
 		this.selectedQuestions = [];
 		this.pastQuestions = [];
 	}
@@ -14,12 +12,8 @@ class QuestionPool {
 		return this.pastQuestions.concat(this.selectedQuestions);
 	}
 
-	getActiveQuestion() {
-		return this.activeQuestion ? QuestionUtils.getActiveQuestion(this.activeQuestion) : null;
-	}
-
 	selectQuestion(question) {
-		if (!this.activeQuestion) {
+		if (!this.questionManager.getActiveQuestion()) {
 			const unselectedQuestionIndex = this.unselectedQuestions.indexOf(question);
 			if (unselectedQuestionIndex != -1) {
 				if (this.selectedQuestions.length < MAX_SELECTED_QUESTIONS) {
@@ -27,30 +21,29 @@ class QuestionPool {
 					this.fireSelectionChanged({ selectedQuestions: [question], unselectedQuestions: [] });
 				}
 			} else if (this.selectedQuestions.includes(question)) {
-				this.activeQuestion = this.questions[question];
 				this.fireQuestionStarted(question);
 			}
 		}
 	}
 
 	stopQuestion() {
-		if (this.activeQuestion) {
-			const activeQuestionIndex = this.selectedQuestions.indexOf(this.activeQuestion);
+		const activeQuestion = this.questionManager.getActiveQuestion();
+
+		if (activeQuestion) {
+			const activeQuestionIndex = this.selectedQuestions.indexOf(activeQuestion);
 			this.pastQuestions.push(...this.selectedQuestions.splice(activeQuestionIndex, 1));
 
 			const unselectedQuestions = this.selectedQuestions;
 			this.unselectedQuestions.push(...unselectedQuestions);
 			this.selectedQuestions = [];
-			this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions });
 
-			this.activeQuestion = null;
+			this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions });
 			this.fireQuestionEnded();
 		}
 	}
 
 	cancel() {
-		if (this.activeQuestion) {
-			this.activeQuestion = null;
+		if (this.questionManager.getActiveQuestion()) {
 			this.fireQuestionEnded();
 		} else if (this.selectedQuestions.length) {
 			const unselectedQuestion = this.selectedQuestions.pop();

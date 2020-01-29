@@ -1,6 +1,7 @@
 const cookie = require('cookie');
 const Impl = require('./impl');
 const User = require('./User');
+const QuestionManager = require('./QuestionManager');
 const QuestionPool = require('./QuestionPool');
 const QuestionUtils = require('./QuestionUtils');
 const ScoreManager = require('./ScoreManager');
@@ -15,8 +16,9 @@ class Session {
 		this.questions = questions;
 		this.admins = {};
 		this.teams = {};
-		this.questionPool = new QuestionPool(questions);
-		this.scoreManager = new ScoreManager(questions);
+		this.questionManager = new QuestionManager(questions);
+		this.questionPool = new QuestionPool(this.questionManager);
+		this.scoreManager = new ScoreManager(this.questionManager);
 		this.timer = new Timer();
 
 		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
@@ -76,17 +78,17 @@ class Session {
 	}
 
 	startQuestion(questionIndex) {
-		const question = this.questions[questionIndex];
+		const { questionManager } = this;
 
-		this.broadcast('questionStart', QuestionUtils.getActiveQuestion(question));
-		this.timer.count(question.time);
-		this.scoreManager.startQuestion(questionIndex);
+		questionManager.startQuestion(questionIndex);
+		this.timer.count(questionManager.getQuestion(questionIndex).time);
+		this.broadcast('questionStart', questionManager.getClearedActiveQuestion());
 	}
 
 	endQuestion() {
-		this.broadcast('questionEnd');
 		this.timer.reset();
-		this.scoreManager.endQuestion();
+		this.questionManager.endQuestion();
+		this.broadcast('questionEnd');
 	}
 
 	addSocket(socket, { admin }) {
@@ -101,7 +103,7 @@ class Session {
 		socket.emit('init', {
 			questions: this.questions.map(question => QuestionUtils.getQuestion(question)),
 			selection: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
-			activeQuestion: this.questionPool.getActiveQuestion(),
+			activeQuestion: this.questionManager.getClearedActiveQuestion(),
 			teams: this.getTeams(),
 			maxPoints: this.questions.reduce((sum, question) => sum + question.points, 0)
 		});
