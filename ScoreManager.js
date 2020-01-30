@@ -23,20 +23,24 @@ class ScoreManager {
 		return teams.map(team => this.getTeam(team));
 	}
 
+	updateScore(team, studentQuestion, originalQuestion) {
+		this.scores[team][originalQuestion._id] = {
+			theme: originalQuestion.theme,
+			score: QuestionUtils.correctQuestion(studentQuestion, originalQuestion) ? originalQuestion.points : 0
+		};
+
+		this.fireScoreChange();
+	}
+
 	correct(team, question) {
 		const activeQuestion = this.questionManager.getActiveQuestion();
-		const activeQuestionId = activeQuestion._id.toString();
 
-		if (
-			activeQuestion
-			&& !Object.keys(this.scores[team]).includes(activeQuestionId)
-		) {
-			this.scores[team][activeQuestionId] = {
-				theme: activeQuestion.theme,
-				score: QuestionUtils.correctQuestion(question, activeQuestion) ? activeQuestion.points : 0
-			};
+		if (activeQuestion) {
+			const activeQuestionId = activeQuestion._id.toString();
 
-			this.fireScoreChange();
+			if (!Object.keys(this.scores[team]).includes(activeQuestionId)) {
+				this.updateScore(team, question, activeQuestion);
+			}
 		}
 	}
 
