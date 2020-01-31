@@ -181,7 +181,7 @@ class StudentView extends Component {
 					return (
 						<div className="card card--wide" key={answer._id} onClick={() => this.handleMultipleChoiceAnswerChanged(i)}>
 							<input type="checkbox" checked={answer.correct} className="mr-3" readOnly/>
-							<TextRenderer initialValue={answer.label}/>
+							<TextRenderer key={answer.label} initialValue={answer.label}/>
 						</div>
 					);
 				})}
@@ -248,7 +248,7 @@ class StudentView extends Component {
 			<div id="questionSection">
 				<div id="questionLabel" className="color-blue">
 					<div id="questionLabelRenderer">
-						<TextRenderer initialValue={this.setNonBreakingSpaces(activeQuestion.label)}/>
+						<TextRenderer key={activeQuestion.label} initialValue={this.setNonBreakingSpaces(activeQuestion.label)}/>
 					</div>
 				</div>
 

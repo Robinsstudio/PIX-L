@@ -10,13 +10,13 @@ const Timer = require('./Timer');
 const MAX_TEAMS = 5;
 
 class Session {
-	constructor(io, url, questions) {
+	constructor(io, url, questions, linkedQuestions) {
 		this.io = io;
 		this.room = url;
 		this.questions = questions;
 		this.admins = {};
 		this.teams = {};
-		this.questionManager = new QuestionManager(questions);
+		this.questionManager = new QuestionManager(questions, linkedQuestions);
 		this.questionPool = new QuestionPool(this.questionManager);
 		this.scoreManager = new ScoreManager(this.questionManager);
 		this.timer = new Timer();
@@ -29,6 +29,10 @@ class Session {
 		this.timer.onOutOfTime(() => this.questionPool.stopQuestion());
 
 		this.scoreManager.onScoreChange(() => this.broadcast('teamChange', this.getTeams()));
+		this.scoreManager.onLinkedQuestionStarted((team, linkedQuestion) => {
+			const socketId = Object.entries(this.teams).find(([_, t]) => t === team)[0];
+			io.to(socketId).emit('questionStart', linkedQuestion);
+		});
 	}
 
 	broadcast(event, payload) {
@@ -141,11 +145,17 @@ module.exports = function(server) {
 				} else {
 					Impl.getByLink(data.url).then(questions => {
 						if (questions.length) {
-							const newSession = new Session(io, data.url, questions);
-							newSession.addSocket(socket, { admin });
-							sessions[data.url] = newSession;
+							Impl.getQuestionsByIds(
+								questions.filter(question => question.linkedQuestion).map(question => {
+									return question.linkedQuestion._id;
+								})
+							).then(linkedQuestions => {
+								const newSession = new Session(io, data.url, questions, linkedQuestions);
+								newSession.addSocket(socket, { admin });
+								sessions[data.url] = newSession;
 
-							socket.removeAllListeners('init');
+								socket.removeAllListeners('init');
+							});
 						}
 					});
 				}

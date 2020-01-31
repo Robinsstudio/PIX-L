@@ -24,23 +24,42 @@ class ScoreManager {
 	}
 
 	updateScore(team, studentQuestion, originalQuestion) {
-		this.scores[team][originalQuestion._id] = {
-			theme: originalQuestion.theme,
-			score: QuestionUtils.correctQuestion(studentQuestion, originalQuestion) ? originalQuestion.points : 0
-		};
+		const originalQuestionId = originalQuestion._id.toString();
+		const alreadyAnswered = Object.keys(this.scores[team]).includes(originalQuestionId);
 
-		this.fireScoreChange();
+		if (!alreadyAnswered) {
+			const score = QuestionUtils.correctQuestion(studentQuestion, originalQuestion) ? originalQuestion.points : 0;
+
+			this.scores[team][originalQuestionId] = {
+				theme: originalQuestion.theme,
+				score
+			};
+
+			this.fireScoreChange();
+
+			if (score === originalQuestion.points && originalQuestion.linkedQuestion) {
+				const linkedQuestion = this.questionManager.getLinkedQuestion(originalQuestion.linkedQuestion._id);
+				if (linkedQuestion) {
+					this.fireLinkedQuestionStarted(team, QuestionUtils.getActiveQuestion(linkedQuestion));
+				}
+			}
+		}
+
+		return alreadyAnswered && this.scores[team][originalQuestionId].score === originalQuestion.points;
 	}
 
 	correct(team, question) {
-		const activeQuestion = this.questionManager.getActiveQuestion();
+		const correctedQuestions = [];
+		let currentQuestion = this.questionManager.getActiveQuestion();
 
-		if (activeQuestion) {
-			const activeQuestionId = activeQuestion._id.toString();
-
-			if (!Object.keys(this.scores[team]).includes(activeQuestionId)) {
-				this.updateScore(team, question, activeQuestion);
-			}
+		while (
+			currentQuestion
+			&& !correctedQuestions.includes(currentQuestion)
+			&& this.updateScore(team, question, currentQuestion)
+			&& currentQuestion.linkedQuestion
+		) {
+			correctedQuestions.push(currentQuestion);
+			currentQuestion = this.questionManager.getLinkedQuestion(currentQuestion.linkedQuestion._id);
 		}
 	}
 
@@ -48,8 +67,16 @@ class ScoreManager {
 		this.onScoreChangeHandler = callback;
 	}
 
+	onLinkedQuestionStarted(callback) {
+		this.onLinkedQuestionStarted = callback;
+	}
+
 	fireScoreChange() {
 		this.onScoreChangeHandler();
+	}
+
+	fireLinkedQuestionStarted(team, linkedQuestion) {
+		this.onLinkedQuestionStarted(team, linkedQuestion);
 	}
 }
 
