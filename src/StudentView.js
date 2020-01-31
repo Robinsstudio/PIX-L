@@ -49,7 +49,6 @@ class StudentView extends Component {
 			this.updateSelection(data.selection);
 			this.updateTeams(data.teams);
 			this.updateMaxPoints(data.maxPoints);
-			this.startQuestion(data.activeQuestion);
 			this.setState({ initialized: true });
 		});
 		this.socket = socket;

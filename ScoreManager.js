@@ -4,11 +4,15 @@ class ScoreManager {
 	constructor(questionManager) {
 		this.questionManager = questionManager;
 		this.scores = {};
+		this.activeQuestions = {};
 	}
 
 	addTeam(team) {
 		if (!this.scores[team]) {
 			this.scores[team] = {};
+		}
+		if (!this.activeQuestions[team]) {
+			this.activeQuestions[team] = null;
 		}
 	}
 
@@ -17,6 +21,11 @@ class ScoreManager {
 			team,
 			score: Object.values(this.scores[team]).reduce((sum, {score}) => sum + score, 0)
 		}
+	}
+
+	getActiveQuestion(team) {
+		return this.questionManager.getActiveQuestion()
+			? this.activeQuestions[team] || QuestionUtils.getActiveQuestion(this.questionManager.getActiveQuestion()) : null;
 	}
 
 	getTeams(teams) {
@@ -40,7 +49,7 @@ class ScoreManager {
 			if (score === originalQuestion.points && originalQuestion.linkedQuestion) {
 				const linkedQuestion = this.questionManager.getLinkedQuestion(originalQuestion.linkedQuestion._id);
 				if (linkedQuestion) {
-					this.fireLinkedQuestionStarted(team, QuestionUtils.getActiveQuestion(linkedQuestion));
+					this.fireLinkedQuestionStarted(team, this.activeQuestions[team] = QuestionUtils.getActiveQuestion(linkedQuestion));
 				}
 			}
 		}
@@ -61,6 +70,10 @@ class ScoreManager {
 			correctedQuestions.push(currentQuestion);
 			currentQuestion = this.questionManager.getLinkedQuestion(currentQuestion.linkedQuestion._id);
 		}
+	}
+
+	endQuestion() {
+		Object.keys(this.activeQuestions).forEach(team => this.activeQuestions[team] = null);
 	}
 
 	onScoreChange(callback) {

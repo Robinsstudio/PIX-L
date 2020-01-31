@@ -1,6 +1,3 @@
-const Impl = require('./impl');
-const QuestionUtils = require('./QuestionUtils');
-
 class QuestionManager {
 	constructor(questions, linkedQuestions) {
 		this.questions = questions;
@@ -22,10 +19,6 @@ class QuestionManager {
 
 	getLinkedQuestion(linkedQuestionId) {
 		return this.linkedQuestions.find(({_id}) => _id.equals(linkedQuestionId));
-	}
-
-	getClearedActiveQuestion() {
-		return this.activeQuestion ? QuestionUtils.getActiveQuestion(this.activeQuestion) : null;
 	}
 
 	getQuestion(index) {

@@ -67,6 +67,8 @@ class Session {
 					this.broadcast('teamChange', this.getTeams());
 				});
 
+				socket.emit('questionStart', this.scoreManager.getActiveQuestion(team));
+
 				socket.removeAllListeners('teamChoice');
 			}
 		});
@@ -83,15 +85,17 @@ class Session {
 
 	startQuestion(questionIndex) {
 		const { questionManager } = this;
+		const question = QuestionUtils.getActiveQuestion(questionManager.getQuestion(questionIndex));
 
 		questionManager.startQuestion(questionIndex);
-		this.timer.count(questionManager.getQuestion(questionIndex).time);
-		this.broadcast('questionStart', questionManager.getClearedActiveQuestion());
+		this.timer.count(question.time);
+		this.broadcast('questionStart', question);
 	}
 
 	endQuestion() {
 		this.timer.reset();
 		this.questionManager.endQuestion();
+		this.scoreManager.endQuestion();
 		this.broadcast('questionEnd');
 	}
 
@@ -107,7 +111,6 @@ class Session {
 		socket.emit('init', {
 			questions: this.questions.map(question => QuestionUtils.getQuestion(question)),
 			selection: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
-			activeQuestion: this.questionManager.getClearedActiveQuestion(),
 			teams: this.getTeams(),
 			maxPoints: this.questions.reduce((sum, question) => sum + question.points, 0)
 		});
