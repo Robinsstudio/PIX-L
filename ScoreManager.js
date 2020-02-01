@@ -46,12 +46,20 @@ class ScoreManager {
 
 			this.fireScoreChange();
 
-			if (score === originalQuestion.points && originalQuestion.linkedQuestion) {
-				const linkedQuestion = this.questionManager.getLinkedQuestion(originalQuestion.linkedQuestion._id);
-				if (linkedQuestion) {
-					this.fireLinkedQuestionStarted(team, this.activeQuestions[team] = QuestionUtils.getActiveQuestion(linkedQuestion));
+			const feedback = QuestionUtils.getFeedback(studentQuestion, originalQuestion);
+
+			if (score === originalQuestion.points) {
+				feedback.positive = true;
+
+				if (originalQuestion.linkedQuestion) {
+					const linkedQuestion = this.questionManager.getLinkedQuestion(originalQuestion.linkedQuestion._id);
+					if (linkedQuestion) {
+						this.fireLinkedQuestionStarted(team, this.activeQuestions[team] = QuestionUtils.getActiveQuestion(linkedQuestion));
+					}
 				}
 			}
+
+			this.fireFeedback(feedback, team);
 		}
 
 		return alreadyAnswered && this.scores[team][originalQuestionId].score === originalQuestion.points;
@@ -80,12 +88,20 @@ class ScoreManager {
 		this.onScoreChangeHandler = callback;
 	}
 
+	onFeedback(callback) {
+		this.onFeedbackHandler = callback;
+	}
+
 	onLinkedQuestionStarted(callback) {
 		this.onLinkedQuestionStarted = callback;
 	}
 
 	fireScoreChange() {
 		this.onScoreChangeHandler();
+	}
+
+	fireFeedback(feedback, team) {
+		this.onFeedbackHandler(feedback, team);
 	}
 
 	fireLinkedQuestionStarted(team, linkedQuestion) {

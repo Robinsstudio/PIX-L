@@ -50,6 +50,36 @@
 	transform: scale(1.05);
 }
 
+#feedback {
+	position: fixed;
+	width: 40rem;
+	padding: 1.5rem;
+	border-radius: .75rem;
+	left: 50%;
+	bottom: 0;
+	transform: translate(-50%, calc(100% + 2rem));
+	transition: transform .5s;
+}
+
+#feedback.visible {
+	transform: translate(-50%, -2rem);
+}
+
+.positive-feedback {
+	background-color: rgb(0, 121, 48);
+}
+
+.negative-feedback {
+	background-color: rgb(214, 14, 14);
+}
+
+.dismiss {
+	position: absolute;
+	top: .5rem;
+	right: .5rem;
+	cursor: pointer;
+}
+
 #questionLabel {
 	margin: 3rem 0;
 	text-align: center;

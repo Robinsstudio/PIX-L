@@ -25,6 +25,12 @@ const correctByQuestionType = {
 	matching: correctMatchingQuestion
 };
 
+const feedbackByQuestionType = {
+	multipleChoice: getMultipleChoiceFeedback,
+	openEnded: getOpenEndedFeedback,
+	matching: getMatchingFeedback
+}
+
 function checkMultipleChoiceQuestion(studentQuestion, originalQuestion) {
 	return studentQuestion
 			&& Array.isArray(studentQuestion.answers)
@@ -69,4 +75,49 @@ function correctQuestion(studentQuestion, originalQuestion) {
 	return correctByQuestionType[originalQuestion.questionType](studentQuestion, originalQuestion);
 }
 
-module.exports = { getQuestion, getActiveQuestion, correctQuestion };
+function getMultipleChoiceFeedback(studentQuestion, originalQuestion) {
+	let feedback = {};
+
+	if (checkMultipleChoiceQuestion(studentQuestion, originalQuestion)) {
+		const studentAnswerIndex = studentQuestion.answers.findIndex(answer => answer.correct);
+		if (studentAnswerIndex != -1 && originalQuestion.answers[studentAnswerIndex].feedback) {
+			feedback.specific = originalQuestion.answers[studentAnswerIndex].feedback;
+		}
+
+		feedback.general = originalQuestion.feedback;
+	}
+
+	return feedback;
+}
+
+function getOpenEndedFeedback(studentQuestion, originalQuestion) {
+	let feedback = {};
+
+	if (checkMultipleChoiceQuestion(studentQuestion, originalQuestion)) {
+		if (correctOpenEndedQuestion(studentQuestion, originalQuestion)) {
+			feedback.specific = originalQuestion.positiveFeedback;
+		} else {
+			feedback.specific = originalQuestion.negativeFeedback;
+		}
+
+		feedback.general = originalQuestion.feedback;
+	}
+
+	return feedback;
+}
+
+function getMatchingFeedback(studentQuestion, originalQuestion) {
+	let feedback = {};
+
+	if (checkMatchingQuestion(studentQuestion, originalQuestion)) {
+		feedback.general = originalQuestion.feedback;
+	}
+
+	return feedback;
+}
+
+function getFeedback(studentQuestion, originalQuestion) {
+	return feedbackByQuestionType[originalQuestion.questionType](studentQuestion, originalQuestion);
+}
+
+module.exports = { getQuestion, getActiveQuestion, correctQuestion, getFeedback };

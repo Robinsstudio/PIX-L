@@ -29,10 +29,8 @@ class Session {
 		this.timer.onOutOfTime(() => this.questionPool.stopQuestion());
 
 		this.scoreManager.onScoreChange(() => this.broadcast('teamChange', this.getTeams()));
-		this.scoreManager.onLinkedQuestionStarted((team, linkedQuestion) => {
-			const socketId = Object.entries(this.teams).find(([_, t]) => t === team)[0];
-			io.to(socketId).emit('questionStart', linkedQuestion);
-		});
+		this.scoreManager.onFeedback((feedback, team) => this.getSocket(team).emit('feedback', feedback));
+		this.scoreManager.onLinkedQuestionStarted((team, linkedQuestion) => this.getSocket(team).emit('questionStart', linkedQuestion));
 	}
 
 	broadcast(event, payload) {
@@ -81,6 +79,11 @@ class Session {
 
 	getTeams() {
 		return this.scoreManager.getTeams(Object.values(this.teams));
+	}
+
+	getSocket(team) {
+		const socketId = Object.entries(this.teams).find(([_, t]) => t === team)[0];
+		return this.io.to(socketId);
 	}
 
 	startQuestion(questionIndex) {

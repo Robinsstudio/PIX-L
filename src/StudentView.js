@@ -19,6 +19,7 @@ class StudentView extends Component {
 			time: null
 		};
 
+		this.dismissFeedback = this.dismissFeedback.bind(this);
 		this.handleCancelClicked = this.handleCancelClicked.bind(this);
 		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
@@ -43,6 +44,7 @@ class StudentView extends Component {
 
 		socket.on('teamChange', teams => this.updateTeams(teams));
 		socket.on('count', time => this.count(time));
+		socket.on('feedback', feedback => this.updateFeedback(feedback));
 
 		socket.on('init', data => {
 			this.updateQuestions(data.questions);
@@ -78,6 +80,14 @@ class StudentView extends Component {
 
 	updateTeams(teams) {
 		this.setState({ teams: teams.sort((t1, t2) => t1.team - t2.team) })
+	}
+
+	updateFeedback(feedback) {
+		this.setState({ feedback: { ...feedback, visible: true } });
+	}
+
+	dismissFeedback() {
+		this.setState({ feedback: { ...this.state.feedback, visible: false } });
 	}
 
 	updateMaxPoints(maxPoints) {
@@ -310,6 +320,20 @@ class StudentView extends Component {
 		);
 	}
 
+	buildFeedback() {
+		const { feedback } = this.state;
+		const visible = feedback && feedback.visible;
+		const positive = feedback && feedback.positive;
+
+		return (
+			<div id="feedback" className={`${visible ? 'visible' : ''} ${positive ? 'positive-feedback' : 'negative-feedback'}`}>
+				<i className="dismiss fas fa-times" onClick={this.dismissFeedback}/>
+				{ feedback && feedback.specific ? <TextRenderer key={feedback.specific} initialValue={feedback.specific}/> : null }
+				{ feedback && feedback.general ? <TextRenderer key={feedback.general} initialValue={feedback.general}/> : null }
+			</div>
+		);
+	}
+
 	render() {
 		const { activeQuestion, teams, maxPoints } = this.state;
 
@@ -322,6 +346,7 @@ class StudentView extends Component {
 						<div id="game">
 							{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
 						</div>
+						{ this.buildFeedback() }
 						<div id="score">
 							<div className="points-container">
 								{teams.map(({team, score}) => {
