@@ -149,7 +149,7 @@ module.exports = function(server) {
 
 					socket.removeAllListeners('init');
 				} else {
-					Impl.getByLink(data.url).then(questions => {
+					Impl.getGameById(data.url).then(questions => {
 						if (questions.length) {
 							Impl.getQuestionsByIds(
 								questions.filter(question => question.linkedQuestion).map(question => {

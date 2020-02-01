@@ -62,11 +62,6 @@ router.post('/SaveGame', User.isAuthenticated, (req, res) => {
 	Impl.saveGame(gameData).then( () => res.status(200).end() );
 });
 
-router.post('/GenerateLink', User.isAuthenticated, (req, res) => {
-	const { _id } = req.body;
-	Impl.generateLink(_id).then(() => res.status(200).end());
-});
-
 router.post('/UpdateAccount', User.isAuthenticated, (req, res) => {
 	const { body: { password, fields }, jwt: { userId } } = req;
 	User.updateAccount(userId, password, fields).then(

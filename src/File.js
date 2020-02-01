@@ -71,24 +71,9 @@ class File extends Component {
 
 	handleContextMenu(event) {
 		const {
-			file: { name, type, url, sessions, _id },
-			copyFile,
-			refresh,
-			updateSessionView
+			file: { name, _id },
+			copyFile
 		} = this.props;
-
-		const sharedLinkItem = url ? {
-			label: 'Copier le lien partageable',
-			onClick: () => this.copyToClipboard(`${window.location.href}jeu/${url}`)
-		} : {
-			label: 'Générer un lien partageable',
-			onClick: () => request('GenerateLink', { _id }).then(() => refresh())
-		};
-
-		const resultsItem = sessions && sessions.length ? {
-			label: 'Consulter les résultats',
-			onClick: () => updateSessionView({ visible: true, sessions })
-		} : [];
 
 		const menuItems = [
 			{ label: 'Ouvrir', onClick: this.open },
@@ -98,10 +83,12 @@ class File extends Component {
 				onClick: () => Modals.showConfirmModal('Supprimer', `Voulez-vous vraiment supprimer ${name} ?`)
 					.then(this.remove).catch(() => {})
 			},
-			{ label: 'Copier', onClick: () => copyFile(_id) }
+			{ label: 'Copier', onClick: () => copyFile(_id) },
+			{
+				label: 'Copier le lien partageable',
+				onClick: () => this.copyToClipboard(`${window.location.href}jeu/${_id}`)
+			}
 		]
-		.concat(type === 'jeu' ? sharedLinkItem : [])
-		.concat(type === 'jeu' ? resultsItem : []);
 
 		this.props.handleContextMenu(event, menuItems);
 	}

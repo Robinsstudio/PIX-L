@@ -47,17 +47,6 @@ const Game  = mongoose.model('Game', {
 	name: String,
 	questions: [{ idQuestion: ObjectId }],
 	url: String,
-	sessions: [{
-		name: String,
-		questions: [{
-			label: String,
-			answers: [{
-				label: String,
-				checked: Boolean,
-				correct: Boolean
-			}]
-		}]
-	}],
 	idParent: ObjectId
 });
 
@@ -189,15 +178,8 @@ module.exports = {
 		}
 	},
 
-	generateLink: (_id) => {
-		return Game.findById(_id).then(game => {
-			game.url = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-			return game.save();
-		});
-	},
-
-	getByLink: (url) => {
-		return Game.find({ url }).then(games => {
+	getGameById: (_id) => {
+		return Game.find({ _id }).then(games => {
 			if (games.length) {
 				return getQuestionsByIds(games[0].questions.map(quest => quest.idQuestion));
 			}
