@@ -49,6 +49,7 @@ class Session {
 	initializeAdminEvents(socket) {
 		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
 		socket.on('cancel', () => this.questionPool.cancel());
+		socket.on('stop', () => this.stop());
 	}
 
 	initializeTeamEvents(socket) {
@@ -117,8 +118,15 @@ class Session {
 			teams: this.getTeams(),
 			maxPoints: this.questions.reduce((sum, question) => sum + question.points, 0)
 		});
+	}
 
-		console.log('Listening to socket ' + socket.id);
+	stop() {
+		if (this.questionManager.getActiveQuestion()) {
+			this.questionPool.stopQuestion();
+		} else {
+			this.scoreManager.saveSession(this.room);
+			this.stopSession(this.room);
+		}
 	}
 }
 
@@ -140,10 +148,15 @@ module.exports = function(server) {
 
 	const sessions = {};
 
+	function stopSession(id) {
+		delete sessions[id];
+	}
+
 	io.on('connection', socket => {
 		socket.on('init', data => {
 			authenticateSocket(socket).then(admin => {
 				const session = sessions[data.url];
+
 				if (session) {
 					session.addSocket(socket, { admin });
 
@@ -157,6 +170,7 @@ module.exports = function(server) {
 								})
 							).then(linkedQuestions => {
 								const newSession = new Session(io, data.url, questions, linkedQuestions);
+								newSession.stopSession = stopSession;
 								newSession.addSocket(socket, { admin });
 								sessions[data.url] = newSession;
 
@@ -167,8 +181,6 @@ module.exports = function(server) {
 				}
 			});
 		});
-
-		socket.on('disconnect', () => console.log('Client disconnected!'));
 	});
 }
 

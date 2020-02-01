@@ -21,6 +21,7 @@ class StudentView extends Component {
 
 		this.dismissFeedback = this.dismissFeedback.bind(this);
 		this.handleCancelClicked = this.handleCancelClicked.bind(this);
+		this.handleStopClicked = this.handleStopClicked.bind(this);
 		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.buildMultipleChoiceQuestionBody = this.buildMultipleChoiceQuestionBody.bind(this);
@@ -119,6 +120,10 @@ class StudentView extends Component {
 
 	handleCancelClicked() {
 		this.socket.emit('cancel');
+	}
+
+	handleStopClicked() {
+		this.socket.emit('stop');
 	}
 
 	handleSubmit() {
@@ -312,8 +317,13 @@ class StudentView extends Component {
 					}
 				</div>
 				{ authenticated &&
-					<div id="cancelLast" className="color-blue" onClick={this.handleCancelClicked}>
-						{ activeQuestion ? 'Annuler la question' : 'Annuler la dernière carte retournée' }
+					<div>
+						<div id="cancelLast" className="color-blue" onClick={this.handleCancelClicked}>
+							{ activeQuestion ? 'Annuler la question' : 'Annuler la dernière carte retournée' }
+						</div>
+						<div id="stopLast" className="color-blue" onClick={this.handleStopClicked}>
+							{ activeQuestion ? 'Terminer la question' : 'Terminer la session' }
+						</div>
 					</div>
 				}
 			</div>

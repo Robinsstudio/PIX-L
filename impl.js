@@ -56,6 +56,12 @@ const Folder = mongoose.model('Folder', {
 	idParent: ObjectId
 });
 
+const Session = mongoose.model('Session', {
+	idGame: ObjectId,
+	date: Date,
+	scores: Object
+});
+
 const getById = (_id) => {
 	return Promise.all([ Folder.findById(_id), Question.findById(_id), Game.findById(_id) ]).then(result => result[0] || result[1] || result[2]);
 }
@@ -185,5 +191,9 @@ module.exports = {
 			}
 			return Promise.resolve([]);
 		});
+	},
+
+	saveSession: (idGame, scores) => {
+		return new Session({ idGame, scores, date: Date.now() }).save();
 	}
 }

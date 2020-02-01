@@ -36,17 +36,17 @@
 	color: rgb(238, 127, 0);
 }
 
-#cancelLast {
+#cancelLast, #stopLast {
 	margin-right: 2rem;
 	cursor: pointer;
 	transition: transform .2s;
 }
 
-#cancelLast:hover {
+#cancelLast:hover, #stopLast:hover {
 	transform: scale(1.1);
 }
 
-#cancelLast:active {
+#cancelLast:active, #stopLast:active {
 	transform: scale(1.05);
 }
 

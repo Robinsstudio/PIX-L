@@ -1,4 +1,5 @@
 const QuestionUtils = require('./QuestionUtils');
+const Impl = require('./impl');
 
 class ScoreManager {
 	constructor(questionManager) {
@@ -82,6 +83,10 @@ class ScoreManager {
 
 	endQuestion() {
 		Object.keys(this.activeQuestions).forEach(team => this.activeQuestions[team] = null);
+	}
+
+	saveSession(idGame) {
+		Impl.saveSession(idGame, this.scores);
 	}
 
 	onScoreChange(callback) {
