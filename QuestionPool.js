@@ -38,6 +38,7 @@ class QuestionPool {
 			this.selectedQuestions = [];
 
 			this.fireSelectionChanged({ selectedQuestions: [], unselectedQuestions });
+			this.fireQuestionDone();
 			this.fireQuestionEnded();
 		}
 	}
@@ -61,6 +62,10 @@ class QuestionPool {
 		this.onQuestionStartedHandler = callback;
 	}
 
+	onQuestionDone(callback) {
+		this.onQuestionDoneHandler = callback;
+	}
+
 	onQuestionEnded(callback) {
 		this.onQuestionEndedHandler = callback;
 	}
@@ -71,6 +76,10 @@ class QuestionPool {
 
 	fireQuestionStarted(startedQuestion) {
 		this.onQuestionStartedHandler(startedQuestion);
+	}
+
+	fireQuestionDone() {
+		this.onQuestionDoneHandler();
 	}
 
 	fireQuestionEnded(questionEnded) {

@@ -23,6 +23,7 @@ class Session {
 
 		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
 		this.questionPool.onQuestionStarted(question => this.startQuestion(question));
+		this.questionPool.onQuestionDone(() => this.scoreManager.updateTurn());
 		this.questionPool.onQuestionEnded(() => this.endQuestion());
 
 		this.timer.onCount(seconds => this.broadcast('count', seconds));
