@@ -7,6 +7,7 @@ class ScoreManager {
 		this.scores = {};
 		this.activeQuestions = {};
 		this.turn = 0;
+		this.outOfTime = false;
 	}
 
 	addTeam(team) {
@@ -40,51 +41,55 @@ class ScoreManager {
 	}
 
 	updateScore(team, studentQuestion, originalQuestion, linked) {
-		const originalQuestionId = originalQuestion._id.toString();
-		const alreadyAnswered = Object.keys(this.scores[team]).includes(originalQuestionId);
+		if (!this.outOfTime) {
+			const originalQuestionId = originalQuestion._id.toString();
+			const alreadyAnswered = this.scores[team][originalQuestionId];
 
-		if (!alreadyAnswered) {
-			const teams = Object.keys(this.scores);
-			let score = QuestionUtils.correctQuestion(studentQuestion, originalQuestion) ? originalQuestion.points : 0;
-			const correct = score === originalQuestion.points;
+			if (!alreadyAnswered) {
+				const teams = Object.keys(this.scores);
+				let score = QuestionUtils.correctQuestion(studentQuestion, originalQuestion) ? originalQuestion.points : 0;
+				const correct = score === originalQuestion.points;
 
-			if (!linked && team == this.getTurn()) {
+				if (!linked && team == this.getTurn()) {
 
-				const [answers, correctAnswers] = Object.values(this.scores).reduce((acc, score) => {
-					let [ answers, correctAnswers ] = acc;
+					const [answers, correctAnswers] = Object.values(this.scores).reduce((acc, score) => {
+						let [ answers, correctAnswers ] = acc;
 
-					if (score[originalQuestionId]) {
-						answers++;
+						if (score[originalQuestionId]) {
+							answers++;
 
-						if (score[originalQuestionId].correct) {
-							correctAnswers++;
+							if (score[originalQuestionId].correct) {
+								correctAnswers++;
+							}
 						}
+
+						return [ answers, correctAnswers ];
+					}, [0, 0]);
+
+					if (correctAnswers === 0) {
+						score++;
 					}
 
-					return [ answers, correctAnswers ];
-				}, [0, 0]);
-
-				if (correctAnswers === 0) {
-					score++;
+					if (correct && answers === teams.length - 1) {
+						score--;
+					}
 				}
 
-				if (answers === teams.length - 1) {
-					score--;
+				this.scores[team][originalQuestionId] = {
+					theme: originalQuestion.theme,
+					score,
+					correct
+				};
+
+				this.fireScoreChange();
+
+				const feedback = QuestionUtils.getFeedback(studentQuestion, originalQuestion);
+
+				if (correct) {
+					feedback.positive = true;
 				}
-			}
 
-			this.scores[team][originalQuestionId] = {
-				theme: originalQuestion.theme,
-				score,
-				correct
-			};
-
-			this.fireScoreChange();
-
-			const feedback = QuestionUtils.getFeedback(studentQuestion, originalQuestion);
-
-			if (correct) {
-				feedback.positive = true;
+				this.fireFeedback(feedback, team);
 
 				if (originalQuestion.linkedQuestion) {
 					const linkedQuestion = this.questionManager.getLinkedQuestion(originalQuestion.linkedQuestion._id);
@@ -93,11 +98,8 @@ class ScoreManager {
 					}
 				}
 			}
-
-			this.fireFeedback(feedback, team);
+			return alreadyAnswered;
 		}
-
-		return alreadyAnswered && this.scores[team][originalQuestionId].correct;
 	}
 
 	correct(team, question) {
@@ -119,8 +121,13 @@ class ScoreManager {
 		this.turn++;
 	}
 
+	timeOut() {
+		this.outOfTime = true;
+	}
+
 	endQuestion() {
 		Object.keys(this.activeQuestions).forEach(team => this.activeQuestions[team] = null);
+		this.outOfTime = false;
 	}
 
 	saveSession(idGame) {

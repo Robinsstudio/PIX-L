@@ -27,7 +27,7 @@ class Session {
 		this.questionPool.onQuestionEnded(() => this.endQuestion());
 
 		this.timer.onCount(seconds => this.broadcast('count', seconds));
-		this.timer.onOutOfTime(() => this.questionPool.stopQuestion());
+		this.timer.onOutOfTime(() => this.scoreManager.timeOut());
 
 		this.scoreManager.onScoreChange(() => this.broadcast('teamChange', this.getTeams()));
 		this.scoreManager.onFeedback((feedback, team) => this.getSocket(team).emit('feedback', feedback));
