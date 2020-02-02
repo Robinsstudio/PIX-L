@@ -25,6 +25,11 @@ class ScoreManager {
 		}
 	}
 
+	getTurn() {
+		const teams = Object.keys(this.scores);
+		return teams.length ? teams[this.turn % teams.length] : null;
+	}
+
 	getActiveQuestion(team) {
 		return this.questionManager.getActiveQuestion()
 			? this.activeQuestions[team] || QuestionUtils.getActiveQuestion(this.questionManager.getActiveQuestion()) : null;
@@ -43,7 +48,7 @@ class ScoreManager {
 			let score = QuestionUtils.correctQuestion(studentQuestion, originalQuestion) ? originalQuestion.points : 0;
 			const correct = score === originalQuestion.points;
 
-			if (!linked && team == teams[this.turn % teams.length]) {
+			if (!linked && team == this.getTurn()) {
 
 				const [answers, correctAnswers] = Object.values(this.scores).reduce((acc, score) => {
 					let [ answers, correctAnswers ] = acc;

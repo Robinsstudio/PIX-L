@@ -23,7 +23,7 @@ class Session {
 
 		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
 		this.questionPool.onQuestionStarted(question => this.startQuestion(question));
-		this.questionPool.onQuestionDone(() => this.scoreManager.updateTurn());
+		this.questionPool.onQuestionDone(() => this.updateTurn());
 		this.questionPool.onQuestionEnded(() => this.endQuestion());
 
 		this.timer.onCount(seconds => this.broadcast('count', seconds));
@@ -51,6 +51,8 @@ class Session {
 		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
 		socket.on('cancel', () => this.questionPool.cancel());
 		socket.on('stop', () => this.stop());
+
+		socket.emit('questionStart', this.questionManager.getActiveQuestion());
 	}
 
 	initializeTeamEvents(socket) {
@@ -68,6 +70,8 @@ class Session {
 				});
 
 				socket.emit('questionStart', this.scoreManager.getActiveQuestion(team));
+
+				this.broadcast('turn', this.scoreManager.getTurn());
 
 				socket.removeAllListeners('teamChoice');
 			}
@@ -102,6 +106,11 @@ class Session {
 		this.questionManager.endQuestion();
 		this.scoreManager.endQuestion();
 		this.broadcast('questionEnd');
+	}
+
+	updateTurn() {
+		this.scoreManager.updateTurn();
+		this.broadcast('turn', this.scoreManager.getTurn());
 	}
 
 	addSocket(socket, { admin }) {

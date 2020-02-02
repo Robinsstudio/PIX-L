@@ -46,6 +46,7 @@ class StudentView extends Component {
 		socket.on('teamChange', teams => this.updateTeams(teams));
 		socket.on('count', time => this.count(time));
 		socket.on('feedback', feedback => this.updateFeedback(feedback));
+		socket.on('turn', turn => this.updateTurn(turn))
 
 		socket.on('init', data => {
 			this.updateQuestions(data.questions);
@@ -89,6 +90,10 @@ class StudentView extends Component {
 
 	dismissFeedback() {
 		this.setState({ feedback: { ...this.state.feedback, visible: false } });
+	}
+
+	updateTurn(turn) {
+		this.setState({ turn });
 	}
 
 	updateMaxPoints(maxPoints) {
@@ -275,6 +280,34 @@ class StudentView extends Component {
 		);
 	}
 
+	buildScore() {
+		const { teams, turn, maxPoints } = this.state;
+
+		return (
+			<div id="score">
+				{ turn &&
+					<div id="team-turn" className="color-blue">
+						Tour : <span className={`color-team-${turn}`}>Équipe { turn }</span>
+					</div>
+				}
+				<div id="points-container">
+					{teams.map(({team, score}) => {
+						return (
+							<div
+								className={`points-rectangle background-color-team-${team}`}
+								style={{ height: `${100 * score / maxPoints}%` }}
+								key={team}
+							>
+								<div className={`points-value color-team-${team}`}>{score}</div>
+							</div>
+						);
+					})}
+				</div>
+				<div id="points-label">pts</div>
+			</div>
+		);
+	}
+
 	buildTeamChooser() {
 		const { initialized, team, teams } = this.state;
 		if (initialized && !team && !this.isAuthenticated()) {
@@ -345,7 +378,7 @@ class StudentView extends Component {
 	}
 
 	render() {
-		const { activeQuestion, teams, maxPoints } = this.state;
+		const { activeQuestion } = this.state;
 
 		return (
 			<Fragment>
@@ -357,22 +390,7 @@ class StudentView extends Component {
 							{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
 						</div>
 						{ this.buildFeedback() }
-						<div id="score">
-							<div className="points-container">
-								{teams.map(({team, score}) => {
-									return (
-										<div
-											className={`points-rectangle background-color-team-${team}`}
-											style={{ height: `${100 * score / maxPoints}%` }}
-											key={team}
-										>
-											<div className={`points-value color-team-${team}`}>{score}</div>
-										</div>
-									);
-								})}
-							</div>
-							<div className="points-label">pts</div>
-						</div>
+						{ this.buildScore() }
 					</div>
 					<div id="gameFooter"/>
 				</div>

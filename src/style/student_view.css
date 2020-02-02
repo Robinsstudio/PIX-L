@@ -222,7 +222,16 @@
 	text-align: center;
 }
 
-.points-container {
+#team-turn  {
+	position: absolute;
+	top: -5rem;
+	left: 50%;
+	font-size: 1.5rem;
+	transform: translateX(-50%);
+	white-space: nowrap;
+}
+
+#points-container {
 	display: flex;
 	justify-content: center;
 	align-items: flex-end;
@@ -248,7 +257,7 @@
 	transform: translate(-.3rem, -1.1rem) rotate(-45deg);
 }
 
-.points-label {
+#points-label {
 	font-size: 3rem;
 	font-weight: bold;
 	color: rgb(213, 213, 213);
