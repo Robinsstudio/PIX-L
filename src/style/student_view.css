@@ -59,6 +59,7 @@
 	bottom: 0;
 	transform: translate(-50%, calc(100% + 2rem));
 	transition: transform .5s;
+	z-index: 10;
 }
 
 #feedback.visible {

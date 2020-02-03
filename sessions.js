@@ -13,7 +13,6 @@ class Session {
 	constructor(io, url, questions, linkedQuestions) {
 		this.io = io;
 		this.room = url;
-		this.questions = questions;
 		this.admins = {};
 		this.teams = {};
 		this.questionManager = new QuestionManager(questions, linkedQuestions);
@@ -52,7 +51,10 @@ class Session {
 		socket.on('cancel', () => this.questionPool.cancel());
 		socket.on('stop', () => this.stop());
 
-		socket.emit('questionStart', this.questionManager.getActiveQuestion());
+		const activeQuestion = this.questionManager.getActiveQuestion();
+		if (activeQuestion) {
+			socket.emit('questionStart', QuestionUtils.getActiveQuestion(activeQuestion));
+		}
 	}
 
 	initializeTeamEvents(socket) {
@@ -123,10 +125,10 @@ class Session {
 		socket.join(this.room);
 
 		socket.emit('init', {
-			questions: this.questions.map(question => QuestionUtils.getQuestion(question)),
+			questions: this.questionManager.getFilteredQuestions(),
 			selection: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
 			teams: this.getTeams(),
-			maxPoints: this.questions.reduce((sum, question) => sum + question.points, 0)
+			maxPoints: this.questionManager.getMaxPoints()
 		});
 	}
 

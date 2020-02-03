@@ -137,11 +137,13 @@ class StudentView extends Component {
 
 	handleMultipleChoiceAnswerChanged(index) {
 		const { activeQuestion } = this.state;
+		const correct = !activeQuestion.answers[index].correct;
+
 		this.setState({
 			activeQuestion: {
 				...activeQuestion,
 				answers: activeQuestion.answers.map((answer, i) => {
-					return index === i ? { ...answer, correct: !answer.correct } : answer;
+					return { ...answer, correct: index === i ? correct : false };
 				})
 			}
 		});
@@ -199,7 +201,7 @@ class StudentView extends Component {
 				{answers.map((answer, i) => {
 					return (
 						<div className="card card--wide" key={answer._id} onClick={() => this.handleMultipleChoiceAnswerChanged(i)}>
-							<input type="checkbox" checked={answer.correct} className="mr-3" readOnly/>
+							<input type="checkbox" checked={!!answer.correct} className="mr-3" readOnly/>
 							<TextRenderer key={answer.label} initialValue={answer.label}/>
 						</div>
 					);

@@ -27,11 +27,10 @@ class QuestionPool {
 	}
 
 	stopQuestion() {
-		const activeQuestion = this.questionManager.getActiveQuestion();
+		const activeQuestionIndex = this.questionManager.getActiveQuestionIndex();
 
-		if (activeQuestion) {
-			const activeQuestionIndex = this.selectedQuestions.indexOf(activeQuestion);
-			this.pastQuestions.push(...this.selectedQuestions.splice(activeQuestionIndex, 1));
+		if (activeQuestionIndex != -1) {
+			this.pastQuestions.push(...this.selectedQuestions.splice(this.selectedQuestions.indexOf(activeQuestionIndex), 1));
 
 			const unselectedQuestions = this.selectedQuestions;
 			this.unselectedQuestions.push(...unselectedQuestions);

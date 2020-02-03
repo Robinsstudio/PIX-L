@@ -66,7 +66,7 @@ class ScoreManager {
 						return [ answers, correctAnswers ];
 					}, [0, 0]);
 
-					if (correctAnswers === 0) {
+					if (correct && correctAnswers === 0) {
 						score++;
 					}
 
