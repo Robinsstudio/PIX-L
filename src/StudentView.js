@@ -7,6 +7,7 @@ import PrettyInput from './PrettyInput';
 import './style/form_view.css';
 import './style/student_view.css';
 import './style/team_chooser.css';
+import StudentViewModal from './StudentViewModal';
 
 const MAX_TEAMS = 5;
 
@@ -47,6 +48,8 @@ class StudentView extends Component {
 		socket.on('count', time => this.count(time));
 		socket.on('feedback', feedback => this.updateFeedback(feedback));
 		socket.on('turn', turn => this.updateTurn(turn))
+
+		socket.on('confirmStopQuestion', () => this.setState({ confirmStopQuestion: true }));
 
 		socket.on('init', data => {
 			this.updateQuestions(data.questions);
@@ -314,25 +317,31 @@ class StudentView extends Component {
 		const { initialized, team, teams } = this.state;
 		if (initialized && !team && !this.isAuthenticated()) {
 			return (
-				<div className="darkBackground">
-					<div id="teamChooser" className="color-blue">
-						<div id="teamChooserTitle">Veuillez choisir une équipe</div>
-						<div id="teamChooserBody">
-							{Array.from({ length: MAX_TEAMS }, (_,i) => i + 1)
-							.filter(team => !teams.find(t => team === t.team))
-							.map(team => {
-								return (
-									<div className="teamOption" onClick={() => this.handleTeamClicked(team)}>
-										Équipe {team}
-										<div className={`teamOptionRectangle background-color-team-${team}`}/>
-									</div>
-								);
-							})}
-						</div>
-					</div>
-				</div>
+				<StudentViewModal title="Veuillez choisir une équipe">
+					{Array.from({ length: MAX_TEAMS }, (_,i) => i + 1)
+					.filter(team => !teams.find(t => team === t.team))
+					.map(team => {
+						return (
+							<div className="teamOption" onClick={() => this.handleTeamClicked(team)}>
+								Équipe {team}
+								<div className={`teamOptionRectangle background-color-team-${team}`}/>
+							</div>
+						);
+					})}
+				</StudentViewModal>
 			);
 		}
+	}
+
+	buildConfirmStopQuestion() {
+		const { confirmStopQuestion } = this.state;
+
+		return (
+			confirmStopQuestion &&
+				<StudentViewModal title="Terminer la question">
+					Êtes-vous sûr de vouloir terminer la question ?
+				</StudentViewModal>
+		);
 	}
 
 	formatTime(time) {
@@ -397,6 +406,7 @@ class StudentView extends Component {
 					<div id="gameFooter"/>
 				</div>
 				{ this.buildTeamChooser() }
+				{ this.buildConfirmStopQuestion() }
 			</Fragment>
 		);
 	}

@@ -49,7 +49,7 @@ class Session {
 	initializeAdminEvents(socket) {
 		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
 		socket.on('cancel', () => this.questionPool.cancel());
-		socket.on('stop', () => this.stop());
+		socket.on('stop', () => this.stop(socket));
 
 		const activeQuestion = this.questionManager.getActiveQuestion();
 		if (activeQuestion) {
@@ -132,9 +132,13 @@ class Session {
 		});
 	}
 
-	stop() {
+	confirmStopQuestion() {
+		this.questionPool.stopQuestion();
+	}
+
+	stop(socket) {
 		if (this.questionManager.getActiveQuestion()) {
-			this.questionPool.stopQuestion();
+			socket.emit('confirmStopQuestion');
 		} else {
 			this.scoreManager.saveSession(this.room);
 			this.stopSession(this.room);

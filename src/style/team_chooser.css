@@ -7,7 +7,7 @@
 	z-index: 100;
 }
 
-#teamChooser {
+#studentViewModal {
 	font-family: 'Questrial', sans-serif;
 	font-weight: bold;
 	position: absolute;
@@ -20,37 +20,15 @@
 	border-radius: .5rem;
 }
 
-#teamChooserTitle {
+#studentViewModalTitle {
 	font-size: 1.5rem;
 	margin: 3rem 0;
 	text-align: center;
 }
 
-#teamChooserBody {
+#studentViewModalBody {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	margin: 0 2rem;
-}
-
-.teamOption {
-	display: flex;
-	align-items: center;
-	margin-bottom: 2rem;
-	transition: transform .2s;
-}
-
-.teamOption:hover {
-	transform: scale(1.25);
-}
-
-.teamOption:active {
-	transform: scale(1.15);
-}
-
-.teamOptionRectangle {
-	width: 4rem;
-	height: 2rem;
-	margin-left: 1rem;
-	border-radius: .3rem;
 }
