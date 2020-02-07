@@ -8,6 +8,9 @@
 }
 
 #studentViewModal {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
 	font-family: 'Questrial', sans-serif;
 	font-weight: bold;
 	position: absolute;
@@ -22,7 +25,7 @@
 
 #studentViewModalTitle {
 	font-size: 1.5rem;
-	margin: 3rem 0;
+	margin: 1rem 0;
 	text-align: center;
 }
 
@@ -31,4 +34,9 @@
 	flex-direction: column;
 	align-items: center;
 	margin: 0 2rem;
+}
+
+#studentViewModalFooter {
+	display: flex;
+	justify-content: space-around;
 }

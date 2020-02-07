@@ -338,7 +338,7 @@ class StudentView extends Component {
 
 		return (
 			confirmStopQuestion &&
-				<StudentViewModal title="Terminer la question">
+				<StudentViewModal title="Terminer la question" confirm>
 					Êtes-vous sûr de vouloir terminer la question ?
 				</StudentViewModal>
 		);

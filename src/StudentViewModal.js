@@ -4,7 +4,7 @@ import './style/team_chooser.css';
 
 class StudentViewModal extends Component {
 	render() {
-		const { title } = this.props;
+		const { title, confirm } = this.props;
 
 		return (
 			<div className="darkBackground">
@@ -13,6 +13,16 @@ class StudentViewModal extends Component {
 					<div id="studentViewModalBody">
 						{ this.props.children }
 					</div>
+					{ confirm &&
+						<div id="studentViewModalFooter">
+							<div className="form-button form-button--small">
+								<span className="form-button-content form-button-content--small">Oui</span>
+							</div>
+							<div className="form-button form-button--small">
+								<span className="form-button-content form-button-content--small">Non</span>
+							</div>
+						</div>
+					}
 				</div>
 			</div>
 		);
