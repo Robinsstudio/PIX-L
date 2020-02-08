@@ -7,15 +7,9 @@ const QuestionUtils = require('./QuestionUtils');
 const ScoreManager = require('./ScoreManager');
 const Timer = require('./Timer');
 
-const MAX_TEAMS = 5;
-
 class Session {
 	constructor(io, url, questions, linkedQuestions) {
-		this.io = io;
-		this.room = url;
-		this.admins = {};
-		this.teams = {};
-		this.questionManager = new QuestionManager(questions, linkedQuestions);
+		this.questionManager = new QuestionManager(io, url, questions, linkedQuestions);
 		this.questionPool = new QuestionPool(this.questionManager);
 		this.scoreManager = new ScoreManager(this.questionManager);
 		this.timer = new Timer();
@@ -29,21 +23,16 @@ class Session {
 		this.timer.onOutOfTime(() => this.scoreManager.timeOut());
 
 		this.scoreManager.onScoreChange(() => this.broadcast('teamChange', this.getTeams()));
-		this.scoreManager.onFeedback((feedback, team) => this.getSocket(team).emit('feedback', feedback));
-		this.scoreManager.onLinkedQuestionStarted((team, linkedQuestion) => this.getSocket(team).emit('questionStart', linkedQuestion));
+		this.scoreManager.onFeedback((feedback, team) => this.emit(team, 'feedback', feedback));
+		this.scoreManager.onLinkedQuestionStarted((team, linkedQuestion) => this.emit(team, 'questionStart', linkedQuestion));
 	}
 
 	broadcast(event, payload) {
-		this.io.to(this.room).emit(event, payload);
+		this.questionManager.broadcast(event, payload);
 	}
 
-	getAvailableTeams() {
-		const teams = Object.values(this.teams);
-		return Array.from({ length: MAX_TEAMS }, (_,i) => i + 1).filter(team => !teams.includes(team));
-	}
-
-	isAdmin(socket) {
-		return this.admins[socket.id];
+	emit(team, event, payload) {
+		this.questionManager.emit(team, event, payload);
 	}
 
 	initializeAdminEvents(socket) {
@@ -59,15 +48,14 @@ class Session {
 
 	initializeTeamEvents(socket) {
 		socket.on('teamChoice', team => {
-			if (this.getAvailableTeams().includes(team)) {
-
+			if (this.questionManager.getAvailableTeams().includes(team)) {
 				this.addTeam(socket, team);
 				this.broadcast('teamChange', this.getTeams());
 
 				socket.on('answer', question => this.scoreManager.correct(team, question));
 
 				socket.on('disconnect', () => {
-					delete this.teams[socket.id];
+					this.questionManager.removeTeam(socket.id);
 					this.broadcast('teamChange', this.getTeams());
 				});
 
@@ -81,17 +69,12 @@ class Session {
 	}
 
 	addTeam(socket, team) {
-		this.teams[socket.id] = team;
+		this.questionManager.addTeam(socket, team);
 		this.scoreManager.addTeam(team);
 	}
 
 	getTeams() {
-		return this.scoreManager.getTeams(Object.values(this.teams));
-	}
-
-	getSocket(team) {
-		const socketId = Object.entries(this.teams).find(([_, t]) => t === team)[0];
-		return this.io.to(socketId);
+		return this.scoreManager.getTeams();
 	}
 
 	startQuestion(questionIndex) {
@@ -117,12 +100,11 @@ class Session {
 
 	addSocket(socket, { admin }) {
 		if (admin) {
-			this.admins[socket.id] = true;
 			this.initializeAdminEvents(socket);
 		} else {
 			this.initializeTeamEvents(socket);
 		}
-		socket.join(this.room);
+		socket.join(this.questionManager.getRoom());
 
 		socket.emit('init', {
 			questions: this.questionManager.getFilteredQuestions(),
@@ -140,8 +122,9 @@ class Session {
 		if (this.questionManager.getActiveQuestion()) {
 			socket.emit('confirmStopQuestion');
 		} else {
-			this.scoreManager.saveSession(this.room);
-			this.stopSession(this.room);
+			const room = this.questionManager.getRoom();
+			this.scoreManager.saveSession(room);
+			this.stopSession(room);
 		}
 	}
 }

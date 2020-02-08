@@ -36,8 +36,8 @@ class ScoreManager {
 			? this.activeQuestions[team] || QuestionUtils.getActiveQuestion(this.questionManager.getActiveQuestion()) : null;
 	}
 
-	getTeams(teams) {
-		return teams.map(team => this.getTeam(team));
+	getTeams() {
+		return this.questionManager.getTeams().map(team => this.getTeam(team));
 	}
 
 	updateScore(team, studentQuestion, originalQuestion, linked) {
