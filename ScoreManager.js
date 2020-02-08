@@ -27,7 +27,7 @@ class ScoreManager {
 	}
 
 	getTurn() {
-		const teams = Object.keys(this.scores);
+		const teams = this.questionManager.getTeams();
 		return teams.length ? teams[this.turn % teams.length] : null;
 	}
 

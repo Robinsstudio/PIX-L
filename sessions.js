@@ -44,6 +44,11 @@ class Session {
 		if (activeQuestion) {
 			socket.emit('questionStart', QuestionUtils.getActiveQuestion(activeQuestion));
 		}
+
+		const turn = this.scoreManager.getTurn();
+		if (turn) {
+			socket.emit('turn', turn);
+		}
 	}
 
 	initializeTeamEvents(socket) {
@@ -57,6 +62,7 @@ class Session {
 				socket.on('disconnect', () => {
 					this.questionManager.removeTeam(socket.id);
 					this.broadcast('teamChange', this.getTeams());
+					this.broadcast('turn', this.scoreManager.getTurn());
 				});
 
 				socket.emit('questionStart', this.scoreManager.getActiveQuestion(team));
