@@ -53,6 +53,10 @@ class QuestionPool {
 		}
 	}
 
+	allQuestionsAnswered() {
+		return !this.selectedQuestions.length && !this.unselectedQuestions.length;
+	}
+
 	onSelectionChanged(callback) {
 		this.onSelectionChangedHandler = callback;
 	}

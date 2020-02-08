@@ -26,6 +26,7 @@ class StudentView extends Component {
 		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleConfirmedStopQuestion = this.handleConfirmedStopQuestion.bind(this);
+		this.handleConfirmedStopSession = this.handleConfirmedStopSession.bind(this);
 		this.buildMultipleChoiceQuestionBody = this.buildMultipleChoiceQuestionBody.bind(this);
 		this.buildOpenEndedQuestionBody = this.buildOpenEndedQuestionBody.bind(this);
 		this.buildMatchingQuestionBody = this.buildMatchingQuestionBody.bind(this);
@@ -51,6 +52,7 @@ class StudentView extends Component {
 		socket.on('turn', turn => this.updateTurn(turn))
 
 		socket.on('confirmStopQuestion', () => this.setState({ confirmStopQuestion: true }));
+		socket.on('confirmStopSession', () => this.setState({ confirmStopSession: true }));
 
 		socket.on('init', data => {
 			this.updateQuestions(data.questions);
@@ -140,6 +142,13 @@ class StudentView extends Component {
 			this.socket.emit('confirmStopQuestion');
 		}
 		this.setState({ confirmStopQuestion: false });
+	}
+
+	handleConfirmedStopSession(confirmed) {
+		if (confirmed) {
+			this.socket.emit('confirmStopSession');
+		}
+		this.setState({ confirmStopSession: false });
 	}
 
 	handleSubmit() {
@@ -352,6 +361,17 @@ class StudentView extends Component {
 		);
 	}
 
+	buildConfirmStopSession() {
+		const { confirmStopSession } = this.state;
+
+		return (
+			confirmStopSession &&
+				<StudentViewModal title="Terminer la session" onClosed={this.handleConfirmedStopSession} confirm>
+					Toutes les questions n'ont pas été terminées. Voulez-vous vraiment terminer la session ?
+				</StudentViewModal>
+		);
+	}
+
 	formatTime(time) {
 		return `${((time - time % 60) / 60).toString().padStart(2, '0')}:${(time % 60).toString().padStart(2, '0')}`;
 	}
@@ -415,6 +435,7 @@ class StudentView extends Component {
 				</div>
 				{ this.buildTeamChooser() }
 				{ this.buildConfirmStopQuestion() }
+				{ this.buildConfirmStopSession() }
 			</Fragment>
 		);
 	}

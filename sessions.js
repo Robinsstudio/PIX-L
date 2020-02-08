@@ -40,6 +40,7 @@ class Session {
 		socket.on('cancel', () => this.questionPool.cancel());
 		socket.on('stop', () => this.stop(socket));
 		socket.on('confirmStopQuestion', () => this.confirmStopQuestion());
+		socket.on('confirmStopSession', () => this.confirmStopSession());
 
 		const activeQuestion = this.questionManager.getActiveQuestion();
 		if (activeQuestion) {
@@ -125,8 +126,14 @@ class Session {
 		this.questionPool.stopQuestion();
 	}
 
+	confirmStopSession() {
+		const room = this.questionManager.getRoom();
+		this.scoreManager.saveSession(room);
+		this.stopSession(room);
+	}
+
 	stop(socket) {
-		const { questionManager, scoreManager } = this;
+		const { questionManager, scoreManager, questionPool } = this;
 
 		if (questionManager.getActiveQuestion()) {
 			if (scoreManager.teamsAnswered() < questionManager.getTeams().length) {
@@ -135,9 +142,11 @@ class Session {
 				this.confirmStopQuestion();
 			}
 		} else {
-			const room = questionManager.getRoom();
-			scoreManager.saveSession(room);
-			this.stopSession(room);
+			if (questionPool.allQuestionsAnswered()) {
+				this.confirmStopSession();
+			} else {
+				socket.emit('confirmStopSession');
+			}
 		}
 	}
 }
