@@ -67,7 +67,7 @@ class QuestionManager {
 	}
 
 	getTeams() {
-		return Object.values(this.teams);
+		return Object.values(this.teams).sort();
 	}
 
 	getAvailableTeams() {

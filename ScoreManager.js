@@ -46,11 +46,11 @@ class ScoreManager {
 			const alreadyAnswered = this.scores[team][originalQuestionId];
 
 			if (!alreadyAnswered) {
-				const teams = Object.keys(this.scores);
+				const teams = this.questionManager.getTeams();
 				let score = QuestionUtils.correctQuestion(studentQuestion, originalQuestion) ? originalQuestion.points : 0;
 				const correct = score === originalQuestion.points;
 
-				if (!linked && team == this.getTurn()) {
+				if (!linked && team === this.getTurn()) {
 
 					const [answers, correctAnswers] = Object.values(this.scores).reduce((acc, score) => {
 						let [ answers, correctAnswers ] = acc;
@@ -114,6 +114,19 @@ class ScoreManager {
 		) {
 			correctedQuestions.push(currentQuestion);
 			currentQuestion = this.questionManager.getLinkedQuestion(currentQuestion.linkedQuestion._id);
+		}
+	}
+
+	teamsAnswered() {
+		const activeQuestion = this.questionManager.getActiveQuestion();
+		const activeQuestionId = activeQuestion._id.toString();
+
+		if (activeQuestion) {
+			return Object.values(this.scores).reduce((acc, score) => {
+				return acc + (score[activeQuestionId] ? 1 : 0);
+			}, 0);
+		} else {
+			return 0;
 		}
 	}
 

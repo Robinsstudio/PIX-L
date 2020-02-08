@@ -25,6 +25,7 @@ class StudentView extends Component {
 		this.handleStopClicked = this.handleStopClicked.bind(this);
 		this.handleOpenEndedAnswerChanged = this.handleOpenEndedAnswerChanged.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
+		this.handleConfirmedStopQuestion = this.handleConfirmedStopQuestion.bind(this);
 		this.buildMultipleChoiceQuestionBody = this.buildMultipleChoiceQuestionBody.bind(this);
 		this.buildOpenEndedQuestionBody = this.buildOpenEndedQuestionBody.bind(this);
 		this.buildMatchingQuestionBody = this.buildMatchingQuestionBody.bind(this);
@@ -132,6 +133,13 @@ class StudentView extends Component {
 
 	handleStopClicked() {
 		this.socket.emit('stop');
+	}
+
+	handleConfirmedStopQuestion(confirmed) {
+		if (confirmed) {
+			this.socket.emit('confirmStopQuestion');
+		}
+		this.setState({ confirmStopQuestion: false });
 	}
 
 	handleSubmit() {
@@ -338,8 +346,8 @@ class StudentView extends Component {
 
 		return (
 			confirmStopQuestion &&
-				<StudentViewModal title="Terminer la question" confirm>
-					Êtes-vous sûr de vouloir terminer la question ?
+				<StudentViewModal title="Terminer la question" onClosed={this.handleConfirmedStopQuestion} confirm>
+					Toutes les équipes n'ont pas encore répondu à la question. Voulez-vous vraiment la terminer ?
 				</StudentViewModal>
 		);
 	}
