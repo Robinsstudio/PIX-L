@@ -48,6 +48,13 @@ class ScoreManager {
 		}
 	}
 
+	getFilteredActiveQuestion(team) {
+		const teamActiveQuestion = this.getActiveQuestion(team);
+		if (teamActiveQuestion) {
+			return QuestionUtils.getActiveQuestion(teamActiveQuestion);
+		}
+	}
+
 	getTeams() {
 		return this.questionManager.getTeams().map(team => this.getTeam(team));
 	}

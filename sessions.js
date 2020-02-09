@@ -67,7 +67,7 @@ class Session {
 					this.broadcast('turn', this.scoreManager.getTurn());
 				});
 
-				socket.emit('questionStart', this.scoreManager.getActiveQuestion(team));
+				socket.emit('questionStart', this.scoreManager.getFilteredActiveQuestion(team));
 
 				this.broadcast('turn', this.scoreManager.getTurn());
 
