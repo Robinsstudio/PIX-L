@@ -46,6 +46,15 @@ class QuestionManager {
 		return this.questions[index];
 	}
 
+	getNextQuestion(question) {
+		if (question) {
+			const currentQuestion = this.questions.find(({_id}) => _id.equals(question._id));
+			if (currentQuestion && currentQuestion.linkedQuestion) {
+				return this.getLinkedQuestion(currentQuestion.linkedQuestion._id);
+			}
+		}
+	}
+
 	getQuestionCount() {
 		return this.questions.length;
 	}

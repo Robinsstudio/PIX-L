@@ -162,7 +162,7 @@ class StudentView extends Component {
 	}
 
 	handleSubmit() {
-		this.socket.emit('answer', this.state.activeQuestion);
+		this.socket.emit('submit', this.state.activeQuestion);
 	}
 
 	handleMultipleChoiceAnswerChanged(index) {
@@ -306,7 +306,7 @@ class StudentView extends Component {
 				{ this.buildActiveQuestionBody() }
 
 				<div className="form-button" onClick={this.handleSubmit}>
-					<span className="form-button-content">Valider</span>
+					<span className="form-button-content">{ this.isAuthenticated() ? 'Suivant' : 'Valider' }</span>
 				</div>
 			</div>
 		);
@@ -428,7 +428,7 @@ class StudentView extends Component {
 	}
 
 	buildTopBar() {
-		const { props: { authenticated }, state: { activeQuestion, time } } = this;
+		const { activeQuestion, time } = this.state;
 		return (
 			<div id="topBar">
 				<div id="countdown">
@@ -439,7 +439,7 @@ class StudentView extends Component {
 							: '' )
 					}
 				</div>
-				{ authenticated &&
+				{ this.isAuthenticated() &&
 					<div>
 						<div id="cancelLast" className="color-blue" onClick={this.handleCancelClicked}>
 							{ activeQuestion ? 'Annuler la question' : 'Annuler la dernière carte retournée' }

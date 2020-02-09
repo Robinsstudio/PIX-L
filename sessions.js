@@ -38,6 +38,7 @@ class Session {
 
 	initializeAdminEvents(socket) {
 		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
+		socket.on('submit', question => socket.emit('questionStart', this.getNextQuestion(question)));
 		socket.on('cancel', () => this.cancel(socket));
 		socket.on('stop', () => this.stop(socket));
 		socket.on('confirmStopQuestion', () => this.confirmStopQuestion());
@@ -61,7 +62,7 @@ class Session {
 				this.addTeam(socket, team);
 				this.broadcast('teamChange', this.getTeams());
 
-				socket.on('answer', question => this.scoreManager.correct(team, question));
+				socket.on('submit', question => this.scoreManager.correct(team, question));
 
 				socket.on('disconnect', () => {
 					this.questionManager.removeTeam(socket.id);
@@ -106,6 +107,12 @@ class Session {
 	updateTurn() {
 		this.scoreManager.updateTurn();
 		this.broadcast('turn', this.scoreManager.getTurn());
+	}
+
+	getNextQuestion(question) {
+		const nextQuestion = this.questionManager.getNextQuestion(question);
+		const returnQuestion = nextQuestion ? nextQuestion : this.questionManager.getActiveQuestion();
+		return returnQuestion ? QuestionUtils.getActiveQuestion(returnQuestion) : null;
 	}
 
 	addSocket(socket, { admin }) {
