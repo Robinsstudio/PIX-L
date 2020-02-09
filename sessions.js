@@ -133,7 +133,7 @@ class Session {
 		scoreManager.saveSession(room);
 		this.stopSession(room);
 
-		this.broadcast('greeting', scoreManager.getLeadingTeam());
+		this.broadcast('greeting', scoreManager.getLeadingTeams());
 	}
 
 	stop(socket) {

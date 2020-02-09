@@ -35,7 +35,7 @@ class PrettyInput extends Component {
 		const { props: { type, id, value, label, className }, state: { active } } = this;
 		return (
 			<div className={`input-text ${className ? className : ''}`} onFocus={this.handleFocus} onBlur={this.handleBlur}>
-				<input type={type} id={id} onChange={this.handleChange} value={value}/>
+				<input type={type} id={id} onChange={this.handleChange} value={value} spellCheck="false" autoComplete="off"/>
 				<label className={`input-text-placeholder ${active ? 'input-text-placeholder--active' : ''}`} htmlFor={id}>{ label }</label>
 			</div>
 		);

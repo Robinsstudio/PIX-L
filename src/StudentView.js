@@ -53,7 +53,7 @@ class StudentView extends Component {
 
 		socket.on('confirmStopQuestion', () => this.setState({ confirmStopQuestion: true }));
 		socket.on('confirmStopSession', () => this.setState({ confirmStopSession: true }));
-		socket.on('greeting', winner => this.setState({ winner }));
+		socket.on('greeting', winners => this.setState({ winners }));
 
 		socket.on('init', data => {
 			this.updateQuestions(data.questions);
@@ -374,15 +374,28 @@ class StudentView extends Component {
 	}
 
 	buildGreeting() {
-		const { winner } = this.state;
+		const { winners } = this.state;
 
 		return (
-			winner &&
+			winners && winners.length &&
 				<StudentViewModal>
 					<div id="greeting">
-						Félicitations à l'
-						<span className={`color-team-${winner.team}`}>équipe { winner.team } </span>
-						qui remporte la victoire !
+						Félicitations
+						{winners.map((winner, i, winners) => {
+							const lastIndex = winners.length - 1;
+							const separator =
+								i > 0 && i < lastIndex ? ', '
+								: i > 0 && i === lastIndex ? ' et '
+								: ' ';
+
+							return (
+								<Fragment>
+									<span>{separator}à l'</span>
+									<span className={`color-team-${winner}`}>équipe {winner + (i < lastIndex ? '' : ' ')}</span>
+								</Fragment>
+							);
+						})}
+						qui remporte{winners.length > 1 ? 'nt' : ''} la victoire !
 					</div>
 				</StudentViewModal>
 		);

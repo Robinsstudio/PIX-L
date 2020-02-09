@@ -52,8 +52,15 @@ class ScoreManager {
 		return this.questionManager.getTeams().map(team => this.getTeam(team));
 	}
 
-	getLeadingTeam() {
-		return this.getTeams().reduce((prev, current) => prev.score < current.score ? current : prev);
+	getLeadingTeams() {
+		return this.getTeams().reduce((prev, current) => {
+			if (prev.score < current.score) {
+				prev = { teams: [current.team], score: current.score };
+			} else if (prev.score === current.score) {
+				prev.teams.push(current.team);
+			}
+			return prev;
+		}, { teams: [], score: 0 }).teams;
 	}
 
 	updateScore(team, studentQuestion, originalQuestion, linked) {
