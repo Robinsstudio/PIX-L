@@ -5,7 +5,6 @@ class ScoreManager {
 	constructor(questionManager) {
 		this.questionManager = questionManager;
 		this.scores = {};
-		this.activeQuestions = {};
 		this.turn = 0;
 		this.outOfTime = false;
 	}
@@ -13,9 +12,6 @@ class ScoreManager {
 	addTeam(team) {
 		if (!this.scores[team]) {
 			this.scores[team] = {};
-		}
-		if (!this.activeQuestions[team]) {
-			this.activeQuestions[team] = null;
 		}
 	}
 
@@ -31,9 +27,25 @@ class ScoreManager {
 		return teams.length ? teams[this.turn % teams.length] : null;
 	}
 
+	getQuestions() {
+		const questions = [];
+		let currentQuestion = this.questionManager.getActiveQuestion();
+
+		while (currentQuestion && !questions.includes(currentQuestion)) {
+			questions.push(currentQuestion);
+			if (currentQuestion.linkedQuestion) {
+				currentQuestion = this.questionManager.getLinkedQuestion(currentQuestion.linkedQuestion._id);
+			}
+		}
+
+		return questions;
+	}
+
 	getActiveQuestion(team) {
-		return this.questionManager.getActiveQuestion()
-			? this.activeQuestions[team] || QuestionUtils.getActiveQuestion(this.questionManager.getActiveQuestion()) : null;
+		const unansweredQuestions = this.getQuestions().filter(({_id}) => !this.scores[team][_id]);
+		if (unansweredQuestions.length) {
+			return unansweredQuestions[0];
+		}
 	}
 
 	getTeams() {
@@ -98,7 +110,7 @@ class ScoreManager {
 				if (originalQuestion.linkedQuestion) {
 					const linkedQuestion = this.questionManager.getLinkedQuestion(originalQuestion.linkedQuestion._id);
 					if (linkedQuestion) {
-						this.fireLinkedQuestionStarted(team, this.activeQuestions[team] = QuestionUtils.getActiveQuestion(linkedQuestion));
+						this.fireLinkedQuestionStarted(team, QuestionUtils.getActiveQuestion(linkedQuestion));
 					}
 				}
 			}
@@ -107,17 +119,11 @@ class ScoreManager {
 	}
 
 	correct(team, question) {
-		const correctedQuestions = [];
-		let currentQuestion = this.questionManager.getActiveQuestion();
+		const activeQuestion = this.questionManager.getActiveQuestion();
+		const teamActiveQuestion = this.getActiveQuestion(team);
 
-		while (
-			currentQuestion
-			&& !correctedQuestions.includes(currentQuestion)
-			&& this.updateScore(team, question, currentQuestion, correctedQuestions.length)
-			&& currentQuestion.linkedQuestion
-		) {
-			correctedQuestions.push(currentQuestion);
-			currentQuestion = this.questionManager.getLinkedQuestion(currentQuestion.linkedQuestion._id);
+		if (activeQuestion && teamActiveQuestion) {
+			this.updateScore(team, question, teamActiveQuestion, activeQuestion !== teamActiveQuestion);
 		}
 	}
 
@@ -143,7 +149,6 @@ class ScoreManager {
 	}
 
 	endQuestion() {
-		Object.keys(this.activeQuestions).forEach(team => this.activeQuestions[team] = null);
 		this.outOfTime = false;
 	}
 
