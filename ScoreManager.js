@@ -143,15 +143,25 @@ class ScoreManager {
 
 	teamsAnswered() {
 		const activeQuestion = this.questionManager.getActiveQuestion();
-		const activeQuestionId = activeQuestion._id.toString();
 
 		if (activeQuestion) {
+			const activeQuestionId = activeQuestion._id.toString();
+
 			return Object.values(this.scores).reduce((acc, score) => {
 				return acc + (score[activeQuestionId] ? 1 : 0);
 			}, 0);
 		} else {
 			return 0;
 		}
+	}
+
+	cancelQuestion() {
+		this.getQuestions().forEach(question => {
+			const questionId = question._id.toString();
+			Object.values(this.scores).forEach(score => delete score[questionId]);
+		});
+
+		this.fireScoreChange();
 	}
 
 	updateTurn() {

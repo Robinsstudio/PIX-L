@@ -27,6 +27,7 @@ class StudentView extends Component {
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleConfirmedStopQuestion = this.handleConfirmedStopQuestion.bind(this);
 		this.handleConfirmedStopSession = this.handleConfirmedStopSession.bind(this);
+		this.handleConfirmedCancelQuestion = this.handleConfirmedCancelQuestion.bind(this);
 		this.buildMultipleChoiceQuestionBody = this.buildMultipleChoiceQuestionBody.bind(this);
 		this.buildOpenEndedQuestionBody = this.buildOpenEndedQuestionBody.bind(this);
 		this.buildMatchingQuestionBody = this.buildMatchingQuestionBody.bind(this);
@@ -53,6 +54,7 @@ class StudentView extends Component {
 
 		socket.on('confirmStopQuestion', () => this.setState({ confirmStopQuestion: true }));
 		socket.on('confirmStopSession', () => this.setState({ confirmStopSession: true }));
+		socket.on('confirmCancelQuestion', () => this.setState({ confirmCancelQuestion: true }));
 		socket.on('greeting', winners => this.setState({ winners }));
 
 		socket.on('init', data => {
@@ -150,6 +152,13 @@ class StudentView extends Component {
 			this.socket.emit('confirmStopSession');
 		}
 		this.setState({ confirmStopSession: false });
+	}
+
+	handleConfirmedCancelQuestion(confirmed) {
+		if (confirmed) {
+			this.socket.emit('confirmCancelQuestion');
+		}
+		this.setState({ confirmCancelQuestion: false });
 	}
 
 	handleSubmit() {
@@ -373,6 +382,19 @@ class StudentView extends Component {
 		);
 	}
 
+	buildConfirmCancelQuestion() {
+		const { confirmCancelQuestion } = this.state;
+
+		return (
+			confirmCancelQuestion &&
+				<StudentViewModal title="Annuler la question" onClosed={this.handleConfirmedCancelQuestion} confirm>
+					Certaines équipes ont déjà répondu à la question.
+					Si vous annulez cette dernière, les points attribués leur seront retirés.
+					Voulez-vous vraiment annuler la question ?
+				</StudentViewModal>
+		);
+	}
+
 	buildGreeting() {
 		const { winners } = this.state;
 
@@ -465,6 +487,7 @@ class StudentView extends Component {
 				{ this.buildTeamChooser() }
 				{ this.buildConfirmStopQuestion() }
 				{ this.buildConfirmStopSession() }
+				{ this.buildConfirmCancelQuestion() }
 				{ this.buildGreeting() }
 			</Fragment>
 		);

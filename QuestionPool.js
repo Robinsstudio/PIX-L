@@ -42,10 +42,15 @@ class QuestionPool {
 		}
 	}
 
-	cancel() {
+	cancelQuestion() {
 		if (this.questionManager.getActiveQuestion()) {
+			this.fireQuestionCanceled();
 			this.fireQuestionEnded();
-		} else if (this.selectedQuestions.length) {
+		}
+	}
+
+	cancelLastRevealedCard() {
+		if (this.selectedQuestions.length) {
 			const unselectedQuestion = this.selectedQuestions.pop();
 			this.unselectedQuestions.push(unselectedQuestion);
 
@@ -65,6 +70,10 @@ class QuestionPool {
 		this.onQuestionStartedHandler = callback;
 	}
 
+	onQuestionCanceled(callback) {
+		this.onQuestionCanceledHandler = callback;
+	}
+
 	onQuestionDone(callback) {
 		this.onQuestionDoneHandler = callback;
 	}
@@ -79,6 +88,10 @@ class QuestionPool {
 
 	fireQuestionStarted(startedQuestion) {
 		this.onQuestionStartedHandler(startedQuestion);
+	}
+
+	fireQuestionCanceled() {
+		this.onQuestionCanceledHandler();
 	}
 
 	fireQuestionDone() {

@@ -16,6 +16,7 @@ class Session {
 
 		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
 		this.questionPool.onQuestionStarted(question => this.startQuestion(question));
+		this.questionPool.onQuestionCanceled(() => this.scoreManager.cancelQuestion());
 		this.questionPool.onQuestionDone(() => this.updateTurn());
 		this.questionPool.onQuestionEnded(() => this.endQuestion());
 
@@ -37,10 +38,11 @@ class Session {
 
 	initializeAdminEvents(socket) {
 		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
-		socket.on('cancel', () => this.questionPool.cancel());
+		socket.on('cancel', () => this.cancel(socket));
 		socket.on('stop', () => this.stop(socket));
 		socket.on('confirmStopQuestion', () => this.confirmStopQuestion());
 		socket.on('confirmStopSession', () => this.confirmStopSession());
+		socket.on('confirmCancelQuestion', () => this.confirmCancelQuestion());
 
 		const activeQuestion = this.questionManager.getActiveQuestion();
 		if (activeQuestion) {
@@ -151,6 +153,22 @@ class Session {
 			} else {
 				socket.emit('confirmStopSession');
 			}
+		}
+	}
+
+	confirmCancelQuestion() {
+		this.questionPool.cancelQuestion();
+	}
+
+	cancel(socket) {
+		if (this.questionManager.getActiveQuestion()) {
+			if (this.scoreManager.teamsAnswered() > 0) {
+				socket.emit('confirmCancelQuestion');
+			} else {
+				this.confirmCancelQuestion();
+			}
+		} else {
+			this.questionPool.cancelLastRevealedCard();
 		}
 	}
 }
