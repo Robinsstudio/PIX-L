@@ -71,9 +71,14 @@ class File extends Component {
 
 	handleContextMenu(event) {
 		const {
-			file: { name, _id },
+			file: { name, type, _id },
 			copyFile
 		} = this.props;
+
+		const copyLinkItem = {
+			label: 'Copier le lien partageable',
+			onClick: () => this.copyToClipboard(`${window.location.href}jeu/${_id}`)
+		};
 
 		const menuItems = [
 			{ label: 'Ouvrir', onClick: this.open },
@@ -83,12 +88,9 @@ class File extends Component {
 				onClick: () => Modals.showConfirmModal('Supprimer', `Voulez-vous vraiment supprimer ${name} ?`)
 					.then(this.remove).catch(() => {})
 			},
-			{ label: 'Copier', onClick: () => copyFile(_id) },
-			{
-				label: 'Copier le lien partageable',
-				onClick: () => this.copyToClipboard(`${window.location.href}jeu/${_id}`)
-			}
+			{ label: 'Copier', onClick: () => copyFile(_id) }
 		]
+		.concat(type === 'jeu' ? copyLinkItem : []);
 
 		this.props.handleContextMenu(event, menuItems);
 	}
