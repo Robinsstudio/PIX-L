@@ -127,9 +127,13 @@ class Session {
 	}
 
 	confirmStopSession() {
-		const room = this.questionManager.getRoom();
-		this.scoreManager.saveSession(room);
+		const { questionManager, scoreManager } = this;
+		const room = questionManager.getRoom();
+
+		scoreManager.saveSession(room);
 		this.stopSession(room);
+
+		this.broadcast('greeting', scoreManager.getLeadingTeam());
 	}
 
 	stop(socket) {

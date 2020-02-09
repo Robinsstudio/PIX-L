@@ -53,6 +53,7 @@ class StudentView extends Component {
 
 		socket.on('confirmStopQuestion', () => this.setState({ confirmStopQuestion: true }));
 		socket.on('confirmStopSession', () => this.setState({ confirmStopSession: true }));
+		socket.on('greeting', winner => this.setState({ winner }));
 
 		socket.on('init', data => {
 			this.updateQuestions(data.questions);
@@ -372,6 +373,21 @@ class StudentView extends Component {
 		);
 	}
 
+	buildGreeting() {
+		const { winner } = this.state;
+
+		return (
+			winner &&
+				<StudentViewModal>
+					<div id="greeting">
+						Félicitations à l'
+						<span className={`color-team-${winner.team}`}>équipe { winner.team } </span>
+						qui remporte la victoire !
+					</div>
+				</StudentViewModal>
+		);
+	}
+
 	formatTime(time) {
 		return `${((time - time % 60) / 60).toString().padStart(2, '0')}:${(time % 60).toString().padStart(2, '0')}`;
 	}
@@ -436,6 +452,7 @@ class StudentView extends Component {
 				{ this.buildTeamChooser() }
 				{ this.buildConfirmStopQuestion() }
 				{ this.buildConfirmStopSession() }
+				{ this.buildGreeting() }
 			</Fragment>
 		);
 	}

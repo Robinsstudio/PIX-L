@@ -287,6 +287,10 @@
 	border-radius: .3rem;
 }
 
+#greeting {
+	font-size: 2rem;
+}
+
 .color-blue {
 	color: rgb(0, 82, 145);
 }

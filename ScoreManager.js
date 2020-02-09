@@ -40,6 +40,10 @@ class ScoreManager {
 		return this.questionManager.getTeams().map(team => this.getTeam(team));
 	}
 
+	getLeadingTeam() {
+		return this.getTeams().reduce((prev, current) => prev.score < current.score ? current : prev);
+	}
+
 	updateScore(team, studentQuestion, originalQuestion, linked) {
 		if (!this.outOfTime) {
 			const originalQuestionId = originalQuestion._id.toString();

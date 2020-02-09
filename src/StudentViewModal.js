@@ -16,7 +16,9 @@ class StudentViewModal extends Component {
 		return (
 			<div className="darkBackground">
 				<div id="studentViewModal" className="color-blue">
-					<div id="studentViewModalTitle">{ title }</div>
+					{ title &&
+						<div id="studentViewModalTitle">{ title }</div>
+					}
 					<div id="studentViewModalBody">
 						{ this.props.children }
 					</div>
