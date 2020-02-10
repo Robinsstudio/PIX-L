@@ -1,4 +1,5 @@
 module.exports = function(server) {
+	const { Readable } = require('stream');
 	const express = require('express');
 	const bodyParser = require('body-parser');
 	const Impl = require('./impl');
@@ -70,6 +71,17 @@ module.exports = function(server) {
 			() => res.status(204).end(),
 			err => res.status(409).json(err)
 		);
+	});
+
+	router.get('/export', User.isAuthenticated, (req, res) => {
+		const file = `a;b;c
+		1;2;3
+		4;5;6`;
+
+		res.setHeader('Content-disposition', `attachment; filename=export.csv`);
+		res.setHeader('Content-type', 'text/csv');
+
+		Readable.from([file]).pipe(res);
 	});
 
 	router.post('/GetGame', (req, res) => {

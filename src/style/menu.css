@@ -5,12 +5,18 @@
 	z-index: 1;
 }
 
-.menu > div {
+.menu > * {
+	display: block;
 	padding: 5px;
+	text-decoration: none;
+	cursor: default;
+	color: black;
 }
 
-.menu > div:hover {
+.menu > *:hover {
 	background-color: #ebebeb;
+	text-decoration: none;
+	color: black;
 }
 
 .autocomplete {
@@ -21,11 +27,10 @@
 	width: 100%;
 }
 
-.autocomplete > .menu > div {
+.autocomplete > .menu > * {
 	background-color: #ffffff;
 }
 
-.autocomplete > .menu > div.active {
+.autocomplete > .menu > *.active {
 	background-color: #ebebeb;
-
 }

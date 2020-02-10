@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import AutoFocusInput from './AutoFocusInput';
 import Modals from './Modals';
 import request from './request';
+import download from './download';
 
 class File extends Component {
 	constructor(props) {
@@ -80,6 +81,12 @@ class File extends Component {
 			onClick: () => this.copyToClipboard(`${window.location.host}${process.env.PUBLIC_URL}/jeu/${_id}`)
 		};
 
+		const downloadSessionsItem = {
+			label: 'Télécharger les sessions',
+			href: download.getDownloadLink(),
+			download: true
+		};
+
 		const menuItems = [
 			{ label: 'Ouvrir', onClick: this.open },
 			{ label: 'Renommer', onClick: this.startRenaming },
@@ -90,7 +97,7 @@ class File extends Component {
 			},
 			{ label: 'Copier', onClick: () => copyFile(_id) }
 		]
-		.concat(type === 'jeu' ? copyLinkItem : []);
+		.concat(type === 'jeu' ? [copyLinkItem, downloadSessionsItem] : []);
 
 		this.props.handleContextMenu(event, menuItems);
 	}
