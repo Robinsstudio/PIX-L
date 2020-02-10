@@ -27,6 +27,7 @@ const Question = mongoose.model('Question', {
 	}],
 
 	/* Open-ended question fields */
+	exactMatch: Boolean,
 	words: [String],
 	positiveFeedback: String,
 	negativeFeedback: String,

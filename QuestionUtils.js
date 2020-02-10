@@ -31,6 +31,14 @@ const feedbackByQuestionType = {
 	matching: getMatchingFeedback
 }
 
+function equals(str1, str2) {
+	return str1 === str2;
+}
+
+function includes(str1, str2) {
+	return str1.includes(str2);
+}
+
 function checkMultipleChoiceQuestion(studentQuestion, originalQuestion) {
 	return studentQuestion
 			&& Array.isArray(studentQuestion.answers)
@@ -60,8 +68,9 @@ function correctMultipleChoiceQuestion(studentQuestion, originalQuestion) {
 }
 
 function correctOpenEndedQuestion(studentQuestion, originalQuestion) {
+	const match = originalQuestion.exactMatch ? equals : includes;
 	return checkOpenEndedQuestion(studentQuestion)
-			&& originalQuestion.words.some(word => studentQuestion.openEndedAnswer.toLowerCase().includes(word.toLowerCase()));
+			&& originalQuestion.words.some(word => match(studentQuestion.openEndedAnswer.toLowerCase(), word.toLowerCase()));
 }
 
 function correctMatchingQuestion(studentQuestion, originalQuestion) {
