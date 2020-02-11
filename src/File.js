@@ -77,7 +77,7 @@ class File extends Component {
 
 		const copyLinkItem = {
 			label: 'Copier le lien partageable',
-			onClick: () => this.copyToClipboard(`${window.location.href}jeu/${_id}`)
+			onClick: () => this.copyToClipboard(`${window.location.host}${process.env.PUBLIC_URL}/jeu/${_id}`)
 		};
 
 		const menuItems = [

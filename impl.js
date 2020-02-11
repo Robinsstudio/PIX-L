@@ -188,9 +188,12 @@ module.exports = {
 	getGameById: (_id) => {
 		return Game.find({ _id }).then(games => {
 			if (games.length) {
-				return getQuestionsByIds(games[0].questions.map(quest => quest.idQuestion));
+				const game = games[0];
+				return getQuestionsByIds(games[0].questions.map(quest => quest.idQuestion)).then(questions => {
+					return { name: game.name, questions };
+				});
 			}
-			return Promise.resolve([]);
+			return Promise.resolve({ name: '', questions: [] });
 		});
 	},
 

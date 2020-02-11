@@ -431,7 +431,7 @@ class StudentView extends Component {
 		const { activeQuestion, time } = this.state;
 		return (
 			<div id="topBar">
-				<div id="countdown">
+				<div id="countdown" className="color-orange">
 					{ activeQuestion && time != null
 						? this.formatTime(time)
 						: ( activeQuestion

@@ -7,6 +7,7 @@ import Modals from './Modals';
 import ProtectedRoute from './ProtectedRoute';
 
 import request from './request';
+import HomeView from './HomeView';
 
 class App extends Component {
 	constructor(props) {
@@ -44,10 +45,15 @@ class App extends Component {
 						/>
 
 						<ProtectedRoute
-							path={process.env.PUBLIC_URL}
+							path={process.env.PUBLIC_URL + '/admin'}
 							component={AdminView}
 							authenticated={authenticated}
 							setAuthenticated={this.setAuthenticated}
+						/>
+
+						<Route
+							path={process.env.PUBLIC_URL}
+							component={HomeView}
 						/>
 					</Switch>
 				</Router>

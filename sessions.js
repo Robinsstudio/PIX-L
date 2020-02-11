@@ -8,7 +8,8 @@ const ScoreManager = require('./ScoreManager');
 const Timer = require('./Timer');
 
 class Session {
-	constructor(io, url, questions, linkedQuestions) {
+	constructor(name, io, url, questions, linkedQuestions) {
+		this.name = name;
 		this.questionManager = new QuestionManager(io, url, questions, linkedQuestions);
 		this.questionPool = new QuestionPool(this.questionManager);
 		this.scoreManager = new ScoreManager(this.questionManager);
@@ -121,7 +122,7 @@ class Session {
 		} else {
 			this.initializeTeamEvents(socket);
 		}
-		socket.join(this.questionManager.getRoom());
+		socket.join(this.getRoom());
 
 		socket.emit('init', {
 			questions: this.questionManager.getFilteredQuestions(),
@@ -136,8 +137,8 @@ class Session {
 	}
 
 	confirmStopSession() {
-		const { questionManager, scoreManager } = this;
-		const room = questionManager.getRoom();
+		const { scoreManager } = this;
+		const room = this.getRoom();
 
 		scoreManager.saveSession(room);
 		this.stopSession(room);
@@ -178,6 +179,14 @@ class Session {
 			this.questionPool.cancelLastRevealedCard();
 		}
 	}
+
+	getRoom() {
+		return this.questionManager.getRoom();
+	}
+
+	getName() {
+		return this.name;
+	}
 }
 
 function authenticateSocket(socket) {
@@ -198,6 +207,15 @@ module.exports = function(server) {
 
 	const sessions = {};
 
+	function getActiveSessions() {
+		return Object.values(sessions).map(session => {
+			return {
+				name: session.getName(),
+				url: session.getRoom()
+			}
+		});
+	}
+
 	function stopSession(id) {
 		delete sessions[id];
 	}
@@ -212,14 +230,14 @@ module.exports = function(server) {
 
 					socket.removeAllListeners('init');
 				} else {
-					Impl.getGameById(data.url).then(questions => {
+					Impl.getGameById(data.url).then(({name, questions}) => {
 						if (questions.length) {
 							Impl.getQuestionsByIds(
 								questions.filter(question => question.linkedQuestion).map(question => {
 									return question.linkedQuestion._id;
 								})
 							).then(linkedQuestions => {
-								const newSession = new Session(io, data.url, questions, linkedQuestions);
+								const newSession = new Session(name, io, data.url, questions, linkedQuestions);
 								newSession.stopSession = stopSession;
 								newSession.addSocket(socket, { admin });
 								sessions[data.url] = newSession;
@@ -232,5 +250,7 @@ module.exports = function(server) {
 			});
 		});
 	});
+
+	return { getActiveSessions };
 }
 
