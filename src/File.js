@@ -81,9 +81,9 @@ class File extends Component {
 			onClick: () => this.copyToClipboard(`${window.location.host}${process.env.PUBLIC_URL}/jeu/${_id}`)
 		};
 
-		const downloadSessionsItem = {
-			label: 'Télécharger les sessions',
-			href: download.getDownloadLink(),
+		const downloadResultsItem = {
+			label: 'Télécharger les résultats',
+			href: download.getDownloadLink(_id),
 			download: true
 		};
 
@@ -97,7 +97,7 @@ class File extends Component {
 			},
 			{ label: 'Copier', onClick: () => copyFile(_id) }
 		]
-		.concat(type === 'jeu' ? [copyLinkItem, downloadSessionsItem] : []);
+		.concat(type === 'jeu' ? [copyLinkItem, downloadResultsItem] : []);
 
 		this.props.handleContextMenu(event, menuItems);
 	}

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const JSZip = require('jszip');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 mongoose.connect('mongodb://localhost:27017/pix-l', { useNewUrlParser: true, useUnifiedTopology: true });
@@ -109,6 +110,8 @@ const getQuestionsByIds = (_ids) => {
 	});
 };
 
+const formatTime = time => time.toString().padStart(2, '0');
+
 module.exports = {
 	createFolder: (folderData) => {
 		return new Folder({ ...folderData, type: 'folder' }).save();
@@ -199,5 +202,53 @@ module.exports = {
 
 	saveSession: (idGame, scores) => {
 		return new Session({ idGame, scores, date: Date.now() }).save();
+	},
+
+	exportSessions: (idGame) => {
+		return Session.find({ idGame }).then(sessions => {
+			const zip = new JSZip();
+
+			sessions.forEach(session => {
+				const scores = session.scores;
+				if (scores) {
+					const teams = Object.keys(scores);
+
+					const scoresByThemeByTeam = Object.entries(scores).reduce((acc, [team, scoresByQuestion]) => {
+						Object.values(scoresByQuestion).forEach(score => {
+							acc[score.theme] = acc[score.theme] || {};
+							acc[score.theme][team] = acc[score.theme][team] + score.score || score.score;
+						});
+						return acc;
+					}, {});
+
+					const headers = ['Thème'].concat(teams.map(team => 'Équipe ' + team)).join(';');
+
+					const rows = Object.entries(scoresByThemeByTeam).map(([theme, scoresByTeam]) => {
+						return [theme].concat(teams.map(team => {
+							return scoresByTeam[team] || 0;
+						})).join(';');
+					}).join('\n');
+
+					const totals = ['Total'].concat(Object.values(scores).map(scoreByQuestion => {
+						return Object.values(scoreByQuestion).reduce((acc, {score}) => acc + score, 0);
+					})).join(';');
+
+					const date = session.date;
+					const fileName =
+						`session_${formatTime(date.getFullYear())}_${formatTime(date.getMonth() + 1)}_`
+						+ `${formatTime(date.getDate())}_${formatTime(date.getHours())}_${formatTime(date.getMinutes())}.csv`;
+
+					zip.file(fileName, [headers, rows, totals].join('\n'));
+				}
+			});
+
+			return Game.findById(idGame).select('name').then(game => {
+				const name = game.name;
+				if (name) {
+					return { zip, name };
+				}
+				return { zip, name: 'sessions' };
+			});
+		});
 	}
 }

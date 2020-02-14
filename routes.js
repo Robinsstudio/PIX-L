@@ -1,5 +1,4 @@
 module.exports = function(server) {
-	const { Readable } = require('stream');
 	const express = require('express');
 	const bodyParser = require('body-parser');
 	const Impl = require('./impl');
@@ -73,15 +72,15 @@ module.exports = function(server) {
 		);
 	});
 
-	router.get('/export', User.isAuthenticated, (req, res) => {
-		const file = `a;b;c
-		1;2;3
-		4;5;6`;
+	router.get('/export/:idGame', User.isAuthenticated, (req, res) => {
+		const { idGame } = req.params;
 
-		res.setHeader('Content-disposition', `attachment; filename=export.csv`);
-		res.setHeader('Content-type', 'text/csv');
+		Impl.exportSessions(idGame).then(({name, zip}) => {
+			res.setHeader('Content-disposition', `attachment; filename=${name}.zip`);
+			res.setHeader('Content-type', 'application/zip');
 
-		Readable.from([file]).pipe(res);
+			zip.generateNodeStream().pipe(res)
+		});
 	});
 
 	router.post('/GetGame', (req, res) => {
