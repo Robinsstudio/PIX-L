@@ -8,11 +8,12 @@ module.exports = function(server) {
 	router.use('/api/', require('./routes')(server));
 
 	if (process.env.NODE_ENV === 'production') {
-		router.get('/jeu/:id', (req, res) => {
-			res.sendFile(__dirname + '/build/index.html');
-		});
 
-		router.use('/', express.static(__dirname + '/build'));
+		router.use('/', (req, res) => {
+			express.static(__dirname + '/build')(req, res, () => {
+				res.sendFile(__dirname + '/build/index.html');
+			});
+		});
 
 		console.log('Production server is running');
 	}
