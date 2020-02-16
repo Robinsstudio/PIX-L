@@ -19,10 +19,12 @@ class TextRenderer extends Component {
 		const { editorState } = this.state;
 
 		return (
-			<Editor
-				editorState={editorState}
-				readOnly={true}
-			/>
+			<div className="textRenderer">
+				<Editor
+					editorState={editorState}
+					readOnly={true}
+				/>
+			</div>
 		);
 	}
 }
