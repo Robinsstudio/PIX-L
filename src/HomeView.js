@@ -21,7 +21,7 @@ class HomeView extends Component {
 		const { sessions } = this.state;
 		return (
 			<div id="homepage">
-				<div id="homepageHeader">
+				<div id="homepageHeader" className="background-color-blue">
 					<div id="smallTitle">PIX-L</div>
 					<Link to={process.env.PUBLIC_URL + '/admin'} id="explorerLink">Espace admin</Link>
 				</div>
@@ -44,7 +44,9 @@ class HomeView extends Component {
 						})}
 					</div>
 				</div>
-				<div id="homepageFooter">&copy; Tous droits réservés 2020 - Robin DOS ANJOS, Damien DONNADIEU et Baptiste GALLAIS</div>
+				<div id="homepageFooter" className="background-color-blue">
+					&copy; Tous droits réservés 2020 - Robin DOS ANJOS, Damien DONNADIEU et Baptiste GALLAIS
+				</div>
 			</div>
 		);
 	}

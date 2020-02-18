@@ -26,6 +26,7 @@
 
 .textRenderer .public-DraftStyleDefault-ltr {
 	text-align: justify;
+	white-space: normal;
 }
 
 .toolbar.visible {

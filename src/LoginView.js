@@ -60,7 +60,7 @@ class LoginView extends Component {
 
 	render() {
 		return (
-			<div className="form-background">
+			<div className="form-background background-color-blue">
 				<div className="form-section">
 					<div className="form-section-header"/>
 					<div className="form" onKeyDown={this.handleKeyDown}>

@@ -24,10 +24,10 @@ class StudentViewModal extends Component {
 					</div>
 					{ confirm &&
 						<div id="studentViewModalFooter">
-							<div className="form-button form-button--small" onClick={() => this.handleClick(true)}>
+							<div className="form-button form-button--small background-color-blue" onClick={() => this.handleClick(true)}>
 								<span className="form-button-content form-button-content--small">Oui</span>
 							</div>
-							<div className="form-button form-button--small" onClick={() => this.handleClick(false)}>
+							<div className="form-button form-button--small background-color-blue" onClick={() => this.handleClick(false)}>
 								<span className="form-button-content form-button-content--small">Non</span>
 							</div>
 						</div>

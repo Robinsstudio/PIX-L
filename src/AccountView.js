@@ -96,7 +96,7 @@ class AccountView extends Component {
 
 	render() {
 		return (
-			<div className="form-background">
+			<div className="form-background background-color-blue">
 				<div className="form-section">
 					<div className="form-section-header"/>
 					<div className="form" onKeyDown={this.handleKeyDown}>
@@ -116,7 +116,7 @@ class AccountView extends Component {
 							{ field: 'passwordConfirm', type: 'password', label: 'Confirmation du mot de passe'}
 						])}
 
-						<div className="form-button" onClick={this.goBack}>
+						<div className="form-button background-color-blue" onClick={this.goBack}>
 							<span className="form-button-content">Retour</span>
 						</div>
 					</div>

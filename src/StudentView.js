@@ -3,11 +3,11 @@ import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from
 import io from 'socket.io-client';
 import TextRenderer from './TextRenderer';
 import PrettyInput from './PrettyInput';
+import StudentViewModal from './StudentViewModal';
 
 import './style/form_view.css';
 import './style/student_view.css';
 import './style/team_chooser.css';
-import StudentViewModal from './StudentViewModal';
 
 const MAX_TEAMS = 5;
 
@@ -17,7 +17,8 @@ class StudentView extends Component {
 		this.state = {
 			teams: [],
 			questions: [],
-			time: null
+			time: null,
+			zoomFactor: 100
 		};
 
 		this.dismissFeedback = this.dismissFeedback.bind(this);
@@ -206,13 +207,18 @@ class StudentView extends Component {
 	}
 
 	buildGame() {
-		const { activeQuestion } = this.state;
+		const { activeQuestion, zoomFactor } = this.state;
+
+		const factor = zoomFactor / 100;
 
 		const style = {
-			'--card-width': '11.25rem',
-			'--card-margin': '2rem',
-			'--number-font-size': '1.5rem',
-			'--theme-font-size': '1rem',
+			'--card-width': `${factor * 11.25}rem`,
+			'--card-margin': `${factor * 2}rem`,
+			'--number-font-size': `${factor * 1.5}rem`,
+			'--theme-font-size': `${factor}rem`,
+			'--card-shadow': `${factor}rem`,
+			'--card-shadow-active': `${factor * .5}rem`,
+			'--card-border-radius': `${factor * .375}rem`
 		};
 
 		return (
@@ -228,7 +234,7 @@ class StudentView extends Component {
 		return (
 			questions.map((question, i) => {
 				return (
-					<div className={`card ${question.selected ? 'selected' : ''}`} key={question._id} onClick={() => this.handleCardClicked(i)}>
+					<div className={`card background-color-blue ${question.selected ? 'selected' : ''}`} key={question._id} onClick={() => this.handleCardClicked(i)}>
 						<div className="card-background">
 							<div className="number">{i + 1}</div>
 						</div>
@@ -322,7 +328,7 @@ class StudentView extends Component {
 
 				{ this.buildActiveQuestionBody() }
 
-				<div className="form-button" onClick={this.handleSubmit}>
+				<div className="form-button background-color-blue" onClick={this.handleSubmit}>
 					<span className="form-button-content">{ this.isAuthenticated() ? 'Suivant' : 'Valider' }</span>
 				</div>
 			</div>
@@ -440,6 +446,22 @@ class StudentView extends Component {
 		);
 	}
 
+	buildZoom() {
+		const { zoomFactor } = this.state;
+
+		return (
+			<div id="zoomWrapper">
+				<div className="square-button background-color-blue mr-3" onClick={() => this.setState({ zoomFactor: Math.max(zoomFactor - 10, 30) })}>
+					<i className="fas fa-minus"/>
+				</div>
+				<span className="color-blue">{ zoomFactor } %</span>
+				<div className="square-button background-color-blue ml-3" onClick={() => this.setState({ zoomFactor: zoomFactor + 10 })}>
+					<i className="fas fa-plus"/>
+				</div>
+			</div>
+		);
+	}
+
 	formatTime(time) {
 		return `${((time - time % 60) / 60).toString().padStart(2, '0')}:${(time % 60).toString().padStart(2, '0')}`;
 	}
@@ -485,13 +507,12 @@ class StudentView extends Component {
 	}
 
 	render() {
-		const { activeQuestion } = this.state;
-
 		return (
 			<Fragment>
 				<div id="gameWrapper">
 					<div id="gameHeader"/>
 					<div id="gameContainer">
+						{ this.buildZoom() }
 						{ this.buildTopBar() }
 						{ this.buildGame() }
 						{ this.buildFeedback() }
