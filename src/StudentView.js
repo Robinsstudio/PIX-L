@@ -205,6 +205,23 @@ class StudentView extends Component {
 		});
 	}
 
+	buildGame() {
+		const { activeQuestion } = this.state;
+
+		const style = {
+			'--card-width': '11.25rem',
+			'--card-margin': '2rem',
+			'--number-font-size': '1.5rem',
+			'--theme-font-size': '1rem',
+		};
+
+		return (
+			<div id="game" style={style}>
+				{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
+			</div>
+		);
+	}
+
 	buildCards() {
 		const { questions } = this.state;
 
@@ -476,9 +493,7 @@ class StudentView extends Component {
 					<div id="gameHeader"/>
 					<div id="gameContainer">
 						{ this.buildTopBar() }
-						<div id="game">
-							{ activeQuestion ? this.buildActiveQuestion() : this.buildCards() }
-						</div>
+						{ this.buildGame() }
 						{ this.buildFeedback() }
 						{ this.buildScore() }
 					</div>
