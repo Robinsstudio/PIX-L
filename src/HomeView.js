@@ -8,7 +8,7 @@ class HomeView extends Component {
 	constructor(props) {
 		super(props);
 
-		this.state = { sessions: [] };
+		this.state = {};
 	}
 
 	componentDidMount() {
@@ -28,21 +28,23 @@ class HomeView extends Component {
 				<div id="homepageMain">
 					<div id="homepageMainTitle" className="color-blue">PIX-L</div>
 					<div id="homepageMainSubtitle" className="color-blue">Votre nouvel outil de préparation à la certification PIX !</div>
-					<div id="homepageSessions">
-						<div id="homepageSessionsTitle" className="color-orange">
-							{ sessions.length
-								? `Session${sessions.length > 1 ? 's' : ''} en cours`
-								: 'Aucune session en cours' }
+					{ sessions &&
+						<div id="homepageSessions">
+							<div id="homepageSessionsTitle" className="color-orange">
+								{ sessions.length
+									? `Session${sessions.length > 1 ? 's' : ''} en cours`
+									: 'Aucune session en cours' }
+							</div>
+							{sessions.map(({name, url}) => {
+								return (
+									<Link
+										to={`${process.env.PUBLIC_URL}/jeu/${url}`}
+										className="homepageSession"
+									>{ name }</Link>
+								);
+							})}
 						</div>
-						{sessions.map(({name, url}) => {
-							return (
-								<Link
-									to={`${process.env.PUBLIC_URL}/jeu/${url}`}
-									className="homepageSession"
-								>{ name }</Link>
-							);
-						})}
-					</div>
+					}
 				</div>
 				<div id="homepageFooter" className="background-color-blue">
 					&copy; Tous droits réservés 2020 - Robin DOS ANJOS, Damien DONNADIEU et Baptiste GALLAIS
