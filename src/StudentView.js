@@ -234,7 +234,7 @@ class StudentView extends Component {
 		return (
 			questions.map((question, i) => {
 				return (
-					<div className={`card background-color-blue ${question.selected ? 'selected' : ''}`} key={question._id} onClick={() => this.handleCardClicked(i)}>
+					<div className={`card ${question.selected ? 'selected' : 'background-color-blue'}`} key={question._id} onClick={() => this.handleCardClicked(i)}>
 						<div className="card-background">
 							<div className="number">{i + 1}</div>
 						</div>
