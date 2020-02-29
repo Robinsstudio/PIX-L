@@ -61,7 +61,7 @@ class ScoreManager {
 	}
 
 	getLeadingTeams() {
-		return this.getTeams().reduce((prev, current) => {
+		return Object.keys(this.scores).map(team => this.getTeam(team)).reduce((prev, current) => {
 			if (prev.score < current.score) {
 				prev = { teams: [current.team], score: current.score };
 			} else if (prev.score === current.score) {
