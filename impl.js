@@ -200,8 +200,8 @@ module.exports = {
 		});
 	},
 
-	saveSession: (idGame, scores) => {
-		return new Session({ idGame, scores, date: Date.now() }).save();
+	saveSession: (sessionData) => {
+		return Session.findOneAndReplace({ _id: sessionData._id }, sessionData, { upsert: true }).exec();
 	},
 
 	exportSessions: (idGame) => {

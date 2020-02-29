@@ -6,6 +6,7 @@ class ScoreManager {
 		this.questionManager = questionManager;
 		this.scores = {};
 		this.turn = 0;
+		this.date = Date.now();
 		this.outOfTime = false;
 	}
 
@@ -114,10 +115,7 @@ class ScoreManager {
 				this.fireScoreChange();
 
 				const feedback = QuestionUtils.getFeedback(studentQuestion, originalQuestion);
-
-				if (correct) {
-					feedback.positive = true;
-				}
+				feedback.positive = !!correct;
 
 				this.fireFeedback(feedback, team);
 
@@ -176,8 +174,8 @@ class ScoreManager {
 		this.outOfTime = false;
 	}
 
-	saveSession(idGame) {
-		Impl.saveSession(idGame, this.scores);
+	saveSession(_id, idGame) {
+		Impl.saveSession({ _id, idGame, scores: this.scores, date: this.date });
 	}
 
 	onScoreChange(callback) {

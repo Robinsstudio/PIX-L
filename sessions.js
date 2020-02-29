@@ -1,4 +1,5 @@
 const cookie = require('cookie');
+const ObjectId = require('mongoose').Types.ObjectId;
 const Impl = require('./impl');
 const User = require('./User');
 const QuestionManager = require('./QuestionManager');
@@ -9,6 +10,7 @@ const Timer = require('./Timer');
 
 class Session {
 	constructor(name, io, url, questions, linkedQuestions) {
+		this._id = ObjectId();
 		this.name = name;
 		this.questionManager = new QuestionManager(io, url, questions, linkedQuestions);
 		this.questionPool = new QuestionPool(this.questionManager);
@@ -18,7 +20,7 @@ class Session {
 		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
 		this.questionPool.onQuestionStarted(question => this.startQuestion(question));
 		this.questionPool.onQuestionCanceled(() => this.scoreManager.cancelQuestion());
-		this.questionPool.onQuestionDone(() => this.updateTurn());
+		this.questionPool.onQuestionDone(() => this.handleQuestionDone());
 		this.questionPool.onQuestionEnded(() => this.endQuestion());
 
 		this.timer.onCount(seconds => this.broadcast('count', seconds));
@@ -105,7 +107,8 @@ class Session {
 		this.broadcast('questionEnd');
 	}
 
-	updateTurn() {
+	handleQuestionDone() {
+		this.scoreManager.saveSession(this._id, this.getRoom());
 		this.scoreManager.updateTurn();
 		this.broadcast('turn', this.scoreManager.getTurn());
 	}
@@ -137,13 +140,8 @@ class Session {
 	}
 
 	confirmStopSession() {
-		const { scoreManager } = this;
-		const room = this.getRoom();
-
-		scoreManager.saveSession(room);
-		this.stopSession(room);
-
-		this.broadcast('greeting', scoreManager.getLeadingTeams());
+		this.stopSession(this.getRoom());
+		this.broadcast('greeting', this.scoreManager.getLeadingTeams());
 	}
 
 	stop(socket) {
