@@ -9,6 +9,10 @@ import ProtectedRoute from './ProtectedRoute';
 import request from './request';
 import HomeView from './HomeView';
 
+/**
+ * This App component is the root component of the project.
+ * It handles client-sided routing with React-Router.
+ */
 class App extends Component {
 	constructor(props) {
 		super(props);
@@ -22,6 +26,11 @@ class App extends Component {
 		request('isAuthenticated').then(resp => resp.json()).then(({authenticated}) => this.setState({ authenticated }));
 	}
 
+	/**
+	 * Sets the user authenticated as the result of a call to the API in componentDidMount()
+	 *
+	 * @param {boolean} authenticated - true if the user has successfully authenticated
+	 */
 	setAuthenticated(authenticated) {
 		this.setState({ authenticated });
 	}
