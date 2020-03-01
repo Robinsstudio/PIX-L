@@ -47,6 +47,10 @@ class Session {
 		socket.on('confirmStopQuestion', () => this.confirmStopQuestion());
 		socket.on('confirmStopSession', () => this.confirmStopSession());
 		socket.on('confirmCancelQuestion', () => this.confirmCancelQuestion());
+		socket.on('disconnect', () => {
+			this.questionManager.removeAdmin(socket.id);
+			this.discard();
+		});
 
 		const activeQuestion = this.questionManager.getActiveQuestion();
 		if (activeQuestion) {
@@ -71,6 +75,8 @@ class Session {
 					this.questionManager.removeTeam(socket.id);
 					this.broadcast('teamChange', this.getTeams());
 					this.broadcast('turn', this.scoreManager.getTurn());
+
+					this.discard();
 				});
 
 				socket.emit('questionStart', this.scoreManager.getFilteredActiveQuestion(team));
@@ -175,6 +181,18 @@ class Session {
 			}
 		} else {
 			this.questionPool.cancelLastRevealedCard();
+		}
+	}
+
+	canDiscard() {
+		return this.questionManager.canDiscard()
+			&& this.questionPool.canDiscard()
+			&& this.scoreManager.canDiscard();
+	}
+
+	discard() {
+		if (this.canDiscard()) {
+			this.stopSession(this.getRoom());
 		}
 	}
 

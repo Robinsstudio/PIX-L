@@ -62,6 +62,10 @@ class QuestionPool {
 		return !this.selectedQuestions.length && !this.unselectedQuestions.length;
 	}
 
+	canDiscard() {
+		return !this.selectedQuestions.length && !this.pastQuestions.length;
+	}
+
 	onSelectionChanged(callback) {
 		this.onSelectionChangedHandler = callback;
 	}

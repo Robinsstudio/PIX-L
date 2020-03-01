@@ -75,6 +75,10 @@ class QuestionManager {
 		delete this.teams[socketId];
 	}
 
+	removeAdmin(socketId) {
+		delete this.admins[socketId];
+	}
+
 	getTeams() {
 		return Object.values(this.teams).sort();
 	}
@@ -86,6 +90,12 @@ class QuestionManager {
 
 	getRoom() {
 		return this.room;
+	}
+
+	canDiscard() {
+		return this.activeQuestion === null
+			&& !Object.keys(this.teams).length
+			&& !Object.keys(this.admins).length;
 	}
 }
 

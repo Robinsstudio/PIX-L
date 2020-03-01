@@ -178,6 +178,10 @@ class ScoreManager {
 		Impl.saveSession({ _id, idGame, scores: this.scores, date: this.date });
 	}
 
+	canDiscard() {
+		return Object.values(this.scores).every(score => !Object.keys(score).length);
+	}
+
 	onScoreChange(callback) {
 		this.onScoreChangeHandler = callback;
 	}
