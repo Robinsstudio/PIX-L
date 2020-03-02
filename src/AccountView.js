@@ -5,6 +5,9 @@ import request from './request';
 
 import './style/form_view.css';
 
+/**
+ * Form which allows users to change their usernames and passwords
+ */
 class AccountView extends Component {
 	constructor(props) {
 		super(props);
@@ -32,10 +35,21 @@ class AccountView extends Component {
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 	}
 
+	/**
+	 * Redirects the user back to the homepage
+	 */
 	goBack() {
 		this.setState({ redirect: true });
 	}
 
+	/**
+	 * Processes keyboard events.
+	 *
+	 * If the Enter key is pressed, then the form is submitted.
+	 * After that, as a response of the server, if one of the fields is filled with an invalid value, it will animate.
+	 *
+	 * @param {KeyboardEvent} event - the event to process
+	 */
 	handleKeyDown(event) {
 		const {
 			password: { value: password },
@@ -65,6 +79,12 @@ class AccountView extends Component {
 		}
 	}
 
+	/**
+	 * Processes change events.
+	 *
+	 * @param {ChangeEvent} event - the event to process
+	 * @param {string} field - the field to update
+	 */
 	updateField(event, field) {
 		this.setState({
 			[field]: {
@@ -74,6 +94,12 @@ class AccountView extends Component {
 		});
 	}
 
+	/**
+	 * Sets the specified field valid/invalid.
+	 *
+	 * @param {string} field - the valid/invalid field
+	 * @param {boolean} invalid - true if the field is invalid, false otherwise
+	 */
 	setFieldInvalid(field, invalid) {
 		this.setState({
 			[field]: {
@@ -83,6 +109,20 @@ class AccountView extends Component {
 		});
 	}
 
+	/**
+	 * Given an array of fields, this method returns the DOM elements.
+	 * It only returns text inputs.
+	 *
+	 * The items in the array are as follows:
+	 *
+	 * {
+	 *   field: <name of the field>,
+	 *   type: 'text' or 'password',
+	 *   invalid: true or false
+	 * }
+	 *
+	 * @param {Array} fields - the array of fields
+	 */
 	buildFields(fields) {
 		return fields.map(({field, type, label}) =>
 			<PrettyInput
@@ -96,6 +136,9 @@ class AccountView extends Component {
 		);
 	}
 
+	/**
+	 * Renders all fields with their values
+	 */
 	render() {
 		if (this.state.redirect) {
 			return <Redirect to={process.env.PUBLIC_URL + '/admin'}/>
