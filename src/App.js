@@ -22,6 +22,9 @@ class App extends Component {
 		this.setAuthenticated = this.setAuthenticated.bind(this);
 	}
 
+	/**
+	 * Fetches the API to determine if the user is authenticated
+	 */
 	componentDidMount() {
 		request('isAuthenticated').then(resp => resp.json()).then(({authenticated}) => this.setState({ authenticated }));
 	}
@@ -35,6 +38,9 @@ class App extends Component {
 		this.setState({ authenticated });
 	}
 
+	/**
+	 * Handles client-sided routing using React-Router
+	 */
 	render() {
 		const { authenticated } = this.state;
 		return (
