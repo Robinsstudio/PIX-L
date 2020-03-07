@@ -16,7 +16,7 @@ class EditorView extends Component {
 
 	removeQuestion(index) {
 		const { editor, update } = this.props;
-		update({ 
+		update({
 			...editor,
 			questions: editor.questions.filter((quest, i) => i !== index)
 		});
@@ -24,8 +24,8 @@ class EditorView extends Component {
 
 	save() {
 		const { editor, save } = this.props;
-		if (editor.model.name) {
-			save(editor.model.name);
+		if (editor.game.name) {
+			save(editor.game.name);
 		} else {
 			Modals.showPromptModal('Nouveau jeu', 'Entrez un nom ici...').then(name => save(name)).catch(() => {});
 		}
@@ -34,7 +34,7 @@ class EditorView extends Component {
 	handleDrop(event) {
 		const { editor, update } = this.props;
 		const index = parseInt(event.target.dataset.index);
-		
+
 		if (event.dataTransfer.types.includes('question')) {
 			const question = JSON.parse(event.dataTransfer.getData('question'));
 
@@ -76,14 +76,14 @@ class EditorView extends Component {
 	}
 
 	render() {
-		const { editor, closeEditor } = this.props;
+		const { editor, close } = this.props;
 		return (
 			<div id="editor" className={`view ${editor.visible ? 'visible' : ''}`}>
 				<div id="editorHeader" className="header">
 					<span className="ml-3">Éditer un jeu</span>
 					<div id="buttons" className="mr-3">
 						<Button color="primary" className="mr-2" onClick={this.save}>Enregistrer</Button>
-						<Button color="secondary" onClick={closeEditor}>Annuler</Button>
+						<Button color="secondary" onClick={close}>Annuler</Button>
 					</div>
 				</div>
 

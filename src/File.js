@@ -26,7 +26,7 @@ class File extends Component {
 	}
 
 	open() {
-		const { edit, requestFolder, refresh, file } = this.props;
+		const { editGame, requestFolder, refresh, file } = this.props;
 		if (file.type === 'folder') {
 			requestFolder(file._id);
 		} else if (file.type === 'question') {
@@ -34,7 +34,7 @@ class File extends Component {
 				request('SaveQuestion', quest).then( () => refresh() );
 			}).catch(() => {});
 		} else if (file.type === 'jeu') {
-			edit(file);
+			editGame(file);
 		}
 	}
 

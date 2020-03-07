@@ -12,7 +12,6 @@ class ExplorerView extends Component {
 		super(props);
 		this.state = {
 			contextMenu: { visible: false },
-			sessionView: { visible: false, sessions: [] },
 			displayByList: false,
 			copiedFile: null
 		};
@@ -66,7 +65,7 @@ class ExplorerView extends Component {
 	}
 
 	buildMenuItems(items) {
-		const { props: { create, folder, refresh }, state: { copiedFile } } = this;
+		const { props: { createGame, folder, refresh }, state: { copiedFile } } = this;
 
 		const pasteItem = copiedFile ? { label: 'Coller', onClick: this.pasteFile } : [];
 
@@ -81,7 +80,7 @@ class ExplorerView extends Component {
 					}).catch(() => {});
 				}
 			},
-			{ label: 'Nouveau jeu', onClick: () => create() }
+			{ label: 'Nouveau jeu', onClick: () => createGame() }
 		);
 	}
 
@@ -90,18 +89,17 @@ class ExplorerView extends Component {
 	}
 
 	buildFileItem(file) {
-		const { handleContextMenu, props: { folder, edit, requestFolder, refresh, updateSessionView } } = this;
+		const { handleContextMenu, props: { folder, editGame, requestFolder, refresh } } = this;
 		return (
 			<File
 				folder={folder}
 				file={file}
-				edit={edit}
+				editGame={editGame}
 				copyFile={this.copyFile}
 				dropFile={this.dropFile}
 				requestFolder={requestFolder}
 				refresh={refresh}
 				handleContextMenu={handleContextMenu}
-				updateSessionView={updateSessionView}
 			/>
 		);
 	}
