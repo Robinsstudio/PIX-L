@@ -4,6 +4,9 @@ import Modals from './Modals';
 import request from './request';
 import download from './download';
 
+/**
+ * This component represents a file in the ExplorerView.
+ */
 class File extends Component {
 	constructor(props) {
 		super(props);
@@ -25,6 +28,13 @@ class File extends Component {
 		this.handleDrop = this.handleDrop.bind(this);
 	}
 
+	/**
+	 * Opens the file. Each type of file has its own behavior:
+	 *
+	 * - Folder: Move ExplorerView to the opened folder.
+	 * - Question: Opens the QuestionModal with the opened question.
+	 * - Game: Opens the game editor with the opened game.
+	 */
 	open() {
 		const { editGame, requestFolder, refresh, file } = this.props;
 		if (file.type === 'folder') {
@@ -38,20 +48,38 @@ class File extends Component {
 		}
 	}
 
+	/**
+	 * Removes the files.
+	 */
 	remove() {
 		const { refresh, file: { _id } } = this.props;
 		request('Delete', { _id }).then( () => refresh() );
 	}
 
+	/**
+	 * Renames the file.
+	 *
+	 * @param {string} name - the new name of the file
+	 */
 	rename(name) {
 		const { refresh, file: { _id } } = this.props;
 		request('Rename', { _id, name }).then( () => refresh() );
 	}
 
+	/**
+	 * Starts renaming the file.
+	 * This shows an input in place of the filename which allows the user to change the name.
+	 */
 	startRenaming() {
 		this.setState({ renaming: true });
 	}
 
+	/**
+	 * Stops renaming the file.
+	 * This hides the input and makes the specified filename visible.
+	 *
+	 * @param {string} name - the new name of the file
+	 */
 	stopRenaming(newName) {
 		if (newName) {
 			this.rename(newName);
@@ -59,6 +87,11 @@ class File extends Component {
 		this.setState({ renaming: false });
 	}
 
+	/**
+	 * This utility method copies a value to the clipboard.
+	 *
+	 * @param {string} value - the value to copy
+	 */
 	copyToClipboard(value) {
 		const hiddenElement = document.createElement('input');
 		hiddenElement.style.background = 'transparent';
@@ -70,10 +103,18 @@ class File extends Component {
 		document.body.removeChild(hiddenElement);
 	}
 
+	/**
+	 * Displays a context menu after a right click was performed.
+	 * This method prepends items which are specific to this file to the context menu.
+	 * It then calls handleContextMenu() in the parent ExplorerView component.
+	 *
+	 * @param {MouseEvent} event - the event resulting from a right click
+	 */
 	handleContextMenu(event) {
 		const {
 			file: { name, type, _id },
-			copyFile
+			copyFile,
+			handleContextMenu
 		} = this.props;
 
 		const copyLinkItem = {
@@ -99,19 +140,35 @@ class File extends Component {
 		]
 		.concat(type === 'jeu' ? [copyLinkItem, downloadResultsItem] : []);
 
-		this.props.handleContextMenu(event, menuItems);
+		handleContextMenu(event, menuItems);
 	}
 
+	/**
+	 * Processes a drag start event.
+	 * The file switches to dragging mode.
+	 *
+	 * @param {DragEvent} event - the drag start event
+	 */
 	handleDragStart(event) {
 		const { file } = this.props;
 		event.dataTransfer.setData(file.type, JSON.stringify(file));
 		this.setState({ dragging: true });
 	}
 
+	/**
+	 * Processes a drag end event.
+	 * The file is no longer is dragging mode.
+	 */
 	handleDragEnd() {
 		this.setState({ dragging: false });
 	}
 
+	/**
+	 * Processes a drag over event.
+	 * If the file is a folder, the icon is magnified to suggest that the dragged file can be dropped.
+	 *
+	 * @param {DragEvent} event - the drag over event
+	 */
 	handleDragOver(event) {
 		const { dragging } = this.state;
 		const element = event.target;
@@ -121,11 +178,23 @@ class File extends Component {
 		event.preventDefault();
 	}
 
+	/**
+	 * Processes a drag leave event.
+	 * If the file is a folder, the icon is no longer magnified.
+	 *
+	 * @param {DragEvent} event - the drag leave event
+	 */
 	handleDragLeave(event) {
 		const element = event.target;
 		element.classList.remove('grow');
 	}
 
+	/**
+	 * Processes a drop event.
+	 * If the file is a folder, the dropped file is moved to that folder.
+	 *
+	 * @param {DragEvent} event - the drop event
+	 */
 	handleDrop(event) {
 		const { props: { file: { _id }, dropFile }, state: { dragging } } = this;
 		const element = event.target;
@@ -136,6 +205,9 @@ class File extends Component {
 		}
 	}
 
+	/**
+	 * Renders the file
+	 */
 	render() {
 		const { props: { file: { type, name } }, state: { renaming } } = this;
 
