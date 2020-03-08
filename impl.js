@@ -86,7 +86,7 @@ const copyRecursiveTo = (_id, idParent) => {
 	return getById(_id).then(file => {
 		const newId = mongoose.Types.ObjectId();
 
-		getByParams({ idParent: file._id }).then(files => {
+		return getByParams({ idParent: file._id }).then(files => {
 			return Promise.all(files.map(f => copyRecursiveTo(f._id, newId)));
 		}).then(() => {
 			file._id = newId;

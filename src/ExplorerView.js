@@ -23,7 +23,7 @@ class ExplorerView extends Component {
 		this.pasteFile = this.pasteFile.bind(this);
 		this.handleContextMenu = this.handleContextMenu.bind(this);
 		this.hideContextMenu = this.hideContextMenu.bind(this);
-		
+
 		this.props.requestFolder();
 	}
 
@@ -66,9 +66,11 @@ class ExplorerView extends Component {
 	}
 
 	buildMenuItems(items) {
-		const { create, folder, refresh } = this.props;
-		return items.concat(
-			{ label: 'Coller', onClick: this.pasteFile },
+		const { props: { create, folder, refresh }, state: { copiedFile } } = this;
+
+		const pasteItem = copiedFile ? { label: 'Coller', onClick: this.pasteFile } : [];
+
+		return items.concat(pasteItem).concat(
 			{ label: 'Nouveau dossier', onClick: () => {
 				Modals.showPromptModal('Nouveau dossier', 'Entrez un nom de dossier ici...').then(name => this.createFolder(name)).catch(() => {});
 			}},
@@ -86,7 +88,7 @@ class ExplorerView extends Component {
 	hideContextMenu() {
 		this.setState({ contextMenu: { visible: false } });
 	}
-  
+
 	buildFileItem(file) {
 		const { handleContextMenu, props: { folder, edit, requestFolder, refresh, updateSessionView } } = this;
 		return (
@@ -121,7 +123,7 @@ class ExplorerView extends Component {
 		this.dropFile(event, _id);
 		event.target.classList.remove('dropZone');
 	}
-	
+
 	render() {
 		const {
 			props: { folder },
