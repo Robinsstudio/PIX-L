@@ -40,6 +40,8 @@ class Session {
 	}
 
 	initializeAdminEvents(socket) {
+		this.questionManager.addAdmin(socket.id);
+
 		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
 		socket.on('submit', question => socket.emit('questionStart', this.getNextQuestion(question)));
 		socket.on('cancel', () => this.cancel(socket));
@@ -66,7 +68,7 @@ class Session {
 	initializeTeamEvents(socket) {
 		socket.on('teamChoice', team => {
 			if (this.questionManager.getAvailableTeams().includes(team)) {
-				this.addTeam(socket, team);
+				this.addTeam(socket.id, team);
 				this.broadcast('teamChange', this.getTeams());
 
 				socket.on('submit', question => this.scoreManager.correct(team, question));
@@ -88,8 +90,8 @@ class Session {
 		});
 	}
 
-	addTeam(socket, team) {
-		this.questionManager.addTeam(socket, team);
+	addTeam(socketId, team) {
+		this.questionManager.addTeam(socketId, team);
 		this.scoreManager.addTeam(team);
 	}
 
@@ -269,4 +271,3 @@ module.exports = function(server) {
 
 	return { getActiveSessions };
 }
-

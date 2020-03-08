@@ -67,8 +67,12 @@ class QuestionManager {
 		return this.questions.concat(this.linkedQuestions).reduce((sum, question) => sum + question.points, 0) + Math.ceil(this.questions.length / 2);
 	}
 
-	addTeam(socket, team) {
-		this.teams[socket.id] = team;
+	addAdmin(socketId) {
+		this.admins[socketId] = true;
+	}
+
+	addTeam(socketId, team) {
+		this.teams[socketId] = team;
 	}
 
 	removeTeam(socketId) {
