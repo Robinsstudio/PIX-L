@@ -11,6 +11,9 @@ import './style/team_chooser.css';
 
 const MAX_TEAMS = 5;
 
+/**
+ * This view is used to play games with students.
+ */
 class StudentView extends Component {
 	constructor(props) {
 		super(props);
@@ -40,6 +43,9 @@ class StudentView extends Component {
 		};
 	}
 
+	/**
+	 * Initializes Socket.IO events
+	 */
 	componentDidMount() {
 		const socket = io('/PIX-L');
 		socket.on('connect', () => socket.emit('init', { url: this.props.match.params.url }));
@@ -68,18 +74,39 @@ class StudentView extends Component {
 		this.socket = socket;
 	}
 
+	/**
+	 * Disconnects the socket if the user leaves the page.
+	 */
 	componentWillUnmount() {
 		this.socket.disconnect();
 	}
 
+	/**
+	 * Returns true is the user is authenticated, false otherwise.
+	 * Students are not authenticated while admins are.
+	 */
 	isAuthenticated() {
 		return this.props.authenticated;
 	}
 
+	/**
+	 * Updates the questions.
+	 *
+	 * @param {Array} questions - the questions of the game
+	 */
 	updateQuestions(questions) {
 		this.setState({ questions });
 	}
 
+	/**
+	 * Updates the selected and unselected questions with the specified selection.
+	 * The selection contains two fields:
+	 *
+	 * - selectedQuestions: the array of selected questions
+	 * - unselectedQuestion: the array of unselected questions
+	 *
+	 * @param {Object} selection - the selected and unselected questions
+	 */
 	updateSelection({ selectedQuestions, unselectedQuestions }) {
 		this.setState({
 			questions: this.state.questions.map((quest, i) => {
@@ -94,57 +121,133 @@ class StudentView extends Component {
 		});
 	}
 
+	/**
+	 * Updates the teams of students.
+	 *
+	 * @param {Array} teams - the teams of students
+	 */
 	updateTeams(teams) {
 		this.setState({ teams: teams.sort((t1, t2) => t1.team - t2.team) })
 	}
 
+	/**
+	 * Updates the feedback to display to the students after they answered a question.
+	 * The feedback contains two fields:
+	 *
+	 * - specific: a feedback specific to the team's answer (optional)
+	 * - general: a general feedback about the question
+	 *
+	 * The general feedback is displayed below the specific feedback.
+	 *
+	 * @param {Object} feedback - the feedback to display
+	 */
 	updateFeedback(feedback) {
 		this.setState({ feedback: { ...feedback, visible: true } });
 	}
 
+	/**
+	 * Hides the feedback.
+	 */
 	dismissFeedback() {
 		this.setState({ feedback: { ...this.state.feedback, visible: false } });
 	}
 
+
+	/**
+	 * Updates the team whose turn it is.
+	 *
+	 * @param {string} turn - the team whose turn it is
+	 */
 	updateTurn(turn) {
 		this.setState({ turn });
 	}
 
+	/**
+	 * Updates the maximum number of points which a team can obtain.
+	 * This value is used to determine the size of scoring bars.
+	 *
+	 * @param {number} maxPoints - the maximum number of points
+	 */
 	updateMaxPoints(maxPoints) {
 		this.setState({ maxPoints });
 	}
 
+	/**
+	 * Starts a question.
+	 *
+	 * @param {Object} activeQuestion - the started question
+	 */
 	startQuestion(activeQuestion) {
 		this.setState({ activeQuestion });
 	}
 
+	/**
+	 * Ends a question.
+	 */
 	endQuestion() {
 		this.setState({ activeQuestion: null, time: null });
 	}
 
+	/**
+	 * Updates the remaining time for the active question.
+	 */
 	count(time) {
 		this.setState({ time });
 	}
 
+	/**
+	 * Chooses a team.
+	 *
+	 * Only students choose teams.
+	 *
+	 * @param {string} team - the choosen team
+	 */
 	handleTeamClicked(team) {
 		this.socket.emit('teamChoice', team);
 		this.setState({ team });
 	}
 
+	/**
+	 * Choose a question to reveal / start.
+	 *
+	 * The first click reveals the theme of the question as well as its number of points.
+	 * The second click starts the question.
+	 *
+	 * @param {number} index - the index of the question
+	 */
 	handleCardClicked(index) {
 		if (this.isAuthenticated()) {
 			this.socket.emit('selectQuestion', index);
 		}
 	}
 
+	/**
+	 * Cancels the last operation performed by an admin.
+	 *
+	 * There are two operations which can be cancelled:
+	 *
+	 * - Starting a question
+	 * - Revealing a question
+	 */
 	handleCancelClicked() {
 		this.socket.emit('cancel');
 	}
 
+	/**
+	 * If a question is in progress, stops the question.
+	 * Otherwise, stops the session.
+	 *
+	 * This feature is only available to admins.
+	 */
 	handleStopClicked() {
 		this.socket.emit('stop');
 	}
 
+	/**
+	 * Confirms that an admin wants to stop the active question.
+	 *
+	 * @param {boolean} confirmed - true if the admin confirmed, false otherwise
+	 */
 	handleConfirmedStopQuestion(confirmed) {
 		if (confirmed) {
 			this.socket.emit('confirmStopQuestion');
@@ -152,6 +255,11 @@ class StudentView extends Component {
 		this.setState({ confirmStopQuestion: false });
 	}
 
+	/**
+	 * Confirms that an admin wants to stop the session.
+	 *
+	 * @param {boolean} confirmed - true if the admin confirmed, false otherwise
+	 */
 	handleConfirmedStopSession(confirmed) {
 		if (confirmed) {
 			this.socket.emit('confirmStopSession');
@@ -159,6 +267,11 @@ class StudentView extends Component {
 		this.setState({ confirmStopSession: false });
 	}
 
+	/**
+	 * Confirms that an admin wants to cancel the active question.
+	 *
+	 * @param {boolean} confirmed - true if the admin confirmed, false otherwise
+	 */
 	handleConfirmedCancelQuestion(confirmed) {
 		if (confirmed) {
 			this.socket.emit('confirmCancelQuestion');
@@ -166,10 +279,19 @@ class StudentView extends Component {
 		this.setState({ confirmCancelQuestion: false });
 	}
 
+	/**
+	 * If the user is a team of students, submits the team's answer to the active question.
+	 * If the user is an admin, shows the following linked question (if any).
+	 */
 	handleSubmit() {
 		this.socket.emit('submit', this.state.activeQuestion);
 	}
 
+	/**
+	 * Updates the team's answer to the active multiple choice question.
+	 *
+	 * @param {number} index - the index of the answer
+	 */
 	handleMultipleChoiceAnswerChanged(index) {
 		const { activeQuestion } = this.state;
 		const correct = !activeQuestion.answers[index].correct;
@@ -184,6 +306,11 @@ class StudentView extends Component {
 		});
 	}
 
+	/**
+	 * Updates the team's answer to the active open ended question.
+	 *
+	 * @param {Event} event - the change event
+	 */
 	handleOpenEndedAnswerChanged(event) {
 		this.setState({
 			activeQuestion: {
@@ -193,6 +320,13 @@ class StudentView extends Component {
 		});
 	}
 
+
+	/**
+	 * Updates the team's answer to the active matching question.
+	 *
+	 * @param {number} fieldIndex - the index of the field
+	 * @param {number} answerIndex - the index of the answer in the field
+	 */
 	handleMatchingFieldAnswerChanged(fieldIndex, answerIndex) {
 		const { activeQuestion } = this.state;
 		this.setState({
@@ -210,6 +344,9 @@ class StudentView extends Component {
 		});
 	}
 
+	/**
+	 * Builds the game.
+	 */
 	buildGame() {
 		const { activeQuestion, zoomFactor } = this.state;
 
@@ -232,6 +369,9 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the cards.
+	 */
 	buildCards() {
 		const { questions } = this.state;
 
@@ -250,6 +390,9 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the multiple choice question body.
+	 */
 	buildMultipleChoiceQuestionBody() {
 		const { answers } = this.state.activeQuestion;
 
@@ -267,6 +410,9 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the open ended question body.
+	 */
 	buildOpenEndedQuestionBody() {
 		const { openEndedAnswer } = this.state.activeQuestion;
 
@@ -282,6 +428,9 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the matching question body.
+	 */
 	buildMatchingQuestionBody() {
 		const { matchingFields } = this.state.activeQuestion;
 
@@ -310,11 +459,22 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the active question body.
+	 * Depending on the question type, one of the following method will be called:
+	 *
+	 * - buildMultipleChoiceQuestionBody()
+	 * - buildOpenEndedQuestionBody()
+	 * - buildMatchingQuestionBody()
+	 */
 	buildActiveQuestionBody() {
 		const { buildersByQuestionType, state: { activeQuestion } } = this;
 		return buildersByQuestionType[activeQuestion.questionType]();
 	}
 
+	/**
+	 * Builds the active question.
+	 */
 	buildActiveQuestion() {
 		const { activeQuestion } = this.state;
 
@@ -335,6 +495,9 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the scoring.
+	*/
 	buildScore() {
 		const { teams, turn, maxPoints } = this.state;
 
@@ -363,6 +526,10 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the team chooser.
+	 * It is a dialog which allows students to choose their team.
+	 */
 	buildTeamChooser() {
 		const { initialized, team, teams } = this.state;
 		if (initialized && !team && !this.isAuthenticated()) {
@@ -383,6 +550,10 @@ class StudentView extends Component {
 		}
 	}
 
+	/**
+	 * Builds a confirm dialog.
+	 * This confirm dialog asks the admin if they really want to stop the active question.
+	 */
 	buildConfirmStopQuestion() {
 		const { confirmStopQuestion } = this.state;
 
@@ -394,6 +565,10 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds a confirm dialog.
+	 * This confirm dialog asks the admin if they really want to stop the session.
+	 */
 	buildConfirmStopSession() {
 		const { confirmStopSession } = this.state;
 
@@ -405,6 +580,10 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds a confirm dialog.
+	 * This confirm dialog asks the admin if they really want to cancel the active question.
+	 */
 	buildConfirmCancelQuestion() {
 		const { confirmCancelQuestion } = this.state;
 
@@ -418,6 +597,10 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the greeting dialog.
+	 * It informs everyone of the winning teams.
+	 */
 	buildGreeting() {
 		const { winners } = this.state;
 
@@ -446,6 +629,10 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the zoom bar.
+	 * It allows resizing cards.
+	 */
 	buildZoom() {
 		const { zoomFactor } = this.state;
 
@@ -462,10 +649,21 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Formats the remaining time for the active question.
+	 */
 	formatTime(time) {
 		return `${((time - time % 60) / 60).toString().padStart(2, '0')}:${(time % 60).toString().padStart(2, '0')}`;
 	}
 
+	/**
+	 * Builds the top bar.
+	 * It contains three elements:
+	 *
+	 * - The remaining time
+	 * - The cancel option (see handleCancelClicked())
+	 * - The stop option (see handleStopClicked())
+	 */
 	buildTopBar() {
 		const { activeQuestion, time } = this.state;
 		return (
@@ -492,6 +690,9 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Builds the feedback to display to the team of students after they answered the active question.
+	 */
 	buildFeedback() {
 		const { feedback } = this.state;
 		const visible = feedback && feedback.visible;
@@ -506,6 +707,9 @@ class StudentView extends Component {
 		);
 	}
 
+	/**
+	 * Renders the StudentView.
+	 */
 	render() {
 		return (
 			<Fragment>
