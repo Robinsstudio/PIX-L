@@ -2,7 +2,16 @@ import React, { Component } from 'react';
 
 import './style/team_chooser.css';
 
+/**
+ * This is a modal used in the StudentView.
+ */
 class StudentViewModal extends Component {
+
+	/**
+	 * Closes the dialog and fires the closed event with the specified boolean.
+	 *
+	 * @param {boolean} confirmed - true if the user clicked "yes", false otherwise
+	 */
 	handleClick(confirmed) {
 		const { onClosed } = this.props;
 		if (typeof onClosed === 'function') {
@@ -10,6 +19,9 @@ class StudentViewModal extends Component {
 		}
 	}
 
+	/**
+	 * Renders a square modal.
+	 */
 	render() {
 		const { title, confirm } = this.props;
 
