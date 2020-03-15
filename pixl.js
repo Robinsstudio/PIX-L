@@ -9,8 +9,10 @@ module.exports = function(server) {
 
 	if (process.env.NODE_ENV === 'production') {
 
+		const serve = express.static(__dirname + '/build');
+
 		router.use('/', (req, res) => {
-			express.static(__dirname + '/build')(req, res, () => {
+			serve(req, res, () => {
 				res.sendFile(__dirname + '/build/index.html');
 			});
 		});
