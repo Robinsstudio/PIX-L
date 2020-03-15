@@ -68,6 +68,10 @@ class StudentView extends Component {
 		this.socket = socket;
 	}
 
+	componentWillUnmount() {
+		this.socket.disconnect();
+	}
+
 	isAuthenticated() {
 		return this.props.authenticated;
 	}
