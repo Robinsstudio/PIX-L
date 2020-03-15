@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 
 import './style/pretty_input.css';
 
+/**
+ * This component is a custom text input.
+ */
 class PrettyInput extends Component {
 	constructor(props) {
 		super(props);
@@ -13,6 +16,11 @@ class PrettyInput extends Component {
 		this.handleBlur = this.handleBlur.bind(this);
 	}
 
+	/**
+	 * Processes a change event.
+	 *
+	 * @param {Event} event - the change event
+	 */
 	handleChange(event) {
 		const { onChange } = this.props;
 		if (typeof onChange === 'function') {
@@ -20,10 +28,16 @@ class PrettyInput extends Component {
 		}
 	}
 
+	/**
+	 * Focuses the input.
+	 */
 	handleFocus() {
 		this.setState({ active: true });
 	}
 
+	/**
+	 * Blurs the input.
+	 */
 	handleBlur() {
 		const { value } = this.props;
 		if (!value) {
@@ -31,6 +45,9 @@ class PrettyInput extends Component {
 		}
 	}
 
+	/**
+	 * Renders the input.
+	 */
 	render() {
 		const { props: { type, id, value, label, className }, state: { active } } = this;
 		return (
