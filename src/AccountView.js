@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import PrettyInput from './PrettyInput';
 import request from './request';
 
@@ -27,11 +28,12 @@ class AccountView extends Component {
 			}
 		};
 
+		this.goBack = this.goBack.bind(this);
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 	}
 
 	goBack() {
-		window.location.href = process.env.PUBLIC_URL + '/';
+		this.setState({ redirect: true });
 	}
 
 	handleKeyDown(event) {
@@ -95,6 +97,10 @@ class AccountView extends Component {
 	}
 
 	render() {
+		if (this.state.redirect) {
+			return <Redirect to={process.env.PUBLIC_URL + '/admin'}/>
+		}
+
 		return (
 			<div className="form-background background-color-blue">
 				<div className="form-section">
