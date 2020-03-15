@@ -78,7 +78,7 @@ class Modals extends Component {
 				/>
 
 				<QuestionModal
-					open={questionModal.open} data={questionModal.data} update={this.updateQuestionModal} 
+					open={questionModal.open} data={questionModal.data} update={this.updateQuestionModal}
 					hide={this.hideQuestionModal} promise={questionModal.promise}
 				/>
 			</Fragment>

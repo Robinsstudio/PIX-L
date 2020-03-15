@@ -136,6 +136,10 @@ module.exports = {
 
 	getQuestionsByIds,
 
+	getQuestionNameById: (_id) => {
+		return Question.findById(_id).select('name');
+	},
+
 	getQuestionNamesStartingWith: (start) => {
 		const regex = new RegExp(`^${start}`, 'i');
 		return Question.find({ name: regex }).limit(10).select('name');

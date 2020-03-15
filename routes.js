@@ -24,6 +24,11 @@ module.exports = function(server) {
 		Impl.getQuestionsByIds(_ids).then(questions => res.json(questions));
 	});
 
+	router.post('/GetQuestionNameById/', User.isAuthenticated, (req, res) => {
+		const { _id } = req.body;
+		Impl.getQuestionNameById(_id).then(question => res.json(question));
+	});
+
 	router.post('/GetQuestionNamesStartingWith', User.isAuthenticated, (req, res) => {
 		const { start } = req.body;
 		Impl.getQuestionNamesStartingWith(start).then(names => res.json(names));
