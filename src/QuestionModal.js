@@ -19,6 +19,14 @@ function uuidv4() {
 	});
 }
 
+/**
+ * This component is a modal which allows the user to edit questions.
+ * Three types of questions can be created:
+ *
+ * - Multiple choice questions
+ * - Open-ended questions
+ * - Matching field questions
+ */
 class QuestionModal extends Component {
 	constructor(props) {
 		super(props);
@@ -65,21 +73,45 @@ class QuestionModal extends Component {
 		};
 	}
 
+	/**
+	 * Updates the label of the question.
+	 *
+	 * @param {string} label - the label of the question
+	 */
 	updateQuestion(label) {
 		const { data, update } = this.props;
 		update({ ...data, label});
 	}
 
+	/**
+	 * Updates the general feedback of the question.
+	 *
+	 * @param {string} feedback - the general feedback of the question
+	 */
 	updateFeedback(feedback) {
 		const { data, update } = this.props;
 		update({ ...data, feedback });
 	}
 
+	/**
+	 * Focuses the answer at the specified index.
+	 * This is used for multiple choice questions only.
+	 *
+	 * @param {number} index - the index of the answer to focus
+	 */
 	setAnswerFocused(index) {
 		const { data, update } = this.props;
 		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, focused: true } : ans) });
 	}
 
+	/**
+	 * Updates the answer at the specified index.
+	 * This is used for multiple choice questions only.
+	 *
+	 * @param {string} label - the label of the answer to update
+	 * @param {string} feedback - the feedback specific to the answer
+	 * @param {number} index - the index of the answer
+	 */
 	updateAnswer(label, feedback, index) {
 		const { data, update } = this.props;
 		const answer = {};
@@ -95,84 +127,170 @@ class QuestionModal extends Component {
 		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, ...answer, focused: false } : ans) });
 	}
 
+	/**
+	 * Adds an answer to the question.
+	 * This is used for multiple choice questions only.
+	 */
 	addAnswer() {
 		const { data, update } = this.props;
 		update({ ...data, answers: data.answers.concat({ key: uuidv4(), correct: false }) });
 	}
 
+	/**
+	 * Removes an answer from the question.
+	 * This is used for multiple choice questions only.
+	 *
+	 * @param {number} index - the index of the answer
+	 */
 	removeAnswer(index) {
 		const { data, update } = this.props;
 		update({ ...data,  answers: data.answers.filter((ans, i) => i !== index) });
 	}
 
+	/**
+	 * Toggles the correctness of the answer at the specified index.
+	 * This is used for multiple choice questions only.
+	 *
+	 * @param {number} index - the index of the answer
+	 */
 	toggleAnswerCorrect(index) {
 		const { data, update } = this.props;
 		update({ ...data, answers: data.answers.map((ans, i) => (i === index) ? { ...ans, correct: !ans.correct } : ans) });
 	}
 
+	/**
+	 * Updates the number of minutes that teams will have to answer the question.
+	 *
+	 * @param {Event} event - the change event
+	 */
 	updateMinutes(event) {
 		const { data, update } = this.props;
 		const minutes = parseInt(event.target.value) || 0;
 		update({ ...data, time: minutes * 60 + data.time % 60 });
 	}
 
+	/**
+	 * Updates the number of seconds that teams will have to answer the question.
+	 *
+	 * @param {Event} event - the change event
+	 */
 	updateSeconds(event) {
 		const { data, update } = this.props;
 		const seconds = parseInt(event.target.value) || 0;
 		update({ ...data, time: data.time - data.time % 60 + seconds });
 	}
 
+	/**
+	 * Updates the number of points that teams will have to answer the question.
+	 *
+	 * @param {Event} event - the change event
+	 */
 	updatePoints(event) {
 		const { data, update } = this.props;
 		const points = parseFloat(event.target.value) || 0;
 		update({ ...data, points });
 	}
 
+	/**
+	 * Updates the linked question of the current question.
+	 *
+	 * @param {Object} linkedQuestion - the linked question of the current question
+	 */
 	updateLinkedQuestion(linkedQuestion) {
 		const { data, update } = this.props;
 		update({ ...data, linkedQuestion });
 	}
 
+	/**
+	 * Updates the theme of the question.
+	 *
+	 * @param {string} theme - the theme of the question
+	 */
 	updateTheme(theme) {
 		const { data, update } = this.props;
 		update({ ...data, theme });
 	}
 
+	/**
+	 * Updates if the keyword typed by a team should match exactly one of the keywords of the question.
+	 *
+	 * @param {Event} event - the change event
+	 */
 	updateExactMatch(event) {
 		const { data, update } = this.props;
 		update({ ...data, exactMatch: event.target.checked });
 	}
 
+	/**
+	 * Updates the keywords of the question.
+	 * This is used for open-ended questions only.
+	 *
+	 * @param {Array} words
+	 */
 	updateWords(words) {
 		const { data, update } = this.props;
 		update({ ...data, words });
 	}
 
+	/**
+	 * Updates the positive feedback to display if a team answers correctly an open-ended question.
+	 * This is used for open-ended questions only.
+	 *
+	 * @param {string} positiveFeedback - the positive feedback
+	 */
 	updatePositiveFeedback(positiveFeedback) {
 		const { data, update } = this.props;
 		update({ ...data, positiveFeedback });
 	}
 
+	/**
+	 * Updates the negative feedback to display if a team answers incorrectly an open-ended question.
+	 * This is used for open-ended questions only.
+	 *
+	 * @param {string} negativeFeedback - the negative feedback
+	 */
 	updateNegativeFeedback(negativeFeedback) {
 		const { data, update } = this.props;
 		update({ ...data, negativeFeedback });
 	}
 
+	/**
+	 * Updates the matching field at the specified index.
+	 * This is used for matching field questions only.
+	 *
+	 * @param {Object} matchingField - the matching field to update
+	 * @param {number} index - the index of the matching field
+	 */
 	updateMatchingField(matchingField, index) {
 		const { data, update } = this.props;
 		update({ ...data, matchingFields: data.matchingFields.map((field, i) => i === index ? { ...field, ...matchingField } : field)});
 	}
 
+	/**
+	 * Adds a matching field to the question.
+	 * This is used for matching field questions only.
+	 */
 	addMatchingField() {
 		const { data, update } = this.props;
 		update({ ...data, matchingFields: data.matchingFields.concat({ key: uuidv4(), label: '', answers: [] }) });
 	}
 
+	/**
+	 * Removes the matching field at the specified index.
+	 * This is used for matching field questions only.
+	 *
+	 * @param {number} index - the index of the matching field
+	 */
 	removeMatchingField(index) {
 		const { data, update } = this.props;
 		update({ ...data, matchingFields: data.matchingFields.filter((_,i) => i !== index) });
 	}
 
+	/**
+	 * Updates the type of the current question.
+	 *
+	 * @param {string} questionType - the type of the question
+	 */
 	updateQuestionType(questionType) {
 		const { props: { data, update }, TYPES } = this;
 		if (questionType !== data.questionType) {
@@ -189,6 +307,11 @@ class QuestionModal extends Component {
 		}
 	}
 
+	/**
+	 * Called when the user presses the save button.
+	 *
+	 * @param {Object} data - the question data
+	 */
 	onConfirm(data) {
 		const { hide, promise: { resolve } } = this.props;
 		if (data.name) {
@@ -202,12 +325,20 @@ class QuestionModal extends Component {
 		}
 	}
 
+	/**
+	 * Called when the user presses the cancel button or dismisses the QuestionModal.
+	 *
+	 * @param {Object} data - the question data
+	 */
 	onCancel(data) {
 		const { hide, promise: { reject } } = this.props;
 		reject(data);
 		hide();
 	}
 
+	/**
+	 * Builds the user interface for multiple choice questions.
+	 */
 	buildMultipleChoiceQuestionView() {
 		const { data } = this.props;
 		return (
@@ -223,6 +354,9 @@ class QuestionModal extends Component {
 		);
 	}
 
+	/**
+	 * Builds the user interface for open-ended questions.
+	 */
 	buildOpenEndedQuestionView() {
 		const { data } = this.props;
 		return (
@@ -237,6 +371,9 @@ class QuestionModal extends Component {
 		);
 	}
 
+	/**
+	 * Builds the user interface for matching field questions.
+	 */
 	buildMatchingQuestionView() {
 		const { data } = this.props;
 		return (
@@ -251,6 +388,9 @@ class QuestionModal extends Component {
 		);
 	}
 
+	/**
+	 * Renders the QuestionModal.
+	 */
 	render() {
 		const { props: { open, data }, TYPES } = this;
 		return (
