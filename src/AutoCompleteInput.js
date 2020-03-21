@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+/**
+ * This component is an input with autocomplete functionality as the user types.
+ */
 class AutoCompleteInput extends Component {
 	constructor(props) {
 		super(props);
@@ -15,10 +18,19 @@ class AutoCompleteInput extends Component {
 		this.clearHints = this.clearHints.bind(this);
 	}
 
+	/**
+	 * Hides hints.
+	 */
 	clearHints() {
 		this.setState({ hints: [], activeHint: -1 });
 	}
 
+	/**
+	 * When the text is changed, an async call is performed to the loadHints prop.
+	 * This async function returns the hints to be displayed as suggestions to what the user types.
+	 *
+	 * @param {Event} event - the change event
+	 */
 	handleChange(event) {
 		const { value } = event.target;
 		const { loadHints } = this.props;
@@ -29,6 +41,11 @@ class AutoCompleteInput extends Component {
 		this.fireOnChange(value);
 	}
 
+	/**
+	 * If the key pressed is either ArrowUp or ArrowDown, it highlights the above or below hint in the dropdown menu.
+	 *
+	 * @param {KeyboardEvent} event - the keydown event
+	 */
 	handleKeyDown(event) {
 		if (['ArrowDown', 'ArrowUp'].includes(event.key)) {
 			const { props: { value }, state: { hints, activeHint, initialValue } } = this;
@@ -50,17 +67,30 @@ class AutoCompleteInput extends Component {
 		this.fireOnKeyDown(event);
 	}
 
+	/**
+	 * Highlights the hint at the specified index.
+	 *
+	 * @param {number} index - the index of the hint
+	 */
 	handleMouseEnter(index) {
 		const { hints } = this.state;
 		this.setState({ activeHint: index });
 		this.fireOnChange(hints[index]);
 	}
 
+	/**
+	 * Hides hints when the input loses focus.
+	 *
+	 * @param {FocusEvent} event - the blur event
+	 */
 	handleBlur(event) {
 		this.clearHints();
 		this.fireOnBlur(event);
 	}
 
+	/**
+	 * Forwards props to the nested input element.
+	 */
 	forwardProps() {
 		const selfProps = [ 'loadHints', 'toString', 'component', 'collapseOnEnter'];
 		const forwardingProps = {};
@@ -74,6 +104,11 @@ class AutoCompleteInput extends Component {
 		return forwardingProps;
 	}
 
+	/**
+	 * Fires a synthetic change event with the entered text.
+	 *
+	 * @param {string} value - the text of the input
+	 */
 	fireOnChange(value) {
 		const { onChange } = this.props;
 		if (typeof onChange === 'function') {
@@ -81,6 +116,11 @@ class AutoCompleteInput extends Component {
 		}
 	}
 
+	/**
+	 * Fires a synthetic keydown event.
+	 *
+	 * @param {KeyboardEvent} event - the keydown event
+	 */
 	fireOnKeyDown(event) {
 		const { onKeyDown } = this.props;
 		if (typeof onKeyDown === 'function') {
@@ -88,6 +128,11 @@ class AutoCompleteInput extends Component {
 		}
 	}
 
+	/**
+	 * Fires a synthetic blur event.
+	 *
+	 * @param {FocusEvent} event - the blur event
+	 */
 	fireOnBlur(event) {
 		const { onBlur } = this.props;
 		if (typeof onBlur === 'function') {
@@ -95,6 +140,9 @@ class AutoCompleteInput extends Component {
 		}
 	}
 
+	/**
+	 * Builds the nested input element.
+	 */
 	buildInputComponent() {
 		const { component, value } = this.props;
 		return React.createElement(component || 'input', {
@@ -107,6 +155,13 @@ class AutoCompleteInput extends Component {
 		});
 	}
 
+	/**
+	 * Builds a string for the specified hint.
+	 * If the value is a string, it is simply returned.
+	 * Otherwise, the function toString provided in the props is called.
+	 *
+	 * @param {String|Object} value - the value to stringify
+	 */
 	buildString(value) {
 		const { toString } = this.props;
 		if (typeof value !== 'string' && typeof toString === 'function') {
@@ -115,6 +170,9 @@ class AutoCompleteInput extends Component {
 		return value;
 	}
 
+	/**
+	 * Renders the AutoCompleteInput.
+	 */
 	render() {
 		const { hints, activeHint } = this.state;
 		return (
