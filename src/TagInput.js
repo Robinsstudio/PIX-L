@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 
+/**
+ * This component allows the user to create or remove tags.
+ * It is used by the OpenEndedQuestionView to create the keywords.
+ */
 class TagInput extends Component {
 	constructor(props) {
 		super(props);
@@ -13,20 +17,41 @@ class TagInput extends Component {
 		this.input = React.createRef();
 	}
 
+	/**
+	 * Adds a tag.
+	 *
+	 * @param {string} tag - the tag to add
+	 */
 	add(tag) {
 		const { props: { tags, onChange } } = this;
 		this.setState({ input: '' }, () => onChange(tags.concat(tag)) );
 	}
 
+	/**
+	 * Removes the tag at the specified index.
+	 *
+	 * @param {number} index - the index of the tag
+	 */
 	remove(index) {
 		const { props: { tags, onChange } } = this;
 		onChange(tags.filter((_, i) => i !== index));
 	}
 
+	/**
+	 * Updates the text input.
+	 *
+	 * @param {Event} event - the change event
+	 */
 	handleChange(event) {
 		this.setState({ input: event.target.value });
 	}
 
+	/**
+	 * If the Enter key is pressed, the text input is cleared and a new tag is created with its content.
+	 * If the Backspace key is pressed and the text input is empty, then the last tag is removed.
+	 *
+	 * @param {KeyboardEvent} event - the keydown event
+	 */
 	handleKeyDown(event) {
 		const { props: { tags }, state: { input } } = this;
 		if (input.length && ['Enter'].includes(event.key)) {
@@ -38,6 +63,9 @@ class TagInput extends Component {
 		}
 	}
 
+	/**
+	 * Renders the TagInput.
+	 */
 	render() {
 		const { props: { tags }, state: { input } } = this;
 		return (
