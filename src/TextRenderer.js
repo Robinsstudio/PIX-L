@@ -10,9 +10,15 @@ class TextRenderer extends Component {
 
 		this.state = {
 			editorState: props.initialValue && props.initialValue.length
-				? EditorState.createWithContent(convertFromRaw(JSON.parse(this.props.initialValue)), decorator)
+				? EditorState.createWithContent(convertFromRaw(JSON.parse(this.setNonBreakingSpaces(this.props.initialValue))), decorator)
 				: EditorState.createEmpty(decorator)
 		};
+	}
+
+	setNonBreakingSpaces(label) {
+		return !label ? label : label
+			.replace(/\s(\?|!|;|:|»)/g, '\u00a0$1')
+			.replace(/(«)\s/g, '$1\u00a0');
 	}
 
 	render() {

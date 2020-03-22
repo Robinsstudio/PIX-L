@@ -315,10 +315,6 @@ class StudentView extends Component {
 		return buildersByQuestionType[activeQuestion.questionType]();
 	}
 
-	setNonBreakingSpaces(label) {
-		return !label ? label : label.replace(/\s\?/g, '\u00a0?');
-	}
-
 	buildActiveQuestion() {
 		const { activeQuestion } = this.state;
 
@@ -326,7 +322,7 @@ class StudentView extends Component {
 			<div id="questionSection">
 				<div id="questionLabel" className="color-blue">
 					<div id="questionLabelRenderer">
-						<TextRenderer key={activeQuestion.label} initialValue={this.setNonBreakingSpaces(activeQuestion.label)}/>
+						<TextRenderer key={activeQuestion.label} initialValue={activeQuestion.label}/>
 					</div>
 				</div>
 
