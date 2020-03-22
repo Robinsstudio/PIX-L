@@ -3,7 +3,13 @@ import { InputGroup, Button } from 'reactstrap';
 import TextEditor from './TextEditor';
 import AnswerField from './AnswerField';
 
+/**
+ * This component contains the UI elements specific to multiple choice questions.
+ */
 class MultipleChoiceQuestionView extends Component {
+	/**
+	 * Renders the MultipleChoiceQuestionView.
+	 */
 	render() {
 		const {
 			data,
