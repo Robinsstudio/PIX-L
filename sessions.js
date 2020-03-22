@@ -156,7 +156,7 @@ class Session {
 		const { questionManager, scoreManager, questionPool } = this;
 
 		if (questionManager.getActiveQuestion()) {
-			if (scoreManager.teamsAnswered() < questionManager.getTeams().length) {
+			if (!this.timer.isOutOfTime() && scoreManager.teamsAnswered() < questionManager.getTeams().length) {
 				socket.emit('confirmStopQuestion');
 			} else {
 				this.confirmStopQuestion();

@@ -14,7 +14,7 @@ class Timer {
 
 	onCount(callback) {
 		this.onCountHandler = () => {
-			if (!this.seconds) {
+			if (this.isOutOfTime()) {
 				this.reset();
 				this.fireOutOfTime();
 			}
@@ -23,6 +23,10 @@ class Timer {
 				callback(--this.seconds);
 			}
 		};
+	}
+
+	isOutOfTime() {
+		return !this.seconds;
 	}
 
 	onOutOfTime(callback) {
