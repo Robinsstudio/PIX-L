@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const JSZip = require('jszip');
-const ObjectId = mongoose.Schema.Types.ObjectId;
+const ObjectId = mongoose.Types.ObjectId;
 
 mongoose.connect('mongodb://localhost:27017/pix-l', { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -193,15 +193,19 @@ module.exports = {
 	},
 
 	getGameById: (_id) => {
-		return Game.find({ _id }).then(games => {
-			if (games.length) {
-				const game = games[0];
-				return getQuestionsByIds(games[0].questions.map(quest => quest.idQuestion)).then(questions => {
-					return { name: game.name, questions };
-				});
-			}
-			return Promise.resolve({ name: '', questions: [] });
-		});
+		const emptyGame = { name: '', questions: [] };
+
+		if (_id && _id.toString().match(/^[0-9a-f]{24}$/i)) {
+			return Game.findById(_id).then(game => {
+				if (game) {
+					return getQuestionsByIds(game.questions.map(quest => quest.idQuestion)).then(questions => {
+						return { name: game.name, questions };
+					});
+				}
+				return emptyGame;
+			});
+		}
+		return Promise.resolve(emptyGame);
 	},
 
 	saveSession: (sessionData) => {
