@@ -4,6 +4,9 @@ import request from './request';
 
 import './style/form_view.css';
 
+/**
+ * This view allows an administrator to log in their account.
+ */
 class LoginView extends Component {
 	constructor(props) {
 		super(props);
@@ -19,6 +22,13 @@ class LoginView extends Component {
 		this.updateField = this.updateField.bind(this);
 	}
 
+	/**
+	 * Authenticates the user by a call to the back-end API.
+	 * If the authentication is successful, a token is stored as a cookie.
+	 * If it fails, then the two text fields will animate.
+	 *
+	 * @param {Object} credentials - an object containing the username and the password
+	 */
 	authenticate(credentials) {
 		const { setAuthenticated } = this.props;
 
@@ -32,6 +42,11 @@ class LoginView extends Component {
 		});
 	}
 
+	/**
+	 * When the Enter key is pressed, the authentication process starts.
+	 *
+	 * @param {KeyboardEvent} event - the keydown event
+	 */
 	handleKeyDown(event) {
 		const { username, password } = this.state;
 		if (event.key === 'Enter') {
@@ -39,10 +54,21 @@ class LoginView extends Component {
 		}
 	}
 
+	/**
+	 * Updates the specified field (username or password).
+	 *
+	 * @param {Event} event - the change event
+	 * @param {string} field - the name of the field
+	 */
 	updateField(event, field) {
 		this.setState({ [field]: event.target.value });
 	}
 
+	/**
+	 * Builds the fields.
+	 *
+	 * @param {Array} fields - the array of fields
+	 */
 	buildFields(fields) {
 		const { authenticationFailed } = this.state;
 
@@ -58,6 +84,9 @@ class LoginView extends Component {
 		);
 	}
 
+	/**
+	 * Renders the LoginView.
+	 */
 	render() {
 		return (
 			<div className="form-background background-color-blue">
