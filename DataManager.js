@@ -7,7 +7,7 @@ const QuestionUtils = require('./QuestionUtils');
 
 const MAX_TEAMS = 5;
 
-class QuestionManager {
+class DataManager {
 	constructor(io, url, questions, linkedQuestions) {
 		this.io = io;
 		this.room = url;
@@ -196,4 +196,4 @@ class QuestionManager {
 	}
 }
 
-module.exports = QuestionManager;
+module.exports = DataManager;

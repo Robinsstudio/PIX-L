@@ -6,9 +6,9 @@
 const MAX_SELECTED_QUESTIONS = 2;
 
 class QuestionPool {
-	constructor(questionManager) {
-		this.questionManager = questionManager;
-		this.unselectedQuestions = Array.from({ length: questionManager.getQuestionCount() }, (_,i) => i);
+	constructor(dataManager) {
+		this.dataManager = dataManager;
+		this.unselectedQuestions = Array.from({ length: dataManager.getQuestionCount() }, (_,i) => i);
 		this.selectedQuestions = [];
 		this.pastQuestions = [];
 	}
@@ -27,7 +27,7 @@ class QuestionPool {
 	 * @param {number} questionIndex - the index of the selected question
 	 */
 	selectQuestion(questionIndex) {
-		if (!this.questionManager.getActiveQuestion()) {
+		if (!this.dataManager.getActiveQuestion()) {
 			const unselectedQuestionIndex = this.unselectedQuestions.indexOf(questionIndex);
 			if (unselectedQuestionIndex != -1) {
 				if (this.selectedQuestions.length < MAX_SELECTED_QUESTIONS) {
@@ -44,7 +44,7 @@ class QuestionPool {
 	 * Stops the active question.
 	 */
 	stopQuestion() {
-		const activeQuestionIndex = this.questionManager.getActiveQuestionIndex();
+		const activeQuestionIndex = this.dataManager.getActiveQuestionIndex();
 
 		if (activeQuestionIndex != -1) {
 			this.pastQuestions.push(...this.selectedQuestions.splice(this.selectedQuestions.indexOf(activeQuestionIndex), 1));
@@ -63,7 +63,7 @@ class QuestionPool {
 	 * Cancels the active question.
 	 */
 	cancelQuestion() {
-		if (this.questionManager.getActiveQuestion()) {
+		if (this.dataManager.getActiveQuestion()) {
 			this.fireQuestionCanceled();
 			this.fireQuestionEnded();
 		}

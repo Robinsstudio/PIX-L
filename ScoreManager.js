@@ -2,8 +2,8 @@ const QuestionUtils = require('./QuestionUtils');
 const Impl = require('./impl');
 
 class ScoreManager {
-	constructor(questionManager) {
-		this.questionManager = questionManager;
+	constructor(dataManager) {
+		this.dataManager = dataManager;
 		this.scores = {};
 		this.turn = 0;
 		this.date = Date.now();
@@ -24,18 +24,18 @@ class ScoreManager {
 	}
 
 	getTurn() {
-		const teams = this.questionManager.getTeams();
+		const teams = this.dataManager.getTeams();
 		return teams.length ? teams[this.turn % teams.length] : null;
 	}
 
 	getQuestions() {
 		const questions = [];
-		let currentQuestion = this.questionManager.getActiveQuestion();
+		let currentQuestion = this.dataManager.getActiveQuestion();
 
 		while (currentQuestion && !questions.includes(currentQuestion)) {
 			questions.push(currentQuestion);
 			if (currentQuestion.linkedQuestion) {
-				currentQuestion = this.questionManager.getLinkedQuestion(currentQuestion.linkedQuestion._id);
+				currentQuestion = this.dataManager.getLinkedQuestion(currentQuestion.linkedQuestion._id);
 			}
 		}
 
@@ -57,7 +57,7 @@ class ScoreManager {
 	}
 
 	getTeams() {
-		return this.questionManager.getTeams().map(team => this.getTeam(team));
+		return this.dataManager.getTeams().map(team => this.getTeam(team));
 	}
 
 	getLeadingTeams() {
@@ -77,7 +77,7 @@ class ScoreManager {
 			const alreadyAnswered = this.scores[team][originalQuestionId];
 
 			if (!alreadyAnswered) {
-				const teams = this.questionManager.getTeams();
+				const teams = this.dataManager.getTeams();
 				let score = QuestionUtils.correctQuestion(studentQuestion, originalQuestion) ? originalQuestion.points : 0;
 				const correct = score === originalQuestion.points;
 
@@ -120,7 +120,7 @@ class ScoreManager {
 				this.fireFeedback(feedback, team);
 
 				if (originalQuestion.linkedQuestion) {
-					const linkedQuestion = this.questionManager.getLinkedQuestion(originalQuestion.linkedQuestion._id);
+					const linkedQuestion = this.dataManager.getLinkedQuestion(originalQuestion.linkedQuestion._id);
 					if (linkedQuestion) {
 						this.fireLinkedQuestionStarted(team, QuestionUtils.getActiveQuestion(linkedQuestion));
 					}
@@ -131,7 +131,7 @@ class ScoreManager {
 	}
 
 	correct(team, question) {
-		const activeQuestion = this.questionManager.getActiveQuestion();
+		const activeQuestion = this.dataManager.getActiveQuestion();
 		const teamActiveQuestion = this.getActiveQuestion(team);
 
 		if (activeQuestion && teamActiveQuestion) {
@@ -140,7 +140,7 @@ class ScoreManager {
 	}
 
 	teamsAnswered() {
-		const activeQuestion = this.questionManager.getActiveQuestion();
+		const activeQuestion = this.dataManager.getActiveQuestion();
 
 		if (activeQuestion) {
 			const activeQuestionId = activeQuestion._id.toString();

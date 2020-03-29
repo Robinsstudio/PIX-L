@@ -2,7 +2,7 @@ const cookie = require('cookie');
 const ObjectId = require('mongoose').Types.ObjectId;
 const Impl = require('./impl');
 const User = require('./User');
-const QuestionManager = require('./QuestionManager');
+const DataManager = require('./DataManager');
 const QuestionPool = require('./QuestionPool');
 const QuestionUtils = require('./QuestionUtils');
 const ScoreManager = require('./ScoreManager');
@@ -12,9 +12,9 @@ class Session {
 	constructor(name, io, url, questions, linkedQuestions) {
 		this._id = ObjectId();
 		this.name = name;
-		this.questionManager = new QuestionManager(io, url, questions, linkedQuestions);
-		this.questionPool = new QuestionPool(this.questionManager);
-		this.scoreManager = new ScoreManager(this.questionManager);
+		this.dataManager = new DataManager(io, url, questions, linkedQuestions);
+		this.questionPool = new QuestionPool(this.dataManager);
+		this.scoreManager = new ScoreManager(this.dataManager);
 		this.timer = new Timer();
 
 		this.questionPool.onSelectionChanged(selection => this.broadcast('questionSelection', selection));
@@ -32,15 +32,15 @@ class Session {
 	}
 
 	broadcast(event, payload) {
-		this.questionManager.broadcast(event, payload);
+		this.dataManager.broadcast(event, payload);
 	}
 
 	emit(team, event, payload) {
-		this.questionManager.emit(team, event, payload);
+		this.dataManager.emit(team, event, payload);
 	}
 
 	initializeAdminEvents(socket) {
-		this.questionManager.addAdmin(socket.id);
+		this.dataManager.addAdmin(socket.id);
 
 		socket.on('selectQuestion', index => this.questionPool.selectQuestion(index));
 		socket.on('submit', question => socket.emit('questionStart', this.getNextQuestion(question)));
@@ -50,11 +50,11 @@ class Session {
 		socket.on('confirmStopSession', () => this.confirmStopSession());
 		socket.on('confirmCancelQuestion', () => this.confirmCancelQuestion());
 		socket.on('disconnect', () => {
-			this.questionManager.removeAdmin(socket.id);
+			this.dataManager.removeAdmin(socket.id);
 			this.discard();
 		});
 
-		const activeQuestion = this.questionManager.getActiveQuestion();
+		const activeQuestion = this.dataManager.getActiveQuestion();
 		if (activeQuestion) {
 			socket.emit('questionStart', QuestionUtils.getActiveQuestion(activeQuestion));
 		}
@@ -67,14 +67,14 @@ class Session {
 
 	initializeTeamEvents(socket) {
 		socket.on('teamChoice', team => {
-			if (this.questionManager.getAvailableTeams().includes(team)) {
+			if (this.dataManager.getAvailableTeams().includes(team)) {
 				this.addTeam(socket.id, team);
 				this.broadcast('teamChange', this.getTeams());
 
 				socket.on('submit', question => this.scoreManager.correct(team, question));
 
 				socket.on('disconnect', () => {
-					this.questionManager.removeTeam(socket.id);
+					this.dataManager.removeTeam(socket.id);
 					this.broadcast('teamChange', this.getTeams());
 					this.broadcast('turn', this.scoreManager.getTurn());
 
@@ -91,7 +91,7 @@ class Session {
 	}
 
 	addTeam(socketId, team) {
-		this.questionManager.addTeam(socketId, team);
+		this.dataManager.addTeam(socketId, team);
 		this.scoreManager.addTeam(team);
 	}
 
@@ -100,17 +100,17 @@ class Session {
 	}
 
 	startQuestion(questionIndex) {
-		const { questionManager } = this;
-		const question = QuestionUtils.getActiveQuestion(questionManager.getQuestion(questionIndex));
+		const { dataManager } = this;
+		const question = QuestionUtils.getActiveQuestion(dataManager.getQuestion(questionIndex));
 
-		questionManager.startQuestion(questionIndex);
+		dataManager.startQuestion(questionIndex);
 		this.timer.count(question.time);
 		this.broadcast('questionStart', question);
 	}
 
 	endQuestion() {
 		this.timer.reset();
-		this.questionManager.endQuestion();
+		this.dataManager.endQuestion();
 		this.scoreManager.endQuestion();
 		this.broadcast('questionEnd');
 	}
@@ -122,8 +122,8 @@ class Session {
 	}
 
 	getNextQuestion(question) {
-		const nextQuestion = this.questionManager.getNextQuestion(question);
-		const returnQuestion = nextQuestion ? nextQuestion : this.questionManager.getActiveQuestion();
+		const nextQuestion = this.dataManager.getNextQuestion(question);
+		const returnQuestion = nextQuestion ? nextQuestion : this.dataManager.getActiveQuestion();
 		return returnQuestion ? QuestionUtils.getActiveQuestion(returnQuestion) : null;
 	}
 
@@ -136,10 +136,10 @@ class Session {
 		socket.join(this.getRoom());
 
 		socket.emit('init', {
-			questions: this.questionManager.getFilteredQuestions(),
+			questions: this.dataManager.getFilteredQuestions(),
 			selection: { selectedQuestions: this.questionPool.getVisibleQuestions(), unselectedQuestions: [] },
 			teams: this.getTeams(),
-			maxPoints: this.questionManager.getMaxPoints()
+			maxPoints: this.dataManager.getMaxPoints()
 		});
 	}
 
@@ -153,10 +153,10 @@ class Session {
 	}
 
 	stop(socket) {
-		const { questionManager, scoreManager, questionPool } = this;
+		const { dataManager, scoreManager, questionPool } = this;
 
-		if (questionManager.getActiveQuestion()) {
-			if (!this.timer.isOutOfTime() && scoreManager.teamsAnswered() < questionManager.getTeams().length) {
+		if (dataManager.getActiveQuestion()) {
+			if (!this.timer.isOutOfTime() && scoreManager.teamsAnswered() < dataManager.getTeams().length) {
 				socket.emit('confirmStopQuestion');
 			} else {
 				this.confirmStopQuestion();
@@ -175,7 +175,7 @@ class Session {
 	}
 
 	cancel(socket) {
-		if (this.questionManager.getActiveQuestion()) {
+		if (this.dataManager.getActiveQuestion()) {
 			if (this.scoreManager.teamsAnswered() > 0) {
 				socket.emit('confirmCancelQuestion');
 			} else {
@@ -187,7 +187,7 @@ class Session {
 	}
 
 	canDiscard() {
-		return this.questionManager.canDiscard()
+		return this.dataManager.canDiscard()
 			&& this.questionPool.canDiscard()
 			&& this.scoreManager.canDiscard();
 	}
@@ -199,7 +199,7 @@ class Session {
 	}
 
 	getRoom() {
-		return this.questionManager.getRoom();
+		return this.dataManager.getRoom();
 	}
 
 	getName() {
