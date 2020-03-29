@@ -1,3 +1,7 @@
+/**
+ * This object represents a game session.
+ */
+
 const cookie = require('cookie');
 const ObjectId = require('mongoose').Types.ObjectId;
 const Impl = require('./impl');
@@ -31,14 +35,32 @@ class Session {
 		this.scoreManager.onLinkedQuestionStarted((team, linkedQuestion) => this.emit(team, 'questionStart', linkedQuestion));
 	}
 
+	/**
+	 * Broadcasts the specified event.
+	 *
+	 * @param {string} event - the event
+	 * @param {any} payload - the event payload
+	 */
 	broadcast(event, payload) {
 		this.dataManager.broadcast(event, payload);
 	}
 
+	/**
+	 * Emits the specified event.
+	 *
+	 * @param {string} team - the team
+	 * @param {string} event - the event to emit
+	 * @param {any} payload - the event payload
+	 */
 	emit(team, event, payload) {
 		this.dataManager.emit(team, event, payload);
 	}
 
+	/**
+	 * Initializes the specified socket with administrator events.
+	 *
+	 * @param {SocketIO.Socket} socket - the socket to initialize
+	 */
 	initializeAdminEvents(socket) {
 		this.dataManager.addAdmin(socket.id);
 
@@ -65,6 +87,11 @@ class Session {
 		}
 	}
 
+	/**
+	 * Initializes the specified socket with team events.
+	 *
+	 * @param {SocketIO.Socket} socket - the socket to initialize
+	 */
 	initializeTeamEvents(socket) {
 		socket.on('teamChoice', team => {
 			if (this.dataManager.getAvailableTeams().includes(team)) {
@@ -90,15 +117,29 @@ class Session {
 		});
 	}
 
+	/**
+	 * Adds a team.
+	 *
+	 * @param {string} socketId - the id of the socket
+	 * @param {string} team - the team
+	 */
 	addTeam(socketId, team) {
 		this.dataManager.addTeam(socketId, team);
 		this.scoreManager.addTeam(team);
 	}
 
+	/**
+	 * Returns the scores of all teams.
+	 */
 	getTeams() {
 		return this.scoreManager.getTeams();
 	}
 
+	/**
+	 * Starts the specified question.
+	 *
+	 * @param {number} questionIndex - the index of the question
+	 */
 	startQuestion(questionIndex) {
 		const { dataManager } = this;
 		const question = QuestionUtils.getActiveQuestion(dataManager.getQuestion(questionIndex));
@@ -108,6 +149,9 @@ class Session {
 		this.broadcast('questionStart', question);
 	}
 
+	/**
+	 * Ends the active question.
+	 */
 	endQuestion() {
 		this.timer.reset();
 		this.dataManager.endQuestion();
@@ -115,18 +159,32 @@ class Session {
 		this.broadcast('questionEnd');
 	}
 
+	/**
+	 * Saves the session and updates the team whose turn it is when a question is done.
+	 */
 	handleQuestionDone() {
 		this.scoreManager.saveSession(this._id, this.getRoom());
 		this.scoreManager.updateTurn();
 		this.broadcast('turn', this.scoreManager.getTurn());
 	}
 
+	/**
+	 * Returns the next linked question of the specified question if any.
+	 *
+	 * @param {Object} question - the question
+	 */
 	getNextQuestion(question) {
 		const nextQuestion = this.dataManager.getNextQuestion(question);
 		const returnQuestion = nextQuestion ? nextQuestion : this.dataManager.getActiveQuestion();
 		return returnQuestion ? QuestionUtils.getActiveQuestion(returnQuestion) : null;
 	}
 
+	/**
+	 * Adds a socket.
+	 *
+	 * @param {SocketIO.Socket} socket - the socket to add
+	 * @param {Object} payload - an object with a property admin to true if the user is authenticated
+	 */
 	addSocket(socket, { admin }) {
 		if (admin) {
 			this.initializeAdminEvents(socket);
@@ -143,15 +201,30 @@ class Session {
 		});
 	}
 
+	/**
+	 * Stops the active question.
+	 */
 	confirmStopQuestion() {
 		this.questionPool.stopQuestion();
 	}
 
+	/**
+	 * Stops the session.
+	 */
 	confirmStopSession() {
 		this.stopSession(this.getRoom());
 		this.broadcast('greeting', this.scoreManager.getLeadingTeams());
 	}
 
+	/**
+	 * If there is an active question, then it stops it.
+	 * Otherwise, it stops the session.
+	 *
+	 * A confirm modal will occasionnally be shown to the user if some conditions are met.
+	 * In this case, the user will have to confirm that they really want to stop the question/session.
+	 *
+	 * @param {SocketIO.Socket} socket - the socket
+	 */
 	stop(socket) {
 		const { dataManager, scoreManager, questionPool } = this;
 
@@ -170,10 +243,22 @@ class Session {
 		}
 	}
 
+	/**
+	 * Cancels the active question.
+	 */
 	confirmCancelQuestion() {
 		this.questionPool.cancelQuestion();
 	}
 
+	/**
+	 * If there is an active question, then it cancels it.
+	 * Otherwise, it hides the last revealed question if any.
+	 *
+	 * A confirm modal will occasionnally be shown to the user if some conditions are met.
+	 * In this case, the user will have to confirm that they really want to cancel the question.
+	 *
+	 * @param {SocketIO.Socket} socket - the socket
+	 */
 	cancel(socket) {
 		if (this.dataManager.getActiveQuestion()) {
 			if (this.scoreManager.teamsAnswered() > 0) {
@@ -186,27 +271,44 @@ class Session {
 		}
 	}
 
+	/**
+	 * Returns true if the session can be safely discarded without data loss, false otherwise.
+	 */
 	canDiscard() {
 		return this.dataManager.canDiscard()
 			&& this.questionPool.canDiscard()
 			&& this.scoreManager.canDiscard();
 	}
 
+	/**
+	 * Discards the session if the required conditions are met.
+	 */
 	discard() {
 		if (this.canDiscard()) {
 			this.stopSession(this.getRoom());
 		}
 	}
 
+	/**
+	 * Returns the id of the game.
+	 */
 	getRoom() {
 		return this.dataManager.getRoom();
 	}
 
+	/**
+	 * Returns the name of the game.
+	 */
 	getName() {
 		return this.name;
 	}
 }
 
+/**
+ * Authenticates the specified socket.
+ *
+ * @param {SocketIO.Socket} socket - the socket to authenticate
+ */
 function authenticateSocket(socket) {
 	if (socket.request.headers.cookie) {
 		const { jwt } = cookie.parse(socket.request.headers.cookie);
@@ -225,6 +327,9 @@ module.exports = function(server) {
 
 	const sessions = {};
 
+	/**
+	 * Returns all active sessions.
+	 */
 	function getActiveSessions() {
 		return Object.values(sessions).map(session => {
 			return {
@@ -234,6 +339,11 @@ module.exports = function(server) {
 		});
 	}
 
+	/**
+	 * Stops the specified session.
+	 *
+	 * @param {string} id - the id of the session
+	 */
 	function stopSession(id) {
 		delete sessions[id];
 	}
