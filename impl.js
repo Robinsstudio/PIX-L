@@ -1,9 +1,16 @@
+/**
+ * This file contain the implementation of all features related to the file explorer.
+ */
+
 const mongoose = require('mongoose');
 const JSZip = require('jszip');
 const ObjectId = mongoose.Types.ObjectId;
 
 mongoose.connect('mongodb://localhost:27017/pix-l', { useNewUrlParser: true, useUnifiedTopology: true });
 
+/**
+ * Question model
+ */
 const Question = mongoose.model('Question', {
 	/* Common fields */
 	type: String,
@@ -44,6 +51,9 @@ const Question = mongoose.model('Question', {
 
 });
 
+/**
+ * Game model
+ */
 const Game  = mongoose.model('Game', {
 	type: String,
 	name: String,
@@ -52,22 +62,40 @@ const Game  = mongoose.model('Game', {
 	idParent: ObjectId
 });
 
+/**
+ * Folder model
+ */
 const Folder = mongoose.model('Folder', {
 	type: String,
 	name: String,
 	idParent: ObjectId
 });
 
+/**
+ * Session model
+ */
 const Session = mongoose.model('Session', {
 	idGame: ObjectId,
 	date: Date,
 	scores: Object
 });
 
+/**
+ * Returns a file by id.
+ * A file can be a folder, a question or a game.
+ *
+ * @param {string} _id - the id of the file
+ */
 const getById = (_id) => {
 	return Promise.all([ Folder.findById(_id), Question.findById(_id), Game.findById(_id) ]).then(result => result[0] || result[1] || result[2]);
 }
 
+/**
+ * Returns files which match the specified parameters.
+ * A file can be a folder, a question or a game.
+ *
+ * @param {Object} params - the parameters to filter files
+ */
 const getByParams = (params) => {
 	return Promise.all([ Folder.find(params), Question.find(params), Game.find(params) ]).then(result => {
 		const folders = result[0].sort((file1, file2) => file1.name.localeCompare(file2.name));
@@ -76,12 +104,24 @@ const getByParams = (params) => {
 	});
 }
 
+/**
+ * Recursively returns all ancestors of the specified folder.
+ *
+ * @param {Object} folder - the folder for which the ancestors must be returned
+ */
 const getParents = (folder) => {
 	return folder.idParent ? Folder.findOne({ _id: folder.idParent }).then(fold => {
 		return fold.idParent ? getParents(fold).then(parents => parents.concat(fold)) : [fold];
 	}) : Promise.resolve([]);
 };
 
+/**
+ * Creates a deep copy of the specified file in the target folder.
+ * If the file is a folder, then all its content is recursively copied.
+ *
+ * @param {string} _id - the id of the file to copy
+ * @param {string} idParent - the id of the target folder
+ */
 const copyRecursiveTo = (_id, idParent) => {
 	return getById(_id).then(file => {
 		const newId = mongoose.Types.ObjectId();
@@ -98,25 +138,52 @@ const copyRecursiveTo = (_id, idParent) => {
 	});
 }
 
+/**
+ * Deletes the specified file.
+ * If the file is a folder, then all its content is recursively deleted.
+ *
+ * @param {string} _id - the id of the file to delete
+ */
 const deleteRecursive = (_id) => {
 	return Folder.find({ idParent: _id }).then(folders => Promise.all(folders.map(folder => deleteRecursive(folder)))).then(() => {
 		return Promise.all([ Folder.deleteMany({ idParent: _id }), Question.deleteMany({ idParent: _id }), Game.deleteMany({ idParent: _id }) ]);
 	});
 }
 
+/**
+ * Returns all specified questions.
+ *
+ * @param {Array} _ids - the ids of the questions to return
+ */
 const getQuestionsByIds = (_ids) => {
 	return Question.where('_id').in(_ids).then(questions => {
 		return questions.sort((q1, q2) => _ids.indexOf(q1.id) - _ids.indexOf(q2.id));
 	});
 };
 
+/**
+ * Pads the specified number with up to two leading zeroes.
+ *
+ * @param {number} time - the number to format
+ */
 const formatTime = time => time.toString().padStart(2, '0');
 
 module.exports = {
+	/**
+	 * Creates a new folder.
+	 *
+	 * @param {Object} folderData - the folder data
+	 */
 	createFolder: (folderData) => {
 		return new Folder({ ...folderData, type: 'folder' }).save();
 	},
 
+	/**
+	 * Returns all files contained in the specified folder.
+	 * It also returns the ancestors of the folder for the breadcrumb.
+	 *
+	 * @param {string} _id - the id of the folder
+	 */
 	listFolder: (_id) => {
 		if (_id) {
 			return Folder.findById(_id).then(folder => {
@@ -136,19 +203,40 @@ module.exports = {
 
 	getQuestionsByIds,
 
+	/**
+	 * Returns the name of the specified question.
+	 *
+	 * @param {string} _id - the id of the question
+	 */
 	getQuestionNameById: (_id) => {
 		return Question.findById(_id).select('name');
 	},
 
+	/**
+	 * Returns all questions whose names start with the specified string.
+	 *
+	 * @param {string} start - the beginning string
+	 */
 	getQuestionNamesStartingWith: (start) => {
 		const regex = new RegExp(`^${start}`, 'i');
 		return Question.find({ name: regex }).limit(10).select('name');
 	},
 
+	/**
+	 * Returns all themes which start with the specified string.
+	 *
+	 * @param {string} start - the beginning string
+	 */
 	getThemesStartingWith: (start) => {
 		return Question.distinct('theme', { theme: new RegExp(`^${start}`, 'i') });
 	},
 
+	/**
+	 * Renames the specified file.
+	 *
+	 * @param {string} _id - the id of the file
+	 * @param {string} name - the new name
+	 */
 	rename: (_id, name) => {
 		return getById(_id).then(file => {
 			file.name = name;
@@ -156,6 +244,12 @@ module.exports = {
 		});
 	},
 
+	/**
+	 * Moves the specified file to a target folder.
+	 *
+	 * @param {string} _id - the id of the file
+	 * @param {string} idParent - the id of the target folder
+	 */
 	move: (_id, idParent) => {
 		return getById(_id).then(file => {
 			file.idParent = idParent;
@@ -163,6 +257,11 @@ module.exports = {
 		});
 	},
 
+	/**
+	 * Deletes the specified file.
+	 *
+	 * @param {string} _id - the id of the file
+	 */
 	delete: (_id) => {
 		return Promise.all([
 			deleteRecursive(_id),
@@ -172,10 +271,21 @@ module.exports = {
 		]);
 	},
 
+	/**
+	 * Pastes a file to a target folder.
+	 *
+	 * @param {string} _id - the id of the file
+	 * @param {string} idParent - the id of the target folder
+	 */
 	paste: (_id, idParent) => {
 		return copyRecursiveTo(_id, idParent);
 	},
 
+	/**
+	 * Saves the specified question.
+	 *
+	 * @param {Object} questionData - the question data
+	 */
 	saveQuestion: (questionData) => {
 		if (questionData._id) {
 			return Question.findOneAndUpdate({ _id: questionData._id }, questionData, { upsert: true });
@@ -184,6 +294,11 @@ module.exports = {
 		}
 	},
 
+	/**
+	 * Saves the specified game.
+	 *
+	 * @param {Object} - the game data
+	 */
 	saveGame: (gameData) => {
 		if (gameData._id) {
 			return Game.findOneAndUpdate({ _id: gameData._id }, gameData, { upsert: true });
@@ -192,6 +307,11 @@ module.exports = {
 		}
 	},
 
+	/**
+	 * Returns all questions from the specified game.
+	 *
+	 * @param {string} _id - the id of the game
+	 */
 	getGameById: (_id) => {
 		const emptyGame = { name: '', questions: [] };
 
@@ -208,10 +328,20 @@ module.exports = {
 		return Promise.resolve(emptyGame);
 	},
 
+	/**
+	 * Saves the specified session.
+	 *
+	 * @param {Object} sessionData - the session data
+	 */
 	saveSession: (sessionData) => {
 		return Session.findOneAndReplace({ _id: sessionData._id }, sessionData, { upsert: true }).exec();
 	},
 
+	/**
+	 * Creates a ZIP file with all sessions of the specified game and downloads it to the client.
+	 *
+	 * @param {string} idGame - the id of the game
+	 */
 	exportSessions: (idGame) => {
 		return Session.find({ idGame }).then(sessions => {
 			const zip = new JSZip();
