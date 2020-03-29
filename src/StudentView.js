@@ -389,7 +389,7 @@ class StudentView extends Component {
 		return (
 			confirmStopQuestion &&
 				<StudentViewModal title="Terminer la question" onClosed={this.handleConfirmedStopQuestion} confirm>
-					Toutes les équipes n'ont pas encore répondu à la question. Voulez-vous vraiment la terminer ?
+					Certaines équipes n'ont pas encore répondu à la question. Voulez-vous vraiment la terminer ?
 				</StudentViewModal>
 		);
 	}
@@ -400,7 +400,7 @@ class StudentView extends Component {
 		return (
 			confirmStopSession &&
 				<StudentViewModal title="Terminer la session" onClosed={this.handleConfirmedStopSession} confirm>
-					Toutes les questions n'ont pas été terminées. Voulez-vous vraiment terminer la session ?
+					Certaines questions n'ont pas encore été terminées. Voulez-vous vraiment terminer la session ?
 				</StudentViewModal>
 		);
 	}
