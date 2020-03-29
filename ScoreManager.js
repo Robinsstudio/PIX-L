@@ -1,3 +1,7 @@
+/**
+ * This object manages the scoring of the teams of students.
+ */
+
 const QuestionUtils = require('./QuestionUtils');
 const Impl = require('./impl');
 
@@ -10,12 +14,22 @@ class ScoreManager {
 		this.outOfTime = false;
 	}
 
+	/**
+	 * Adds a team.
+	 *
+	 * @param {string} team - the team
+	 */
 	addTeam(team) {
 		if (!this.scores[team]) {
 			this.scores[team] = {};
 		}
 	}
 
+	/**
+	 * Returns the score of the specified team.
+	 *
+	 * @param {string} team - the team
+	 */
 	getTeam(team) {
 		return {
 			team,
@@ -23,11 +37,18 @@ class ScoreManager {
 		}
 	}
 
+	/**
+	 * Returns the team whose turn it is.
+	 */
 	getTurn() {
 		const teams = this.dataManager.getTeams();
 		return teams.length ? teams[this.turn % teams.length] : null;
 	}
 
+
+	/**
+	 * Returns the active question and all its linked questions.
+	 */
 	getQuestions() {
 		const questions = [];
 		let currentQuestion = this.dataManager.getActiveQuestion();
@@ -42,6 +63,13 @@ class ScoreManager {
 		return questions;
 	}
 
+	/**
+	 * Returns the active question for the specified team.
+	 * If the team has already answered the active question, then it returns its linked question if any.
+	 * This process continues if there are multiple linked questions.
+	 *
+	 * @param {string} team - the team
+	 */
 	getActiveQuestion(team) {
 		const unansweredQuestions = this.getQuestions().filter(({_id}) => !this.scores[team][_id]);
 		if (unansweredQuestions.length) {
@@ -49,6 +77,12 @@ class ScoreManager {
 		}
 	}
 
+	/**
+	 * Returns the active question for the specified team by a call to getActiveQuestion(team).
+	 * After that, it filters out the answer fields and returns it.
+	 *
+	 * @param {string} team - the team
+	 */
 	getFilteredActiveQuestion(team) {
 		const teamActiveQuestion = this.getActiveQuestion(team);
 		if (teamActiveQuestion) {
@@ -56,10 +90,16 @@ class ScoreManager {
 		}
 	}
 
+	/**
+	 * Returns the scores of all currently connected teams.
+	 */
 	getTeams() {
 		return this.dataManager.getTeams().map(team => this.getTeam(team));
 	}
 
+	/**
+	 * Returns the team which has the highest score.
+	 */
 	getLeadingTeams() {
 		return Object.keys(this.scores).map(team => this.getTeam(team)).reduce((prev, current) => {
 			if (prev.score < current.score) {
@@ -71,6 +111,14 @@ class ScoreManager {
 		}, { teams: [], score: 0 }).teams;
 	}
 
+	/**
+	 * Checks the answer of the team to their active question and updates their score accordingly.
+	 *
+	 * @param {string} team - the team
+	 * @param {Object} studentQuestion - the answer from the team
+	 * @param {Object} originalQuestion - the original question
+	 * @param {boolean} linked - true if the question is a linked question, false otherwise
+	 */
 	updateScore(team, studentQuestion, originalQuestion, linked) {
 		if (!this.outOfTime) {
 			const originalQuestionId = originalQuestion._id.toString();
@@ -130,6 +178,12 @@ class ScoreManager {
 		}
 	}
 
+	/**
+	 * Checks the answer of the team to the specified question.
+	 *
+	 * @param {string} team - the team
+	 * @param {Object} question - the question that the team answered
+	 */
 	correct(team, question) {
 		const activeQuestion = this.dataManager.getActiveQuestion();
 		const teamActiveQuestion = this.getActiveQuestion(team);
@@ -139,6 +193,9 @@ class ScoreManager {
 		}
 	}
 
+	/**
+	 * Returns the number of teams which asked the active questions.
+	 */
 	teamsAnswered() {
 		const activeQuestion = this.dataManager.getActiveQuestion();
 
@@ -153,6 +210,9 @@ class ScoreManager {
 		}
 	}
 
+	/**
+	 * Removes the points gained by the teams to the active question as a result of the question being canceled.
+	 */
 	cancelQuestion() {
 		this.getQuestions().forEach(question => {
 			const questionId = question._id.toString();
@@ -162,46 +222,94 @@ class ScoreManager {
 		this.fireScoreChange();
 	}
 
+	/**
+	 * Updates the team whose turn it is.
+	 */
 	updateTurn() {
 		this.turn++;
 	}
 
+	/**
+	 * Sets the time as elapsed.
+	 */
 	timeOut() {
 		this.outOfTime = true;
 	}
 
+	/**
+	 * Reset the time.
+	 */
 	endQuestion() {
 		this.outOfTime = false;
 	}
 
+	/**
+	 * Saves the session.
+	 *
+	 * @param {string} _id - the id of the session
+	 * @param {string} idGame - the id of the game
+	 */
 	saveSession(_id, idGame) {
 		Impl.saveSession({ _id, idGame, scores: this.scores, date: this.date });
 	}
 
+	/**
+	 * Returns true if no teams answered any question, false otherwise.
+	 */
 	canDiscard() {
 		return Object.values(this.scores).every(score => !Object.keys(score).length);
 	}
 
+	/**
+	 * Sets a listener to the score change event.
+	 *
+	 * @param {Function} callback - the listener
+	 */
 	onScoreChange(callback) {
 		this.onScoreChangeHandler = callback;
 	}
 
+	/**
+	 * Sets a listener to the feedback event.
+	 *
+	 * @param {Function} callback - the listener
+	 */
 	onFeedback(callback) {
 		this.onFeedbackHandler = callback;
 	}
 
+	/**
+	 * Sets a listener to the linked question started event.
+	 *
+	 * @param {Function} callback - the listener
+	 */
 	onLinkedQuestionStarted(callback) {
 		this.onLinkedQuestionStarted = callback;
 	}
 
+	/**
+	 * Fires the score change event.
+	 */
 	fireScoreChange() {
 		this.onScoreChangeHandler();
 	}
 
+	/**
+	 * Fires the feedback event.
+	 *
+	 * @param {Object} feedback - the feedback to respond to the team
+	 * @param {string} team - the team
+	 */
 	fireFeedback(feedback, team) {
 		this.onFeedbackHandler(feedback, team);
 	}
 
+	/**
+	 * Fires the linked question started event.
+	 *
+	 * @param {string} team - the team
+	 * @param {Object} linkedQuestion - the linked question which has started
+	 */
 	fireLinkedQuestionStarted(team, linkedQuestion) {
 		this.onLinkedQuestionStarted(team, linkedQuestion);
 	}
