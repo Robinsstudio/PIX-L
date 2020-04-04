@@ -1,7 +1,25 @@
 import React, { Component } from 'react';
 import { InputGroup, Input, Button, Collapse } from 'reactstrap';
 
+/**
+ * This component creates a matching field in a matching question.
+ *
+ * Similarly to the AnswerField component, it is an expandable text editor.
+ * The main difference is that this component can contain as many nested text inputs as desired.
+ * Those inputs can be freely added and removed by the user.
+ *
+ * During a session with the teams of students, a matching field will be shown as a dropdown.
+ * The dropdown will contain all nested text input values.
+ *
+ * The main text editor will be used as a label next to the dropdown.
+ */
 class MatchingField extends Component {
+	/**
+	 * Focuses this matching field.
+	 * This results in expanding all nested text inputs.
+	 *
+	 * @param {number} index - the index of this matching field
+	 */
 	setMatchingFieldFocused(index) {
 		const { field, updateMatchingField } = this.props;
 		if (!field.focused) {
@@ -9,6 +27,13 @@ class MatchingField extends Component {
 		}
 	}
 
+	/**
+	 * Blurs this matching field.
+	 * This results in collapsing all nested text inputs.
+	 *
+	 * @param {FocusEvent} event - the blur event
+	 * @param {number} index - the index of this matching field
+	 */
 	setMatchingFieldUnfocused(event, index) {
 		const { props: { updateMatchingField }, refs: { focusManager } } = this;
 		if (!focusManager.contains(event.relatedTarget)) {
@@ -16,17 +41,34 @@ class MatchingField extends Component {
 		}
 	}
 
+	/**
+	 * Updates the label of this matching field.
+	 *
+	 * @param {Event} event - the change event
+	 * @param {number} index - the index of this matching field
+	 */
 	setMatchingFieldLabel(event, index) {
 		const { updateMatchingField } = this.props;
 		updateMatchingField({ label: event.target.value }, index);
 	}
 
-	addAnswerToMatchingField(fieldIndex) {
+	/**
+	 * Adds an answer to this matching field.
+	 *
+	 * @param {number} index - the index of this matching field
+	 */
+	addAnswerToMatchingField(index) {
 		const { field, updateMatchingField } = this.props;
 		const answers = field.answers.concat({ label: '', correct: false });
-		updateMatchingField({ answers }, fieldIndex);
+		updateMatchingField({ answers }, index);
 	}
 
+	/**
+	 * Removes an answer from this matching field.
+	 *
+	 * @param {number} fieldIndex - the index of this matching field
+	 * @param {number} answerIndex - the index of the answer in this matching field
+	 */
 	removeAnswerFromMatchingField(fieldIndex, answerIndex) {
 		const { props: { field, updateMatchingField }, refs: { matchingFieldInput } } = this;
 		const answers = field.answers.filter((_,i) => i !== answerIndex);
@@ -34,18 +76,34 @@ class MatchingField extends Component {
 		matchingFieldInput.focus();
 	}
 
+	/**
+	 * Updates the answer at the specified index in this matching field.
+	 *
+	 * @param {Event} event - the change event
+	 * @param {number} fieldIndex - the index of this matching field
+	 * @param {number} answerIndex - the index of the answer in this matching field
+	 */
 	updateAnswerFromMatchingField(event, fieldIndex, answerIndex) {
 		const { field, updateMatchingField } = this.props;
 		const answers = field.answers.map((answer,i) => (i === answerIndex) ? { ...answer, label: event.target.value } : answer);
 		updateMatchingField({ answers }, fieldIndex);
 	}
 
+	/**
+	 * Toggles the correctness of the answer at the specified index in this matching field.
+	 *
+	 * @param {number} fieldIndex - the index of this matching field
+	 * @param {number} answerIndex - the index of the answer in this matching field
+	 */
 	toggleAnswerFromMatchingFieldCorrect(fieldIndex, answerIndex) {
 		const { field, updateMatchingField } = this.props;
 		const answers = field.answers.map((answer,i) => (i === answerIndex) ? { ...answer, correct: !answer.correct } : answer);
 		updateMatchingField({ answers }, fieldIndex);
 	}
 
+	/**
+	 * Renders the MatchingField.
+	 */
 	render() {
 		const {
 			field,

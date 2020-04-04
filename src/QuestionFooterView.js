@@ -4,6 +4,15 @@ import TextEditor from './TextEditor';
 import AutoCompleteInput from './AutoCompleteInput';
 import request from './request';
 
+/**
+ * Builds the lower part of the question editor.
+ * It contains fields common to all types of questions:
+ *
+ * - The theme
+ * - The linked question
+ * - The time (as minutes and seconds)
+ * - The number of points
+ */
 class QuestionFooterView extends Component {
 	constructor(props) {
 		super(props);
@@ -11,6 +20,9 @@ class QuestionFooterView extends Component {
 		this.handleLinkedQuestionBlur = this.handleLinkedQuestionBlur.bind(this);
 	}
 
+	/**
+	 * Fetches the name of the linked question (if there is one) and updates it.
+	 */
 	componentDidMount() {
 		const { data: { linkedQuestion }, updateLinkedQuestion } = this.props;
 
@@ -22,14 +34,28 @@ class QuestionFooterView extends Component {
 		}
 	}
 
+	/**
+	 * Fetches all question names which start with the specified string.
+	 *
+	 * @param {string} start - the beginning string
+	 */
 	loadQuestionNames(start) {
 		return request('GetQuestionNamesStartingWith', { start }).then(res => res.json());
 	}
 
+	/**
+	 * Fetches all themes which start with the specified string.
+	 *
+	 * @param {string} start - the beginning string
+	 */
 	loadThemes(start) {
 		return request('GetThemesStartingWith', { start }).then(res => res.json());
 	}
 
+	/**
+	 * Processes a blur event.
+	 * It triggers the update of the linked question if necessary.
+	 */
 	handleLinkedQuestionBlur() {
 		const { data: { linkedQuestion }, updateLinkedQuestion } = this.props;
 		if (typeof linkedQuestion === 'string') {
@@ -37,6 +63,9 @@ class QuestionFooterView extends Component {
 		}
 	}
 
+	/**
+	 * Renders the QuestionFooterView.
+	 */
 	render() {
 		const {
 			data,

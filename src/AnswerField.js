@@ -3,6 +3,11 @@ import { Button, Collapse } from 'reactstrap';
 import TextEditor from './TextEditor';
 import './style/answer_field.css';
 
+/**
+ * This component is an expandable text editor.
+ * When it is focused, it reveals another nested text editor.
+ * It is used by the MultipleChoiceQuestionView component for multiple choice questions.
+ */
 class AnswerField extends Component {
 	constructor(props) {
 		super(props);
@@ -10,6 +15,11 @@ class AnswerField extends Component {
 		this.handleBlur = this.handleBlur.bind(this);
 	}
 
+	/**
+	 * Updates the label and the feedback of the associated answer when this component loses focus.
+	 *
+	 * @param {FocusEvent} event - the blur event
+	 */
 	handleBlur(event) {
 		const { props: { index, updateAnswer }, refs: { focusManager } } = this;
 		if (!focusManager.contains(event.relatedTarget)) {
@@ -23,6 +33,9 @@ class AnswerField extends Component {
 		}
 	}
 
+	/**
+	 * Renders the AnswerField.
+	 */
 	render() {
 		const {
 			removeAnswer,

@@ -1,3 +1,12 @@
+/**
+ * Returns the specified question with only the three following fields:
+ *
+ * - id
+ * - theme
+ * - points
+ *
+ * @param {Object} question - the question to filter
+ */
 function getQuestion(question) {
 	return {
 		_id: question._id,
@@ -6,6 +15,11 @@ function getQuestion(question) {
 	};
 }
 
+/**
+ * Returns the specified question without the answer fields.
+ *
+ * @param {Object} question - the question to filter
+ */
 function getActiveQuestion(question) {
 	return {
 		_id: question._id,
@@ -39,6 +53,12 @@ function includes(str1, str2) {
 	return str1.includes(str2);
 }
 
+/**
+ * Checks the specified multiple choice question against the original question to ensure it is not malformed.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function checkMultipleChoiceQuestion(studentQuestion, originalQuestion) {
 	return studentQuestion
 			&& Array.isArray(studentQuestion.answers)
@@ -46,10 +66,22 @@ function checkMultipleChoiceQuestion(studentQuestion, originalQuestion) {
 			&& studentQuestion.answers.filter(e => e).length === studentQuestion.answers.length;
 }
 
+
+/**
+ * Checks the specified open-ended question to ensure it is not malformed.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ */
 function checkOpenEndedQuestion(studentQuestion) {
 	return studentQuestion && typeof studentQuestion.openEndedAnswer === 'string';
 }
 
+/**
+ * Checks the specified matching question against the original question to ensure it is not malformed.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function checkMatchingQuestion(studentQuestion, originalQuestion) {
 	return studentQuestion
 			&& Array.isArray(studentQuestion.matchingFields)
@@ -62,17 +94,38 @@ function checkMatchingQuestion(studentQuestion, originalQuestion) {
 			});
 }
 
+/**
+ * Checks the answer to the specified multiple choice question against the original question.
+ * Returns true if the answer is correct, false otherwise.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function correctMultipleChoiceQuestion(studentQuestion, originalQuestion) {
 	return checkMultipleChoiceQuestion(studentQuestion, originalQuestion)
 			&& originalQuestion.answers.every(({correct}, i) => correct === !!studentQuestion.answers[i].correct);
 }
 
+/**
+ * Checks the answer to the specified open-ended question against the original question.
+ * Returns true if the answer is correct, false otherwise.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function correctOpenEndedQuestion(studentQuestion, originalQuestion) {
 	const match = originalQuestion.exactMatch ? equals : includes;
 	return checkOpenEndedQuestion(studentQuestion)
 			&& originalQuestion.words.some(word => match(studentQuestion.openEndedAnswer.toLowerCase(), word.toLowerCase()));
 }
 
+/**
+ * Checks the answer to the specified matching question against the original question.
+ * Returns true if the answer is correct, false otherwise.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function correctMatchingQuestion(studentQuestion, originalQuestion) {
 	return checkMatchingQuestion(studentQuestion, originalQuestion)
 			&& originalQuestion.matchingFields.every((field, i) => {
@@ -80,10 +133,24 @@ function correctMatchingQuestion(studentQuestion, originalQuestion) {
 			});
 }
 
+/**
+ * Checks the answer to the specified question against the original question.
+ * Returns true if the answer is correct, false otherwise.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function correctQuestion(studentQuestion, originalQuestion) {
 	return correctByQuestionType[originalQuestion.questionType](studentQuestion, originalQuestion);
 }
 
+/**
+ * Builds the feedback to respond to the team of students.
+ * The answer to the specified multiple choice question is first checked, and the feedback is built accordingly.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function getMultipleChoiceFeedback(studentQuestion, originalQuestion) {
 	let feedback = {};
 
@@ -99,6 +166,13 @@ function getMultipleChoiceFeedback(studentQuestion, originalQuestion) {
 	return feedback;
 }
 
+/**
+ * Builds the feedback to respond to the team of students.
+ * The answer to the specified open-ended question is first checked, and the feedback is built accordingly.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function getOpenEndedFeedback(studentQuestion, originalQuestion) {
 	let feedback = {};
 
@@ -115,6 +189,13 @@ function getOpenEndedFeedback(studentQuestion, originalQuestion) {
 	return feedback;
 }
 
+/**
+ * Builds the feedback to respond to the team of students.
+ * The answer to the specified matching question is first checked, and the feedback is built accordingly.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function getMatchingFeedback(studentQuestion, originalQuestion) {
 	let feedback = {};
 
@@ -125,6 +206,13 @@ function getMatchingFeedback(studentQuestion, originalQuestion) {
 	return feedback;
 }
 
+/**
+ * Builds the feedback to respond to the team of students.
+ * The answer to the specified question is first checked, and the feedback is built accordingly.
+ *
+ * @param {Object} studentQuestion - the question returned by the team of students
+ * @param {Object} originalQuestion - the original question
+ */
 function getFeedback(studentQuestion, originalQuestion) {
 	return feedbackByQuestionType[originalQuestion.questionType](studentQuestion, originalQuestion);
 }

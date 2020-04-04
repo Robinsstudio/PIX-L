@@ -4,6 +4,9 @@ import request from './request';
 
 import './style/home_view.css';
 
+/**
+ * Homepage with sessions in progress
+ */
 class HomeView extends Component {
 	constructor(props) {
 		super(props);
@@ -11,12 +14,18 @@ class HomeView extends Component {
 		this.state = {};
 	}
 
+	/**
+	 * Fetches the sessions in progress
+	 */
 	componentDidMount() {
 		request('GetActiveSessions')
 		.then(res => res.json())
 		.then(sessions => this.setState({ sessions }));
 	}
 
+	/**
+	 * Renders the homepage with the sessions in progress when they are fetched
+	 */
 	render() {
 		const { sessions } = this.state;
 		return (

@@ -1,3 +1,8 @@
+/**
+ * Returns a new multiple choice question.
+ *
+ * @param {string} idParent - the id of the parent folder
+ */
 function createMultipleChoiceQuestion(idParent) {
 	return {
 		questionType: 'multipleChoice',
@@ -9,6 +14,11 @@ function createMultipleChoiceQuestion(idParent) {
 	};
 }
 
+/**
+ * Returns a new open-ended question.
+ *
+ * @param {string} idParent - the id of the parent folder
+ */
 function createOpenEndedQuestion(idParent) {
 	return {
 		questionType: 'openEnded',
@@ -20,6 +30,11 @@ function createOpenEndedQuestion(idParent) {
 	};
 }
 
+/**
+ * Returns a new matching question.
+ *
+ * @param {string} idParent - the id of the parent folder
+ */
 function createMatchingQuestion(idParent) {
 	return {
 		questionType: 'matching',

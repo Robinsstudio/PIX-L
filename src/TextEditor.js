@@ -5,6 +5,11 @@ import PromptPopover from './PromptPopover';
 import 'draft-js/dist/Draft.css';
 import './style/text_editor.css';
 
+/**
+ * This component is a text editor.
+ * It provides styling features such as bold, italic and underline.
+ * It also supports hypertext links.
+ */
 class TextEditor extends Component {
 	constructor(props) {
 		super(props);
@@ -33,11 +38,21 @@ class TextEditor extends Component {
 		this.removeLink = this.removeLink.bind(this);
 	}
 
+	/**
+	 * Focuses the editor.
+	 */
 	focus() {
 		this.refs.editor.focus();
 		this.setState({ focused: true });
 	}
 
+	/**
+	 * Processes a focus event.
+	 * If the editor was clicked outside of the toolbar, it focuses the editor.
+	 * This behavior prevents the editor from focusing when the toolbar is clicked, which would hide the toolbar.
+	 *
+	 * @param {FocusEvent} event - the focus event
+	 */
 	handleFocus(event) {
 		const { toolbar } = this.refs;
 
@@ -46,6 +61,13 @@ class TextEditor extends Component {
 		}
 	}
 
+	/**
+	 * Processes a blur event.
+	 * If the event does not originate from the toolbar, it blurs the editor.
+	 * This behavior prevents the editor from losing focus when only the toolbar should lose focus.
+	 *
+	 * @param {FocusEvent} event - the blur event
+	 */
 	handleBlur(event) {
 		const { toolbar } = this.refs;
 
@@ -59,11 +81,21 @@ class TextEditor extends Component {
 		}
 	}
 
+	/**
+	 * Updates the hypertext link in the popover with the specified value.
+	 *
+	 * @param {string} value - the hypertext link
+	 */
 	handlePopoverChange(value) {
 		const { popover } = this.state;
 		this.setState({ popover: { ...popover, value } });
 	}
 
+	/**
+	 * Updates the popover.
+	 *
+	 * @param {Object} ppv - the popover
+	 */
 	setPopover(ppv) {
 		const { popover } = this.state;
 		this.setState({ popover: { ...popover, ...ppv } }, () => {
@@ -73,6 +105,10 @@ class TextEditor extends Component {
 		});
 	}
 
+	/**
+	 * Displays the popover as a result of a click on the link icon in the toolbar.
+	 * If the selected text already contains a hypertext link, it appears in the popover.
+	 */
 	promptForLink() {
 		const { editorState } = this.state;
 		const selection = editorState.getSelection();
@@ -93,6 +129,11 @@ class TextEditor extends Component {
 		}
 	}
 
+	/**
+	 * Confirms the hypertext link, adds it to the text, and closes the popover.
+	 *
+	 * @param {string} url - the hypertext link
+	 */
 	confirmLink(url) {
 		const { editorState } = this.state;
 		const contentState = editorState.getCurrentContent();
@@ -112,6 +153,9 @@ class TextEditor extends Component {
 		}, () => setTimeout(this.focus, 0));
 	}
 
+	/**
+	 * Removes all links in the selected text.
+	 */
 	removeLink() {
 		const { editorState } = this.state;
 		const selection = editorState.getSelection();
@@ -122,6 +166,16 @@ class TextEditor extends Component {
 		}
 	}
 
+	/**
+	 * Toggles the specified inline style in the selected text among the three following:
+	 *
+	 * - Bold
+	 * - Italic
+	 * - Underline
+	 *
+	 * @param {MouseEvent} event - the mouse event
+	 * @param {string} style - the inline style to toggle
+	 */
 	toggleInlineStyle(event, style) {
 		event.preventDefault();
 
@@ -130,6 +184,11 @@ class TextEditor extends Component {
 		this.setState({ editorState: newEditorState });
 	}
 
+	/**
+	 * Builds a button which will be used to toggle the specified inline style in the toolbar.
+	 *
+	 * @param {string} style - the inline style
+	 */
 	buildInlineStyleControl(style) {
 		const currentStyle = this.state.editorState.getCurrentInlineStyle();
 		return (
@@ -139,6 +198,9 @@ class TextEditor extends Component {
 		);
 	}
 
+	/**
+	 * Renders the TextEditor.
+	 */
 	render() {
 		const { props: { placeholder, style, className }, state: { focused, popover, editorState } } = this;
 		return (

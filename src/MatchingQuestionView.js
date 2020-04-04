@@ -4,7 +4,13 @@ import TextEditor from './TextEditor';
 import MatchingField from './MatchingField';
 import './style/answer_field.css';
 
+/**
+ * This component contains the UI elements specific to matching questions.
+ */
 class MatchingQuestionView extends Component {
+	/**
+	 * Renders the MatchingQuestionView.
+	 */
 	render() {
 		const {
 			data,

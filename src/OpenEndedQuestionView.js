@@ -2,7 +2,13 @@ import React, { Component, Fragment } from 'react';
 import TextEditor from './TextEditor';
 import TagInput from './TagInput';
 
+/**
+ * This component contains the UI elements specific to open-ended questions.
+ */
 class OpenEndedQuestionView extends Component {
+	/**
+	 * Renders the OpenEndedQuestionView.
+	 */
 	render() {
 		const {
 			data,
