@@ -8,6 +8,8 @@ import QuestionUtils from './QuestionUtils';
 import QuestionFooterView from './QuestionFooterView';
 import MatchingQuestionView from './MatchingQuestionView';
 
+import './style/question_modal.css';
+
 /* https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript */
 function uuidv4() {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -29,6 +31,7 @@ class QuestionModal extends Component {
 		this.updatePoints = this.updatePoints.bind(this);
 		this.updateLinkedQuestion = this.updateLinkedQuestion.bind(this);
 		this.updateTheme = this.updateTheme.bind(this);
+		this.updateExactMatch = this.updateExactMatch.bind(this);
 		this.updateWords = this.updateWords.bind(this);
 		this.updatePositiveFeedback = this.updatePositiveFeedback.bind(this);
 		this.updateNegativeFeedback = this.updateNegativeFeedback.bind(this);
@@ -135,6 +138,11 @@ class QuestionModal extends Component {
 		update({ ...data, theme });
 	}
 
+	updateExactMatch(event) {
+		const { data, update } = this.props;
+		update({ ...data, exactMatch: event.target.checked });
+	}
+
 	updateWords(words) {
 		const { data, update } = this.props;
 		update({ ...data, words });
@@ -221,6 +229,7 @@ class QuestionModal extends Component {
 			<OpenEndedQuestionView
 				data={data}
 				updateQuestion={this.updateQuestion}
+				updateExactMatch={this.updateExactMatch}
 				updateWords={this.updateWords}
 				updatePositiveFeedback={this.updatePositiveFeedback}
 				updateNegativeFeedback={this.updateNegativeFeedback}

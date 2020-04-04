@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const ObjectId = mongoose.Schema.Types.ObjectId;
+const JSZip = require('jszip');
+const ObjectId = mongoose.Types.ObjectId;
 
 mongoose.connect('mongodb://localhost:27017/pix-l', { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -27,6 +28,7 @@ const Question = mongoose.model('Question', {
 	}],
 
 	/* Open-ended question fields */
+	exactMatch: Boolean,
 	words: [String],
 	positiveFeedback: String,
 	negativeFeedback: String,
@@ -47,17 +49,6 @@ const Game  = mongoose.model('Game', {
 	name: String,
 	questions: [{ idQuestion: ObjectId }],
 	url: String,
-	sessions: [{
-		name: String,
-		questions: [{
-			label: String,
-			answers: [{
-				label: String,
-				checked: Boolean,
-				correct: Boolean
-			}]
-		}]
-	}],
 	idParent: ObjectId
 });
 
@@ -65,6 +56,12 @@ const Folder = mongoose.model('Folder', {
 	type: String,
 	name: String,
 	idParent: ObjectId
+});
+
+const Session = mongoose.model('Session', {
+	idGame: ObjectId,
+	date: Date,
+	scores: Object
 });
 
 const getById = (_id) => {
@@ -89,7 +86,7 @@ const copyRecursiveTo = (_id, idParent) => {
 	return getById(_id).then(file => {
 		const newId = mongoose.Types.ObjectId();
 
-		getByParams({ idParent: file._id }).then(files => {
+		return getByParams({ idParent: file._id }).then(files => {
 			return Promise.all(files.map(f => copyRecursiveTo(f._id, newId)));
 		}).then(() => {
 			file._id = newId;
@@ -113,11 +110,7 @@ const getQuestionsByIds = (_ids) => {
 	});
 };
 
-const getQuestionsByIdsWithoutAnswers = (_ids) => {
-	return Question.where('_id').in(_ids).select('label answers.label -_id').then(questions => {
-		return questions.sort((q1, q2) => _ids.indexOf(q1.id) - _ids.indexOf(q2.id));
-	});
-};
+const formatTime = time => time.toString().padStart(2, '0');
 
 module.exports = {
 	createFolder: (folderData) => {
@@ -143,15 +136,8 @@ module.exports = {
 
 	getQuestionsByIds,
 
-	getQuestionsByTags: (tags, idParent) => {
-		return Question.find({ idParent }).where('tags').all(tags).then(questions => {
-			return questions.sort((q1, q2) => q1.name.localeCompare(q2.name));
-		});
-	},
-
-	getTagsStartingWith: (start) => {
-		const regex = new RegExp(eval(`/^${start}/i`));
-		return Question.distinct('tags').then(tags => tags.filter(tag => tag.match(regex)).sort());
+	getQuestionNameById: (_id) => {
+		return Question.findById(_id).select('name');
 	},
 
 	getQuestionNamesStartingWith: (start) => {
@@ -206,39 +192,71 @@ module.exports = {
 		}
 	},
 
-	generateLink: (_id) => {
-		return Game.findById(_id).then(game => {
-			game.url = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-			return game.save();
-		});
-	},
+	getGameById: (_id) => {
+		const emptyGame = { name: '', questions: [] };
 
-	getByLink: (url) => {
-		return Game.find({ url }).then(games => {
-			if (games.length) {
-				return getQuestionsByIdsWithoutAnswers(games[0].questions.map(quest => quest.idQuestion));
-			}
-			return Promise.resolve([]);
-		});
-	},
-
-	saveSession: (url, session) => {
-		return Game.find({ url }).then(games => {
-			if (games.length) {
-				const game = games[0];
-				return getQuestionsByIds(game.questions.map(q => q.idQuestion)).then(questions => {
-					session.questions.forEach((question, i) => {
-						question.answers.forEach((answer, j) => {
-							answer.correct = questions[i].answers[j].correct;
-						});
+		if (_id && _id.toString().match(/^[0-9a-f]{24}$/i)) {
+			return Game.findById(_id).then(game => {
+				if (game) {
+					return getQuestionsByIds(game.questions.map(quest => quest.idQuestion)).then(questions => {
+						return { name: game.name, questions };
 					});
-					game.sessions = game.sessions || [];
-					game.sessions = game.sessions.concat(session);
-					game.save();
-					return session.questions;
-				});
-			}
-			return Promise.resolve();
+				}
+				return emptyGame;
+			});
+		}
+		return Promise.resolve(emptyGame);
+	},
+
+	saveSession: (sessionData) => {
+		return Session.findOneAndReplace({ _id: sessionData._id }, sessionData, { upsert: true }).exec();
+	},
+
+	exportSessions: (idGame) => {
+		return Session.find({ idGame }).then(sessions => {
+			const zip = new JSZip();
+
+			sessions.forEach(session => {
+				const scores = session.scores;
+				if (scores) {
+					const teams = Object.keys(scores);
+
+					const scoresByThemeByTeam = Object.entries(scores).reduce((acc, [team, scoresByQuestion]) => {
+						Object.values(scoresByQuestion).forEach(score => {
+							acc[score.theme] = acc[score.theme] || {};
+							acc[score.theme][team] = acc[score.theme][team] + score.score || score.score;
+						});
+						return acc;
+					}, {});
+
+					const headers = ['Thème'].concat(teams.map(team => 'Équipe ' + team)).join(';');
+
+					const rows = Object.entries(scoresByThemeByTeam).map(([theme, scoresByTeam]) => {
+						return [theme].concat(teams.map(team => {
+							return scoresByTeam[team] || 0;
+						})).join(';');
+					}).join('\n');
+
+					const totals = ['Total'].concat(Object.values(scores).map(scoreByQuestion => {
+						return Object.values(scoreByQuestion).reduce((acc, {score}) => acc + score, 0);
+					})).join(';');
+
+					const date = session.date;
+					const fileName =
+						`session_${formatTime(date.getFullYear())}_${formatTime(date.getMonth() + 1)}_`
+						+ `${formatTime(date.getDate())}_${formatTime(date.getHours())}_${formatTime(date.getMinutes())}.csv`;
+
+					zip.file(fileName, [headers, rows, totals].join('\n'));
+				}
+			});
+
+			return Game.findById(idGame).select('name').then(game => {
+				const name = game.name;
+				if (name) {
+					return { zip, name };
+				}
+				return { zip, name: 'sessions' };
+			});
 		});
 	}
 }

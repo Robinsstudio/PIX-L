@@ -7,6 +7,7 @@ class OpenEndedQuestionView extends Component {
 		const {
 			data,
 			updateQuestion,
+			updateExactMatch,
 			updateWords,
 			updatePositiveFeedback,
 			updateNegativeFeedback,
@@ -14,6 +15,10 @@ class OpenEndedQuestionView extends Component {
 		return (
 			<Fragment>
 				<TextEditor onChange={updateQuestion} initialValue={data.label} placeholder="Saisissez votre question ici"/>
+				<div id="exactMatch" className="mt-3 mb-1">
+					<input type="checkbox" className="mr-2" onChange={updateExactMatch} checked={!!data.exactMatch}/>
+					<span>Correspondance exacte</span>
+				</div>
 				<TagInput onChange={updateWords} tags={data.words}/>
 				<TextEditor onChange={updatePositiveFeedback} initialValue={data.positiveFeedback} placeholder="Saisissez votre feedback positif ici" className="mt-3"/>
 				<TextEditor onChange={updateNegativeFeedback} initialValue={data.negativeFeedback} placeholder="Saisissez votre feedback négatif ici" className="mt-3"/>

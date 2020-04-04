@@ -1,17 +1,24 @@
-const express = require('express');
+module.exports = function(server) {
+	const express = require('express');
+	const cookieParser = require('cookie-parser');
 
-const router = express.Router();
+	const router = express.Router();
 
-router.use('/api/', require('./routes'));
+	router.use(cookieParser());
+	router.use('/api/', require('./routes')(server));
 
-if (process.env.NODE_ENV === 'production') {
-	router.get('/jeu/:id', (req, res) => {
-		res.sendFile(__dirname + '/build/index.html');
-	});
+	if (process.env.NODE_ENV === 'production') {
 
-	router.use('/', express.static(__dirname + '/build'));
+		const serve = express.static(__dirname + '/build');
 
-	console.log('Production server is running');
-}
+		router.use('/', (req, res) => {
+			serve(req, res, () => {
+				res.sendFile(__dirname + '/build/index.html');
+			});
+		});
 
-module.exports = router;
+		console.log('Production server is running');
+	}
+
+	return router;
+};

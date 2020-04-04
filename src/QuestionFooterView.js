@@ -11,6 +11,17 @@ class QuestionFooterView extends Component {
 		this.handleLinkedQuestionBlur = this.handleLinkedQuestionBlur.bind(this);
 	}
 
+	componentDidMount() {
+		const { data: { linkedQuestion }, updateLinkedQuestion } = this.props;
+
+		if (linkedQuestion) {
+			request('GetQuestionNameById', { _id: linkedQuestion._id }).then(res => res.json())
+			.then(question => {
+				updateLinkedQuestion(question);
+			});
+		}
+	}
+
 	loadQuestionNames(start) {
 		return request('GetQuestionNamesStartingWith', { start }).then(res => res.json());
 	}

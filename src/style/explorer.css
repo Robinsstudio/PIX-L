@@ -3,6 +3,10 @@
 	transition: flex .5s;
 }
 
+#account > a {
+	color: black;
+}
+
 #path {
 	display: flex;
 }

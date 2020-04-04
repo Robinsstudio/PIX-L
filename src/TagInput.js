@@ -41,7 +41,7 @@ class TagInput extends Component {
 	render() {
 		const { props: { tags }, state: { input } } = this;
 		return (
-			<div className="tagContainer mt-3">
+			<div className="tagContainer">
 				{ tags.map((tag, index) => {
 					return (
 						<div className="bg-success tag mr-2">

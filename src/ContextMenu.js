@@ -20,11 +20,18 @@ class ContextMenu extends Component {
 	componentDidUpdate() {
 		this.computePosition();
 	}
+
+	buildMenuItem(item) {
+		if (item.href) {
+			return <a {...item}>{item.label}</a>;
+		}
+		return <div {...item}>{item.label}</div>;
+	}
 	
 	render() {
 		return (
 			<div className="menu" onClick={this.props.onClick} ref={this.element}>
-				{this.props.items.map(item => <div {...item}>{item.label}</div>)}
+				{this.props.items.map(item => this.buildMenuItem(item))}
 			</div>
 		);
 	}

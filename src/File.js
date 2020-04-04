@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import AutoFocusInput from './AutoFocusInput';
 import Modals from './Modals';
 import request from './request';
+import download from './download';
 
 class File extends Component {
 	constructor(props) {
@@ -71,24 +72,20 @@ class File extends Component {
 
 	handleContextMenu(event) {
 		const {
-			file: { name, type, url, sessions, _id },
-			copyFile,
-			refresh,
-			updateSessionView
+			file: { name, type, _id },
+			copyFile
 		} = this.props;
 
-		const sharedLinkItem = url ? {
+		const copyLinkItem = {
 			label: 'Copier le lien partageable',
-			onClick: () => this.copyToClipboard(`${window.location.href}jeu/${url}`)
-		} : {
-			label: 'Générer un lien partageable',
-			onClick: () => request('GenerateLink', { _id }).then(() => refresh())
+			onClick: () => this.copyToClipboard(`${window.location.host}${process.env.PUBLIC_URL}/jeu/${_id}`)
 		};
 
-		const resultsItem = sessions && sessions.length ? {
-			label: 'Consulter les résultats',
-			onClick: () => updateSessionView({ visible: true, sessions })
-		} : [];
+		const downloadResultsItem = {
+			label: 'Télécharger les résultats',
+			href: download.getDownloadLink(_id),
+			download: true
+		};
 
 		const menuItems = [
 			{ label: 'Ouvrir', onClick: this.open },
@@ -100,8 +97,7 @@ class File extends Component {
 			},
 			{ label: 'Copier', onClick: () => copyFile(_id) }
 		]
-		.concat(type === 'jeu' ? sharedLinkItem : [])
-		.concat(type === 'jeu' ? resultsItem : []);
+		.concat(type === 'jeu' ? [copyLinkItem, downloadResultsItem] : []);
 
 		this.props.handleContextMenu(event, menuItems);
 	}

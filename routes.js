@@ -1,89 +1,117 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const Impl = require('./impl');
+module.exports = function(server) {
+	const express = require('express');
+	const bodyParser = require('body-parser');
+	const Impl = require('./impl');
+	const User = require('./User');
+	const sessions = require('./sessions')(server);
 
-const router = express.Router();
+	const router = express.Router();
 
-router.use(bodyParser.json());
+	router.use(bodyParser.json());
 
-router.post('/CreateFolder', (req, res) => {
-	const folderData = req.body;
-	Impl.createFolder(folderData).then( () => res.status(200).end() );
-});
+	router.post('/CreateFolder', User.isAuthenticated, (req, res) => {
+		const folderData = req.body;
+		Impl.createFolder(folderData).then( () => res.status(200).end() );
+	});
 
-router.post('/ListFolder', (req, res) => {
-	const { _id } = req.body;
-	Impl.listFolder(_id).then(json => res.json(json));
-});
+	router.post('/ListFolder', User.isAuthenticated, (req, res) => {
+		const { _id } = req.body;
+		Impl.listFolder(_id).then(json => res.json(json));
+	});
 
-router.post('/GetQuestionsByIds', (req, res) => {
-	const { _ids } = req.body;
-	Impl.getQuestionsByIds(_ids).then(questions => res.json(questions));
-});
+	router.post('/GetQuestionsByIds', User.isAuthenticated, (req, res) => {
+		const { _ids } = req.body;
+		Impl.getQuestionsByIds(_ids).then(questions => res.json(questions));
+	});
 
-router.post('/GetQuestionsByTags', (req, res) => {
-	const { tags, idParent } = req.body;
-	Impl.getQuestionsByTags(tags, idParent).then(questions => res.json(questions));
-});
+	router.post('/GetQuestionNameById/', User.isAuthenticated, (req, res) => {
+		const { _id } = req.body;
+		Impl.getQuestionNameById(_id).then(question => res.json(question));
+	});
 
-router.post('/GetTagsStartingWith', (req, res) => {
-	const { start } = req.body;
-	Impl.getTagsStartingWith(start).then(tags => res.json(tags));
-});
+	router.post('/GetQuestionNamesStartingWith', User.isAuthenticated, (req, res) => {
+		const { start } = req.body;
+		Impl.getQuestionNamesStartingWith(start).then(names => res.json(names));
+	});
 
-router.post('/GetQuestionNamesStartingWith', (req, res) => {
-	const { start } = req.body;
-	Impl.getQuestionNamesStartingWith(start).then(names => res.json(names));
-});
+	router.post('/GetThemesStartingWith', User.isAuthenticated, (req, res) => {
+		const { start } = req.body;
+		Impl.getThemesStartingWith(start).then(themes => res.json(themes));
+	});
 
-router.post('/GetThemesStartingWith', (req, res) => {
-	const { start } = req.body;
-	Impl.getThemesStartingWith(start).then(themes => res.json(themes));
-});
+	router.post('/Rename', User.isAuthenticated, (req, res) => {
+		const { _id, name } = req.body;
+		Impl.rename(_id, name).then( () => res.status(200).end() );
+	});
 
-router.post('/Rename', (req, res) => {
-	const { _id, name } = req.body;
-	Impl.rename(_id, name).then( () => res.status(200).end() );
-});
+	router.post('/Move', User.isAuthenticated, (req, res) => {
+		const { _id, idParent } = req.body;
+		Impl.move(_id, idParent).then(() => res.status(200).end());
+	});
 
-router.post('/Move', (req, res) => {
-	const { _id, idParent } = req.body;
-	Impl.move(_id, idParent).then(() => res.status(200).end());
-});
+	router.post('/Delete', User.isAuthenticated, (req, res) => {
+		const { _id } = req.body;
+		Impl.delete(_id).then(() => res.status(200).end());
+	});
 
-router.post('/Delete', (req, res) => {
-	const { _id } = req.body;
-	Impl.delete(_id).then(() => res.status(200).end());
-});
+	router.post('/Paste', User.isAuthenticated, (req, res) => {
+		const { _id, idParent } = req.body;
+		Impl.paste(_id, idParent).then(() => res.status(200).end());
+	});
 
-router.post('/Paste', (req, res) => {
-	const { _id, idParent } = req.body;
-	Impl.paste(_id, idParent).then(() => res.status(200).end());
-});
+	router.post('/SaveQuestion', User.isAuthenticated, (req, res) => {
+		const questionData = { ...req.body, type: 'question'};
+		Impl.saveQuestion(questionData).then( () => res.status(200).end() );
+	});
 
-router.post('/SaveQuestion', (req, res) => {
-	const questionData = { ...req.body, type: 'question'};
-	Impl.saveQuestion(questionData).then( () => res.status(200).end() );
-});
+	router.post('/SaveGame', User.isAuthenticated, (req, res) => {
+		const gameData = { ...req.body, type: 'jeu'};
+		Impl.saveGame(gameData).then( () => res.status(200).end() );
+	});
 
-router.post('/SaveGame', (req, res) => {
-	const gameData = { ...req.body, type: 'jeu'};
-	Impl.saveGame(gameData).then( () => res.status(200).end() );
-});
+	router.post('/UpdateAccount', User.isAuthenticated, (req, res) => {
+		const { body: { password, fields }, jwt: { userId } } = req;
+		User.updateAccount(userId, password, fields).then(
+			() => res.status(204).end(),
+			err => res.status(409).json(err)
+		);
+	});
 
-router.post('/GenerateLink', (req, res) => {
-	const { _id } = req.body;
-	Impl.generateLink(_id).then(() => res.status(200).end());
-});
+	router.get('/export/:idGame', User.isAuthenticated, (req, res) => {
+		const { idGame } = req.params;
 
-router.post('/GetGame', (req, res) => {
-	const { url } = req.body;
-	Impl.getByLink(url).then(questions => res.json(questions));
-});
+		Impl.exportSessions(idGame).then(({name, zip}) => {
+			res.setHeader('Content-disposition', `attachment; filename=${name}.zip`);
+			res.setHeader('Content-type', 'application/zip');
 
-router.post('/SaveSession', (req, res) => {
-	const { url, session } = req.body;
-	Impl.saveSession(url, session).then(questions => res.json(questions));
-});
+			zip.generateNodeStream().pipe(res)
+		});
+	});
 
-module.exports = router;
+	router.post('/GetGame', (req, res) => {
+		const { url } = req.body;
+		Impl.getByLink(url).then(questions => res.json(questions));
+	});
+
+	router.post('/GetActiveSessions', (req, res) => {
+		res.json(sessions.getActiveSessions());
+	});
+
+	router.post('/Authenticate', (req, res) => {
+		const { username, password } = req.body;
+		User.authenticate(username, password).then(token => {
+			res.cookie('jwt', token, { httpOnly: true /*, secure: true */ }).status(200).json({ authenticated: true });
+		}, error => {
+			res.status(200).json({ authenticated: false });
+		});
+	});
+
+	router.post('/isAuthenticated', (req, res) => {
+		User.checkAuthentication(req.cookies.jwt, res).then(
+			() => res.status(200).json({ authenticated: true }),
+			() => res.status(200).json({ authenticated: false })
+		);
+	});
+
+	return router;
+}

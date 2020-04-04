@@ -24,6 +24,11 @@
 	border-radius: .25rem;
 }
 
+.textRenderer .public-DraftStyleDefault-ltr {
+	text-align: justify;
+	white-space: normal;
+}
+
 .toolbar.visible {
 	display: flex;
 }
