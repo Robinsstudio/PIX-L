@@ -4,6 +4,7 @@
 
 const mongoose = require('mongoose');
 const JSZip = require('jszip');
+const stringify = require('csv-stringify/lib/sync');
 const ObjectId = mongoose.Types.ObjectId;
 
 mongoose.connect('mongodb://localhost:27017/pix-l', { useNewUrlParser: true, useUnifiedTopology: true });
@@ -359,24 +360,31 @@ module.exports = {
 						return acc;
 					}, {});
 
-					const headers = ['Thème'].concat(teams.map(team => 'Équipe ' + team)).join(';');
+					const headers = ['Thème'].concat(teams.map(team => 'Équipe ' + team));
 
 					const rows = Object.entries(scoresByThemeByTeam).map(([theme, scoresByTeam]) => {
 						return [theme].concat(teams.map(team => {
 							return scoresByTeam[team] || 0;
-						})).join(';');
-					}).join('\n');
+						}));
+					});
 
-					const totals = ['Total'].concat(Object.values(scores).map(scoreByQuestion => {
-						return Object.values(scoreByQuestion).reduce((acc, {score}) => acc + score, 0);
-					})).join(';');
+					const footers = Object.values(scores).reduce((acc, scoreByQuestion) => {
+						const teamScores = Object.values(scoreByQuestion);
+						const total = teamScores.reduce((acc, {score}) => acc + score, 0);
+						const mean = teamScores.length !== 0 ? total / teamScores.length : 0;
+
+						acc.totals.push(total);
+						acc.means.push(mean);
+
+						return acc;
+					}, { totals: ['Totaux'], means: ['Moyennes'] });
 
 					const date = session.date;
 					const fileName =
 						`session_${formatTime(date.getFullYear())}_${formatTime(date.getMonth() + 1)}_`
 						+ `${formatTime(date.getDate())}_${formatTime(date.getHours())}_${formatTime(date.getMinutes())}.csv`;
 
-					zip.file(fileName, [headers, rows, totals].join('\n'));
+					zip.file(fileName, stringify([headers].concat(rows).concat([footers.totals]).concat([footers.means]), { delimiter: ';' }));
 				}
 			});
 

@@ -1,6 +1,6 @@
 const app = require('express')();
 const server = require('http').createServer(app);
 
-app.use('/', require('./pixl')(server));
+app.use('/PIX-L', require('./pixl')(server));
 
 server.listen(8080);
