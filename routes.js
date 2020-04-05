@@ -24,6 +24,11 @@ module.exports = function(server) {
 		Impl.getQuestionsByIds(_ids).then(questions => res.json(questions));
 	});
 
+	router.post('/GetQuestionsByIdParent', User.isAuthenticated, (req, res) => {
+		const { idParent } = req.body;
+		Impl.getQuestionsByIdParent(idParent).then(questions => res.json(questions));
+	});
+
 	router.post('/GetQuestionNameById/', User.isAuthenticated, (req, res) => {
 		const { _id } = req.body;
 		Impl.getQuestionNameById(_id).then(question => res.json(question));

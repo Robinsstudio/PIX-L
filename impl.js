@@ -115,6 +115,21 @@ const getParents = (folder) => {
 	}) : Promise.resolve([]);
 };
 
+
+/**
+ * Recursively returns all questions contained in the folder and its subfolders with the specified id.
+ *
+ * @param {string} idParent - the id of the folder
+ */
+const getQuestionsByIdParentRecursive = (idParent) => {
+	return Promise.all([
+		Question.find({ idParent }),
+		Folder.find({ idParent }).then(folders => {
+			return Promise.all(folders.map(folder => getQuestionsByIdParentRecursive(folder._id)));
+		})
+	]).then(([children, descendants]) => children.concat(descendants.flat()));
+};
+
 /**
  * Creates a deep copy of the specified file in the target folder.
  * If the file is a folder, then all its content is recursively copied.
@@ -202,6 +217,15 @@ module.exports = {
 	},
 
 	getQuestionsByIds,
+
+	/**
+	 * Returns all questions contained in the specified folder and its subfolders.
+	 *
+	 * @param {string} idParent - the id of the folder
+	 */
+	getQuestionsByIdParent: (idParent) => {
+		return getQuestionsByIdParentRecursive(idParent);
+	},
 
 	/**
 	 * Returns the name of the specified question.
