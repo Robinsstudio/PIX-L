@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Alert, Button } from 'reactstrap';
 import Modals from './Modals';
+import request from './request';
 
 /**
  * This view is the game editor.
@@ -16,6 +17,21 @@ class EditorView extends Component {
 		this.handleDragOver = this.handleDragOver.bind(this);
 		this.handleDragLeave = this.handleDragLeave.bind(this);
 		this.handleDragStart = this.handleDragStart.bind(this);
+	}
+
+	/**
+	 * Adds the specified questions to the game at the specified index.
+	 *
+	 * @param {Array} questions - the questions to add
+	 * @param {number} index - the index where to start adding the questions
+	 */
+	addQuestions(questions, index) {
+		const { editor, update } = this.props;
+
+		update({
+			...editor,
+			questions: [...editor.questions.slice(0, index), ...questions, ...editor.questions.slice(index)]
+		});
 	}
 
 	/**
@@ -51,6 +67,9 @@ class EditorView extends Component {
 	 * - Dragging a question from the ExplorerView to the EditorView.
 	 * It allows adding questions to a game very easily.
 	 *
+	 * - Dragging a folder from the ExplorerView to the EditorView.
+	 * It allows adding all questions from a folder and its subfolders.
+	 *
 	 * - Reordering questions in the EditorView.
 	 *
 	 * @param {DragEvent} event - the drop event
@@ -63,10 +82,7 @@ class EditorView extends Component {
 			const question = JSON.parse(event.dataTransfer.getData('question'));
 
 			if (!editor.questions.some(quest => question._id === quest._id)) {
-				update({
-					...editor,
-					questions: [...editor.questions.slice(0, index), question, ...editor.questions.slice(index)]
-				});
+				this.addQuestions([question], index);
 			}
 
 		} else if (event.dataTransfer.types.includes('srcindex')) {
@@ -76,6 +92,12 @@ class EditorView extends Component {
 
 			questions.splice(dstIndex, 0, questions.splice(srcIndex, 1)[0]);
 			update({ ...editor, questions });
+
+		} else if (event.dataTransfer.types.includes('folder')) {
+			const folder = JSON.parse(event.dataTransfer.getData('folder'));
+			request('GetQuestionsByIdParent', { idParent: folder._id })
+			.then(r => r.json())
+			.then(questions => this.addQuestions(questions, index));
 		}
 		event.target.classList.remove('dropZone');
 	}
@@ -83,12 +105,12 @@ class EditorView extends Component {
 	/**
 	 * Processes a drag over event.
 	 *
-	 * Displays a drop zone that indicates to the user where the question will be dropped.
+	 * Displays a drop zone that indicates to the user where the question/folder will be dropped.
 	 *
 	 * @param {DragEvent} event - the drag over event
 	 */
 	handleDragOver(event) {
-		if (event.dataTransfer.types.some(e => ['question', 'srcindex'].includes(e))) {
+		if (event.dataTransfer.types.some(e => ['question', 'srcindex', 'folder'].includes(e))) {
 			event.target.classList.add('dropZone');
 		}
 		event.preventDefault();
