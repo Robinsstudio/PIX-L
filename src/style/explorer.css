@@ -14,8 +14,8 @@
 #path > .arrow {
 	width: 25px;
 	height: 25px;
-	
-	background-image: url("../icons/arrow.svg");
+
+	background-image: url("../assets/icons/arrow.svg");
 }
 
 #path > span:hover {
@@ -38,11 +38,11 @@
 }
 
 #icons {
-	background-image: url("../icons/icons.png");
+	background-image: url("../assets/icons/icons.png");
 }
 
 #list {
-	background-image: url("../icons/list.png");
+	background-image: url("../assets/icons/list.png");
 }
 
 .list {
@@ -87,15 +87,15 @@
 }
 
 .folder {
-	background-image: url("../icons/folder.svg");
+	background-image: url("../assets/icons/folder.svg");
 }
 
 .question {
-	background-image: url("../icons/question.png");
+	background-image: url("../assets/icons/question.png");
 }
 
 .jeu {
-	background-image: url("../icons/jeu.png");
+	background-image: url("../assets/icons/jeu.png");
 }
 
 .fileName {
