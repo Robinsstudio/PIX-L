@@ -377,38 +377,36 @@ module.exports = {
 					const teams = Object.keys(scores);
 
 					const scoresByThemeByTeam = Object.entries(scores).reduce((acc, [team, scoresByQuestion]) => {
-						Object.values(scoresByQuestion).forEach(score => {
-							acc[score.theme] = acc[score.theme] || {};
-							acc[score.theme][team] = acc[score.theme][team] + score.score || score.score;
+						Object.values(scoresByQuestion).forEach(teamScore => {
+							acc[teamScore.theme] = acc[teamScore.theme] || {};
+							acc[teamScore.theme][team] = acc[teamScore.theme][team] + teamScore.score || teamScore.score;
 						});
 						return acc;
 					}, {});
 
-					const headers = ['Thème'].concat(teams.map(team => 'Équipe ' + team));
+					const headers = ['Thème'].concat(teams.map(team => 'Équipe ' + team)).concat('Moyenne');
 
 					const rows = Object.entries(scoresByThemeByTeam).map(([theme, scoresByTeam]) => {
 						return [theme].concat(teams.map(team => {
 							return scoresByTeam[team] || 0;
-						}));
+						})).concat(Object.values(scoresByTeam).reduce((acc, score) => acc + score) / teams.length);
 					});
 
-					const footers = Object.values(scores).reduce((acc, scoreByQuestion) => {
-						const teamScores = Object.values(scoreByQuestion);
-						const total = teamScores.reduce((acc, {score}) => acc + score, 0);
-						const mean = teamScores.length !== 0 ? total / teamScores.length : 0;
-
-						acc.totals.push(total);
-						acc.means.push(mean);
-
-						return acc;
-					}, { totals: ['Totaux'], means: ['Moyennes'] });
+					const totals = ['Total'].concat(Object.values(scores).map(scoreByQuestion => {
+						return Object.values(scoreByQuestion).reduce((acc, {score}) => acc + score, 0);
+					}));
 
 					const date = session.date;
 					const fileName =
 						`session_${formatTime(date.getFullYear())}_${formatTime(date.getMonth() + 1)}_`
 						+ `${formatTime(date.getDate())}_${formatTime(date.getHours())}_${formatTime(date.getMinutes())}.csv`;
 
-					zip.file(fileName, stringify([headers].concat(rows).concat([footers.totals]).concat([footers.means]), { delimiter: ';' }));
+					zip.file(fileName, stringify([headers].concat(rows).concat([totals]), {
+						delimiter: ';',
+						cast: {
+							number: n => n.toString().replace('.', ',')
+						}
+					}));
 				}
 			});
 
