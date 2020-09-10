@@ -5,7 +5,7 @@
 
 const QuestionUtils = require('./QuestionUtils');
 
-const MAX_TEAMS = 5;
+const MAX_TEAMS = 8;
 
 class DataManager {
 	constructor(io, url, questions, linkedQuestions) {

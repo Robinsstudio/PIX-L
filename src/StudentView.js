@@ -9,7 +9,7 @@ import './style/form_view.css';
 import './style/student_view.css';
 import './style/team_chooser.css';
 
-const MAX_TEAMS = 5;
+const MAX_TEAMS = 8;
 
 /**
  * This view is used to play games with students.
